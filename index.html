@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+	<meta charset="utf-8">
+	<title>Landing Page | Invoke App</title>
+	<meta name="viewport"
+		content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet"	href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="calendar.css">
+</head>
+
+<body>
+
+	<!--navbar-->
+
+	<nav class="navbar">
+		<div class="navbar-inner">
+			<a href="#" class="navbar-logo">Invoke App</a>
+			<ul class="navbar-menu">
+				<li><a href="#"
+						class="navbar-link">Home</a></li>
+				<li><a href="#"	class="navbar-link">Features</a></li>
+				<li><a href="#"	class="navbar-link">Pricing</a></li>
+				<li><a href="#"	class="navbar-link">Contact</a></li>
+			</ul>
+		</div>
+	</nav>
+
+
+    <!--hero section-->
+
+	<section class="hero">
+		<div class="hero-inner">
+			<h1 class="hero-title">Invoke App</h1>
+			<p class="hero-subtitle">Adventure begins now</p>
+			<a href="#"
+				class="hero-cta">Get Started</a>
+		</div>
+	</section>
+
+	<!--features section-->
+
+	<section class="features">
+		<div class="features-inner">
+			<div class="feature">
+				<span class="material-symbols-rounded">calendar_today</span>
+				<h2 class="feature-title">Calendar</h2>
+				<p class="feature-description">Keep track of your schedule with our calendar feature.</p>
+			</div>
+			<div class="feature">
+				<span class="material-symbols-rounded">insert_chart_outlined</span>
+				<h2 class="feature-title">Analytics</h2>
+				<p class="feature-description">Get insights into your business with our analytics feature.</p>
+			</div>
+			<div class="feature">
+				<span class="material-symbols-rounded">mail_outline</span>
+				<h2 class="feature-title">Email</h2>
+				<p class="feature-description">Send and receive emails with our email feature.</p>
+			</div>
+		</div>
+	</section>
+
+	<!--calendar section-->
+	<section
+	<div class="calendar-container">
+		<header class="calendar-header">
+			<p class="calendar-current-date"></p>
+			<div class="calendar-navigation">
+				<span id="calendar-prev"
+					class="material-symbols-rounded">
+					chevron_left
+				</span>
+				<span id="calendar-next"
+					class="material-symbols-rounded">
+					chevron_right
+				</span>
+			</div>
+		</header>
+		<div class="calendar-body">
+			<ul class="calendar-weekdays">
+				<li>Sun</li>
+				<li>Mon</li>
+				<li>Tue</li>
+				<li>Wed</li>
+				<li>Thu</li>
+				<li>Fri</li>
+				<li>Sat</li>
+			</ul>
+			<ul class="calendar-dates"></ul>
+		</div>
+	</div>
+	</section>
+
+	<!--carousel section-->
+
+	<section class="carousel">
+		<div class="carousel-inner">
+			<div class="carousel-slide">
+				<img src="images/carousel-1.jpg"
+					alt="Carousel Image">
+				<h2 class="carousel-title">Adventure Awaits</h2>
+				<p class="carousel-description">Explore the world with us</p>
+			</div>
+			<div class="carousel-slide">
+				<img src="images/carousel-2.jpg"
+					alt="Carousel Image">
+				<h2 class="carousel-title">Let's Get Started</h2>
+				<p class="carousel-description">Get ready for the adventure of a lifetime</p>
+			</div>
+			<div class="carousel-slide">
+				<img src="images/carousel-3.jpg"
+					alt="Carousel Image">
+				<h2 class="carousel-title">Experience Nature</h2>
+				<p class="carousel-description">Take a trip to the mountains</p>
+			</div>
+		</div>
+		<div class="carousel-navigation">
+			<span id="carousel-prev"
+				class="material-symbols-rounded">
+				chevron_left
+			</span>
+			<span id="carousel-next"
+				class="material-symbols-rounded">
+				chevron_right
+			</span>
+		</div>
+	</section>
+
+	<!--features section-->
+
+	
+	<!--pricing section-->
+
+	<section class="pricing">
+		<div class="pricing-inner">
+			<div class="pricing-card">
+				<h2 class="pricing-title">Basic</h2>
+				<p class="pricing-price">$9.99</p>
+				<ul class="pricing-features">
+					<li>Calendar</li>
+					<li>Analytics</li>
+					<li>Email</li>
+				</ul>
+				<a href="#"
+					class="pricing-cta">Get Started</a>
+			</div>
+			<div class="pricing-card">
+				<h2 class="pricing-title">Pro</h2>
+				<p class="pricing-price">$19.99</p>
+				<ul class="pricing-features">
+					<li>Calendar</li>
+					<li>Analytics</li>
+					<li>Email</li>
+					<li>24/7 Support</li>
+				</ul>
+				<a href="#"
+					class="pricing-cta">Get Started</a>
+			</div>
+			<div class="pricing-card">
+				<h2 class="pricing-title">Premium</h2>
+				<p class="pricing-price">$29.99</p>
+				<ul class="pricing-features">
+					<li>Calendar</li>
+					<li>Analytics</li>
+					<li>Email</li>
+					<li>24/7 Support</li>
+					<li>Custom Domain</li>
+				</ul>
+				<a href="#"
+					class="pricing-cta">Get Started</a>
+			</div>
+		</div>
+	<!--footer section-->
+	<footer class="footer">
+		<div class="footer-inner">
+			<p>&copy; 2024 Invoke App</p>
+		</div>
+	</footer>
+	<!--scripts-->
+	<script src="https://code.iconify.design/1/1.0.7/iconify.min.js"></script>
+    <script src="calendar.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
