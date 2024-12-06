@@ -1,70 +1,69 @@
-# Getting Started with Create React App
+# **Invoke/Summon**
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## **Overview**
+**Invoke/Summon** is a platform connecting **players** and **Game Masters (GMs)** in the realm of role-playing games (RPGs). It allows players to find RPG sessions quickly and enables GMs to create and manage sessions with ease, whether for leisure or monetization.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## **Features**
 
-### `npm start`
+### **Core Features (MVP)**
+1. **User Management**:
+   - Registration, login, and profile customization (players and GMs).
+   - Player profiles include game preferences and experience levels.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+2. **Session Management**:
+   - **GMs** can create sessions with:
+     - Titles
+     - Descriptions
+     - Formats (online/in-person)
+     - Dates and times.
+   - **Players** can search sessions using filters like:
+     - Game type
+     - Date
+     - Format
+     - Experience level.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+3. **Request Custom/Private Sessions**:
+   - Players can directly request a GM to organize a **custom or private session** tailored to their preferences.
 
-### `npm test`
+4. **Ratings and Reviews**:
+   - Players rate GMs after sessions.
+   - Reviews are visible on GM profiles.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+5. **Interactive Calendar**:
+   - View upcoming sessions.
+   - Notifications and reminders for registered sessions.
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## **Future Features**
+1. **Integrated Messaging**: Direct communication between players and GMs for better session organization and custom session requests.
+2. **Payment System**: Secure payment for GM services, including private sessions.
+3. **Campaign Tools**: Share and manage game materials like character sheets and maps.
+4. **External Integration**: Sync sessions with external calendars like Google Calendar.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## **Technical Stack**
 
-### `npm run eject`
+### **Frontend**
+- **React.js**: For a fast and responsive user interface.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### **Backend**
+- **Node.js with Express.js**: API management and session handling.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### **Database**
+- **MongoDB**: Flexible and suited for semi-structured data.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### **Hosting**
+- Local deployment on a **Proxmox** virtualized environment.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+---
 
-## Learn More
+## **Setup**
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### **Prerequisites**
+- **Node.js** (v16+)
+- **MongoDB**
+- Proxmox (for deployment)
