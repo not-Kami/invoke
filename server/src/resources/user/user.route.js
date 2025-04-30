@@ -1,9 +1,11 @@
-import { Router } from "express";
+import express from "express";
 import userController from "./user.controller.js";
+import { uploads, compressImage } from "../../middlewares/upload.middleware.js";
 
-const userRouter = Router();
+const router = express.Router();
 
-userRouter.post("/", userController.createUser);
-userRouter.get("/", userController.getUsers);
+router.post("/", userController.createUser);
+router.get("/", userController.getUsers);
+router.post("/:id/avatar", uploads.user.single('avatar'), compressImage('user'), userController.updateAvatar);
 
-export default userRouter;
+export default router;

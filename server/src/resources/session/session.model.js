@@ -7,6 +7,10 @@ const sessionSchema = new mongoose.Schema({
     sessionType: { type: String, enum: ["online", "offline"], required: true },
     isOneShot: { type: Boolean, default: false },
     game: { type: mongoose.Schema.Types.ObjectId, ref: 'Game', required: true },
+    image: {
+        data: { type: Buffer },
+        contentType: { type: String }
+    },
     dm: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     players: { type: [mongoose.Schema.Types.ObjectId], ref: "User", default: [] },
     status: { type: String, enum: ["open", "full", "finished", "cancelled"], default: "open" },

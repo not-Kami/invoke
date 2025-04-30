@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import UserRole from "./user.enum.js";
 
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -7,7 +8,10 @@ const userSchema = new mongoose.Schema({
     verified: { type: Boolean, default: false },
     role: { type: String, enum: UserRole, default: UserRole.USER },
     isDM: { type: Boolean, default: false },
-    avatar: { type: String, default: null },
+    avatar: {
+        data: { type: Buffer },
+        contentType: { type: String }
+    },
     bio: { type: String, default: null },
     favorite_games: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Game' }],
     evaluations: { type: [mongoose.Schema.Types.ObjectId], ref: "Evaluation", default: [] },

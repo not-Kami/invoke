@@ -7,6 +7,10 @@ const campaignSchema = new mongoose.Schema({
     dm: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     players: { type: [mongoose.Schema.Types.ObjectId], ref: "User", default: [] },
     sessions: { type: [mongoose.Schema.Types.ObjectId], ref: "Session", default: [] },
+    image: {
+        data: { type: Buffer },
+        contentType: { type: String }
+    },
     active: { type: Boolean, default: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
