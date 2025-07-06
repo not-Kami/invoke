@@ -8,7 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/app.js",
     "start": "node src/app.js",
-    "build": "npm install"
+    "build": "npm install",
+    "seed": "node src/seeders/index.js"
   },
   "author": "Kami",
   "license": "ISC",

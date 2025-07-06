@@ -1,0 +1,730 @@
+type: collection.insomnia.rest/5.0
+name: API/V1
+meta:
+  id: wrk_7387176fff8346469907ddf978e82f2b
+  created: 1751797624880
+  modified: 1751803601508
+  description: ""
+collection:
+  - name: Games
+    meta:
+      id: fld_2e6372b3e57443dcbf3ba472061f7ce2
+      created: 1704542400000
+      modified: 1704542400000
+      sortKey: -1704542400000
+      description: Game management endpoints
+    children:
+      - url: http://localhost:3000/api/v1/games/{{ _.game_id }}
+        name: Delete Game
+        meta:
+          id: req_0f05316d7fec488eb39ab6bef6f41c54
+          created: 1704542400000
+          modified: 1751802347314
+          isPrivate: false
+          description: Delete a game
+          sortKey: -1704542400000
+        method: DELETE
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/games
+        name: Create Game
+        meta:
+          id: req_8d8fd6a6852f4edc937fd77c7975a5d9
+          created: 1704542400000
+          modified: 1751802622994
+          isPrivate: false
+          description: Create a new game
+          sortKey: -1704542400000
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "name": "Dungeons & Dragons 5e",
+              "description": "The world's greatest roleplaying game",
+              "genre": "Fantasy",
+              "system": "D&D 5e",
+              "image": "https://example.com/dnd5e.jpg",
+              "isActive": true
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/games
+        name: Get All Games
+        meta:
+          id: req_b2983d96959a47d682580d7260e95541
+          created: 1704542400000
+          modified: 1751802341885
+          isPrivate: false
+          description: Get all games with pagination and filtering
+          sortKey: -1704542400000
+        method: GET
+        parameters:
+          - name: page
+            value: "1"
+            description: Page number
+          - name: limit
+            value: "10"
+            description: Items per page
+          - name: search
+            value: ""
+            description: Search term for name or description
+          - name: genre
+            value: ""
+            description: Filter by genre
+          - name: system
+            value: ""
+            description: Filter by system
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/games/686a63033973e80f5f7118cc
+        name: Get Game by ID
+        meta:
+          id: req_c59cce6b02a14f1fa1612146f0beeba3
+          created: 1704542400000
+          modified: 1751802641419
+          isPrivate: false
+          description: Get a specific game by ID
+          sortKey: -1704542400000
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/games/686a63033973e80f5f7118cc
+        name: Update Game
+        meta:
+          id: req_e35130fdb15c4d03a731eab61547b1e8
+          created: 1704542400000
+          modified: 1751803017855
+          isPrivate: false
+          description: Update game information
+          sortKey: -1704542400000
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "name": "D&D 5e Updated",
+              "description": "Updated description"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Feedback
+    meta:
+      id: fld_415a112a28d3417388c92bb973f7a1b8
+      created: 1704542400000
+      modified: 1704542400000
+      sortKey: -1704542400000
+      description: Feedback management endpoints
+    children:
+      - url: http://localhost:3000/api/v1/feedback
+        name: Create Feedback
+        meta:
+          id: req_49442794309b4503be96e2821f7f71aa
+          created: 1704542400000
+          modified: 1751803340350
+          isPrivate: false
+          description: Create a new feedback entry
+          sortKey: -1704542400000
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "author": "686a61f740a5031f43827fd0",
+              "rating": 5,
+              "comment": "Amazing session! The DM was fantastic.",
+              "target": "686a659de6cbbba01674d81e",
+              "session": "686a64c9e6cbbba01674d814"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/feedback/686a61f740a5031f43827fd0
+        name: Update Feedback
+        meta:
+          id: req_5ad74dd44d764cf2ac20ad4992e19fec
+          created: 1704542400000
+          modified: 1751803352745
+          isPrivate: false
+          description: Update feedback information
+          sortKey: -1704542400000
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "rating": 4,
+              "comment": "Updated feedback comment"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/feedback/{{ _.feedback_id }}
+        name: Delete Feedback
+        meta:
+          id: req_8a3a6f2cbcec4c6180f4cbb4286a4816
+          created: 1704542400000
+          modified: 1751802292522
+          isPrivate: false
+          description: Delete a feedback entry
+          sortKey: -1704542400000
+        method: DELETE
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/feedback/686a61f740a5031f43827fd0
+        name: Get Feedback by ID
+        meta:
+          id: req_d5f4fa1bd6ad44d897bbe362cc47b8db
+          created: 1704542400000
+          modified: 1751803357852
+          isPrivate: false
+          description: Get a specific feedback by ID
+          sortKey: -1704542400000
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Sessions
+    meta:
+      id: fld_8c54ee6ad9404fcbbe62e39c930c8689
+      created: 1704542400000
+      modified: 1704542400000
+      sortKey: -1704542400000
+      description: Session management endpoints
+    children:
+      - url: http://localhost:3000/api/v1/sessions
+        name: Create Session
+        meta:
+          id: req_4fafaec8f96941ff9d3bb35d9e3b880a
+          created: 1704542400000
+          modified: 1751802672321
+          isPrivate: false
+          description: Create a new gaming session
+          sortKey: -1704542400000
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "title": "Epic Adventure Begins",
+              "description": "The party embarks on a legendary quest",
+              "date": "2024-02-15T18:00:00.000Z",
+              "sessionType": "online",
+              "isOneShot": false,
+              "game": "686a63033973e80f5f7118cc",
+              "dm": "686a61f740a5031f43827fd0",
+              "players": [],
+              "status": "open"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/sessions
+        name: Get All Sessions
+        meta:
+          id: req_53c5fc7e35bb4aba9fb0ff4b02206a17
+          created: 1704542400000
+          modified: 1751801933795
+          isPrivate: false
+          description: Get all sessions with pagination and filtering
+          sortKey: -1704542400000
+        method: GET
+        parameters:
+          - name: page
+            value: "1"
+            description: Page number
+          - name: limit
+            value: "10"
+            description: Items per page
+          - name: search
+            value: ""
+            description: Search term for title or description
+          - name: sessionType
+            value: ""
+            description: Filter by session type (online/offline)
+          - name: status
+            value: ""
+            description: Filter by status (open/full/finished/cancelled)
+          - name: game
+            value: ""
+            description: Filter by game ID
+          - name: dm
+            value: ""
+            description: Filter by DM ID
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/sessions/{{ _.session_id }}
+        name: Delete Session
+        meta:
+          id: req_6dd58b1b4e7c49e7a5dff1112e2cacff
+          created: 1704542400000
+          modified: 1751801929300
+          isPrivate: false
+          description: Delete a session
+          sortKey: -1704542400000
+        method: DELETE
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/sessions/686a64c9e6cbbba01674d814
+        name: Get Session by ID
+        meta:
+          id: req_9085017b78a14318aa79d4b6ab592a1a
+          created: 1704542400000
+          modified: 1751803095182
+          isPrivate: false
+          description: Get a specific session by ID
+          sortKey: -1704542400000
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/sessions/686a64c9e6cbbba01674d814
+        name: Update Session
+        meta:
+          id: req_c8978cc351de47d9a0ce4d455bfdbd99
+          created: 1704542400000
+          modified: 1751803099078
+          isPrivate: false
+          description: Update session information
+          sortKey: -1704542400000
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "title": "Updated Session Title",
+              "description": "Updated session description",
+              "status": "full"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Users
+    meta:
+      id: fld_98af3983bef847a5a04dac922b6c8024
+      created: 1704542400000
+      modified: 1704542400000
+      sortKey: -1704542400000
+      description: User management endpoints
+    children:
+      - url: http://localhost:3000/api/v1/users
+        name: Get All Users
+        meta:
+          id: req_5512c0ca1dd1447bad571afbd8b561a3
+          created: 1704542400000
+          modified: 1751801904948
+          isPrivate: false
+          description: Get all users with pagination and filtering
+          sortKey: -1704542400000
+        method: GET
+        parameters:
+          - name: page
+            value: "1"
+            description: Page number
+          - name: limit
+            value: "10"
+            description: Items per page
+          - name: search
+            value: ""
+            description: Search term for name or email
+          - name: role
+            value: ""
+            description: Filter by role (user/admin)
+          - name: isDM
+            value: ""
+            description: Filter by DM status (true/false)
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/users/{{ _.user_id }}
+        name: Delete User
+        meta:
+          id: req_61d46b6edfba4e018d3966f7ceb91ddf
+          created: 1704542400000
+          modified: 1751801899122
+          isPrivate: false
+          description: Delete a user (soft delete)
+          sortKey: -1704542400000
+        method: DELETE
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/users/686a61f740a5031f43827fd0
+        name: Get User by ID
+        meta:
+          id: req_61eaa9442ced472eb48d6f516c9904dd
+          created: 1704542400000
+          modified: 1751802510495
+          isPrivate: false
+          description: Get a specific user by ID
+          sortKey: -1704542400000
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/users
+        name: Create User
+        meta:
+          id: req_7c003c24badc40578a3fc70ad258c50c
+          created: 1704542400000
+          modified: 1751803288198
+          isPrivate: false
+          description: Create a new user account
+          sortKey: -1704542400000
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "name": "J. R R Tolkien",
+              "email": "tolkien@example.com",
+              "password": "SecurePass123!",
+              "role": "user",
+              "isDM": true,
+              "avatar": "https://example.com/avatar.jpg",
+              "bio": "D&D enthusiast and dungeon master"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/users/686a61f740a5031f43827fd0
+        name: Update User
+        meta:
+          id: req_a8413c18cada49eca786506c2a94ce45
+          created: 1704542400000
+          modified: 1751802560007
+          isPrivate: false
+          description: Update user information
+          sortKey: -1704542400000
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "name": "John Updated",
+              "email": "john.updated@example.com",
+              "bio": "Updated bio",
+              "isDM": true
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Campaigns
+    meta:
+      id: fld_aa518b8c491846a0bd80492e50bc9837
+      created: 1704542400000
+      modified: 1704542400000
+      sortKey: -1704542400000
+      description: Campaign management endpoints
+    children:
+      - url: http://localhost:3000/api/v1/campaigns/{{ _.campaign_id }}
+        name: Delete Campaign
+        meta:
+          id: req_21588fc5282d461e9553c7104788a242
+          created: 1704542400000
+          modified: 1751801729859
+          isPrivate: false
+          description: Delete a campaign (soft delete)
+          sortKey: -1704542400000
+        method: DELETE
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/campaigns
+        name: Create Campaign
+        meta:
+          id: req_26ffe55272eb40e9b1559170f53bbd89
+          created: 1704542400000
+          modified: 1751803147401
+          isPrivate: false
+          description: Create a new campaign
+          sortKey: -1704542400000
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "name": "The Lost Mines of Phandelver",
+              "description": "A D&D 5e adventure for levels 1-5",
+              "startDate": "2024-01-15T00:00:00.000Z",
+              "endDate": "2024-06-15T00:00:00.000Z",
+              "game": "686a63033973e80f5f7118cc",
+              "dm": "686a61f740a5031f43827fd0",
+              "players": [],
+              "sessions": [],
+              "active": true
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/campaigns/686a650ee6cbbba01674d81a
+        name: Get Campaign by ID
+        meta:
+          id: req_461d7a3f712a4ba1a66fb645faad1c2d
+          created: 1704542400000
+          modified: 1751803178713
+          isPrivate: false
+          description: Get a specific campaign by ID
+          sortKey: -1704542400000
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/campaigns
+        name: Get All Campaigns
+        meta:
+          id: req_843516c7aa414032967e59898b76d067
+          created: 1704542400000
+          modified: 1751801651209
+          isPrivate: false
+          description: Get all campaigns with pagination and filtering
+          sortKey: -1704542400000
+        method: GET
+        parameters:
+          - name: page
+            value: "1"
+            description: Page number
+          - name: limit
+            value: "10"
+            description: Items per page
+          - name: search
+            value: ""
+            description: Search term for name or description
+          - name: active
+            value: ""
+            description: Filter by active status (true/false)
+          - name: game
+            value: ""
+            description: Filter by game ID
+          - name: dm
+            value: ""
+            description: Filter by DM ID
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/campaigns/686a650ee6cbbba01674d81a
+        name: Update Campaign
+        meta:
+          id: req_f8d5c30e65d54d5691656160d39e0166
+          created: 1704542400000
+          modified: 1751803183690
+          isPrivate: false
+          description: Update campaign information
+          sortKey: -1704542400000
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "name": "Updated Campaign Name",
+              "description": "Updated campaign description",
+              "active": false
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - url: localhost:3000http://localhost:3000/api/v1
+    name: Root
+    meta:
+      id: req_faeb8c7fea0f41e38dc93dbf8c6f5bb8
+      created: 1704542400000
+      modified: 1751801666042
+      isPrivate: false
+      description: API root endpoint
+      sortKey: -1704542400000
+    method: GET
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_2c82b4697b7d85c6e538857f61c71c9e8c6dfe31
+    created: 1751797624882
+    modified: 1751797624882
+environments:
+  name: Base Environment
+  meta:
+    id: env_2c82b4697b7d85c6e538857f61c71c9e8c6dfe31
+    created: 1751797624881
+    modified: 1751802165357
+    isPrivate: false
+  data:
+    "":
+      base_url: http://localhost:3000/api/v1
+      guest_id: 684d376d0de7b408b3d8a55e
+      vendor_id: 684ec21bb1304996981ebf49
+      budget_id: 684d376d0de7b408b3d8a568
+      wedding_id: 684d376c0de7b408b3d8a55c
+      token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODRkMzc2YzBkZTdiNDA4YjNkOGE1NTgiLCJlbWFpbCI6Im1hcmllLmR1cG9udEBleGFtcGxlLmNvbSIsImZpcnN0TmFtZSI6Ik1hcmllIiwibGFzdE5hbWUiOiJEdXBvbnQiLCJpYXQiOjE3NDk5OTE3NzIsImV4cCI6MTc1MDE2NDU3Mn0.DRDQ8YAa8Vn-RfQTm06aUu0W647ggLKo88EbLK5dguw
+  subEnvironments:
+    - name: New Environment
+      meta:
+        id: env_76c596caca12434faf1e319af6d2ae6a
+        created: 1751802091623
+        modified: 1751802091623
+        isPrivate: true
+        sortKey: 1751802091623
