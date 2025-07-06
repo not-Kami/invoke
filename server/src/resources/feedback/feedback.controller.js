@@ -6,7 +6,15 @@ const feedbackController = {
         res.status(201).json(feedback);
     },
     getFeedback: async (req, res) => {
-        const feedback = await Feedback.find();
+        const feedback = await Feedback.findById(req.params.id);
+        res.status(200).json(feedback);
+    },
+    updateFeedback: async (req, res) => {
+        const feedback = await Feedback.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.status(200).json(feedback);
+    },
+    deleteFeedback: async (req, res) => {
+        const feedback = await Feedback.findByIdAndDelete(req.params.id);
         res.status(200).json(feedback);
     }
 }

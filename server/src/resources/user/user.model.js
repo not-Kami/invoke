@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
+import UserRole from "./user.enum.js";
 
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     verified: { type: Boolean, default: false },
-    role: { type: String, enum: UserRole, default: UserRole.USER },
+    role: { type: String, enum: Object.values(UserRole), default: UserRole.USER },
     isDM: { type: Boolean, default: false },
     avatar: { type: String, default: null },
     bio: { type: String, default: null },

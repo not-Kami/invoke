@@ -1,0 +1,974 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2024-01-06T12:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
+  "resources": [
+    {
+      "_id": "req_root",
+      "parentId": "wrk_invoke_api",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}",
+      "name": "Root",
+      "description": "API root endpoint",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_users_create",
+      "parentId": "fld_users",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/users",
+      "name": "Create User",
+      "description": "Create a new user account",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecurePass123!\",\n  \"role\": \"user\",\n  \"isDM\": false,\n  \"avatar\": \"https://example.com/avatar.jpg\",\n  \"bio\": \"D&D enthusiast and dungeon master\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_users_get_all",
+      "parentId": "fld_users",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/users",
+      "name": "Get All Users",
+      "description": "Get all users with pagination and filtering",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "1",
+          "description": "Page number"
+        },
+        {
+          "name": "limit",
+          "value": "10",
+          "description": "Items per page"
+        },
+        {
+          "name": "search",
+          "value": "",
+          "description": "Search term for name or email"
+        },
+        {
+          "name": "role",
+          "value": "",
+          "description": "Filter by role (user/admin)"
+        },
+        {
+          "name": "isDM",
+          "value": "",
+          "description": "Filter by DM status (true/false)"
+        }
+      ],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_users_get_by_id",
+      "parentId": "fld_users",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/users/{{ _.user_id }}",
+      "name": "Get User by ID",
+      "description": "Get a specific user by ID",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_users_update",
+      "parentId": "fld_users",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/users/{{ _.user_id }}",
+      "name": "Update User",
+      "description": "Update user information",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"John Updated\",\n  \"email\": \"john.updated@example.com\",\n  \"bio\": \"Updated bio\",\n  \"isDM\": true\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_users_delete",
+      "parentId": "fld_users",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/users/{{ _.user_id }}",
+      "name": "Delete User",
+      "description": "Delete a user (soft delete)",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_games_create",
+      "parentId": "fld_games",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/games",
+      "name": "Create Game",
+      "description": "Create a new game",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Dungeons & Dragons 5e\",\n  \"description\": \"The world's greatest roleplaying game\",\n  \"genre\": \"Fantasy\",\n  \"system\": \"D&D 5e\",\n  \"image\": \"https://example.com/dnd5e.jpg\",\n  \"createdBy\": \"{{ _.user_id }}\",\n  \"isActive\": true\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_games_get_all",
+      "parentId": "fld_games",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/games",
+      "name": "Get All Games",
+      "description": "Get all games with pagination and filtering",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "1",
+          "description": "Page number"
+        },
+        {
+          "name": "limit",
+          "value": "10",
+          "description": "Items per page"
+        },
+        {
+          "name": "search",
+          "value": "",
+          "description": "Search term for name or description"
+        },
+        {
+          "name": "genre",
+          "value": "",
+          "description": "Filter by genre"
+        },
+        {
+          "name": "system",
+          "value": "",
+          "description": "Filter by system"
+        }
+      ],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_games_get_by_id",
+      "parentId": "fld_games",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/games/{{ _.game_id }}",
+      "name": "Get Game by ID",
+      "description": "Get a specific game by ID",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_games_update",
+      "parentId": "fld_games",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/games/{{ _.game_id }}",
+      "name": "Update Game",
+      "description": "Update game information",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"D&D 5e Updated\",\n  \"description\": \"Updated description\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_games_delete",
+      "parentId": "fld_games",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/games/{{ _.game_id }}",
+      "name": "Delete Game",
+      "description": "Delete a game",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_sessions_create",
+      "parentId": "fld_sessions",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/sessions",
+      "name": "Create Session",
+      "description": "Create a new gaming session",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"Epic Adventure Begins\",\n  \"description\": \"The party embarks on a legendary quest\",\n  \"date\": \"2024-02-15T18:00:00.000Z\",\n  \"sessionType\": \"online\",\n  \"isOneShot\": false,\n  \"game\": \"{{ _.game_id }}\",\n  \"dm\": \"{{ _.user_id }}\",\n  \"players\": [],\n  \"status\": \"open\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_sessions_get_all",
+      "parentId": "fld_sessions",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/sessions",
+      "name": "Get All Sessions",
+      "description": "Get all sessions with pagination and filtering",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "1",
+          "description": "Page number"
+        },
+        {
+          "name": "limit",
+          "value": "10",
+          "description": "Items per page"
+        },
+        {
+          "name": "search",
+          "value": "",
+          "description": "Search term for title or description"
+        },
+        {
+          "name": "sessionType",
+          "value": "",
+          "description": "Filter by session type (online/offline)"
+        },
+        {
+          "name": "status",
+          "value": "",
+          "description": "Filter by status (open/full/finished/cancelled)"
+        },
+        {
+          "name": "game",
+          "value": "",
+          "description": "Filter by game ID"
+        },
+        {
+          "name": "dm",
+          "value": "",
+          "description": "Filter by DM ID"
+        }
+      ],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_sessions_get_by_id",
+      "parentId": "fld_sessions",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/sessions/{{ _.session_id }}",
+      "name": "Get Session by ID",
+      "description": "Get a specific session by ID",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_sessions_update",
+      "parentId": "fld_sessions",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/sessions/{{ _.session_id }}",
+      "name": "Update Session",
+      "description": "Update session information",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"Updated Session Title\",\n  \"description\": \"Updated session description\",\n  \"status\": \"full\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_sessions_delete",
+      "parentId": "fld_sessions",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/sessions/{{ _.session_id }}",
+      "name": "Delete Session",
+      "description": "Delete a session",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_campaigns_create",
+      "parentId": "fld_campaigns",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/campaigns",
+      "name": "Create Campaign",
+      "description": "Create a new campaign",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"The Lost Mines of Phandelver\",\n  \"description\": \"A D&D 5e adventure for levels 1-5\",\n  \"startDate\": \"2024-01-15T00:00:00.000Z\",\n  \"endDate\": \"2024-06-15T00:00:00.000Z\",\n  \"game\": \"{{ _.game_id }}\",\n  \"dm\": \"{{ _.user_id }}\",\n  \"players\": [],\n  \"sessions\": [],\n  \"active\": true\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_campaigns_get_all",
+      "parentId": "fld_campaigns",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/campaigns",
+      "name": "Get All Campaigns",
+      "description": "Get all campaigns with pagination and filtering",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "1",
+          "description": "Page number"
+        },
+        {
+          "name": "limit",
+          "value": "10",
+          "description": "Items per page"
+        },
+        {
+          "name": "search",
+          "value": "",
+          "description": "Search term for name or description"
+        },
+        {
+          "name": "active",
+          "value": "",
+          "description": "Filter by active status (true/false)"
+        },
+        {
+          "name": "game",
+          "value": "",
+          "description": "Filter by game ID"
+        },
+        {
+          "name": "dm",
+          "value": "",
+          "description": "Filter by DM ID"
+        }
+      ],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_campaigns_get_by_id",
+      "parentId": "fld_campaigns",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/campaigns/{{ _.campaign_id }}",
+      "name": "Get Campaign by ID",
+      "description": "Get a specific campaign by ID",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_campaigns_update",
+      "parentId": "fld_campaigns",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/campaigns/{{ _.campaign_id }}",
+      "name": "Update Campaign",
+      "description": "Update campaign information",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Updated Campaign Name\",\n  \"description\": \"Updated campaign description\",\n  \"active\": false\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_campaigns_delete",
+      "parentId": "fld_campaigns",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/campaigns/{{ _.campaign_id }}",
+      "name": "Delete Campaign",
+      "description": "Delete a campaign (soft delete)",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_feedback_create",
+      "parentId": "fld_feedback",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/feedback",
+      "name": "Create Feedback",
+      "description": "Create a new feedback entry",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"author\": \"{{ _.user_id }}\",\n  \"rating\": 5,\n  \"comment\": \"Amazing session! The DM was fantastic.\",\n  \"target\": \"{{ _.target_user_id }}\",\n  \"session\": \"{{ _.session_id }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_feedback_get_all",
+      "parentId": "fld_feedback",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/feedback",
+      "name": "Get All Feedback",
+      "description": "Get all feedback with pagination and filtering",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "1",
+          "description": "Page number"
+        },
+        {
+          "name": "limit",
+          "value": "10",
+          "description": "Items per page"
+        },
+        {
+          "name": "search",
+          "value": "",
+          "description": "Search term for comments"
+        },
+        {
+          "name": "rating",
+          "value": "",
+          "description": "Filter by rating (1-5)"
+        },
+        {
+          "name": "author",
+          "value": "",
+          "description": "Filter by author ID"
+        },
+        {
+          "name": "target",
+          "value": "",
+          "description": "Filter by target user ID"
+        },
+        {
+          "name": "session",
+          "value": "",
+          "description": "Filter by session ID"
+        }
+      ],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_feedback_get_by_id",
+      "parentId": "fld_feedback",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/feedback/{{ _.feedback_id }}",
+      "name": "Get Feedback by ID",
+      "description": "Get a specific feedback by ID",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_feedback_update",
+      "parentId": "fld_feedback",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/feedback/{{ _.feedback_id }}",
+      "name": "Update Feedback",
+      "description": "Update feedback information",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"rating\": 4,\n  \"comment\": \"Updated feedback comment\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_feedback_delete",
+      "parentId": "fld_feedback",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "url": "{{ _.base_url }}/feedback/{{ _.feedback_id }}",
+      "name": "Delete Feedback",
+      "description": "Delete a feedback entry",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1704542400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "wrk_invoke_api",
+      "parentId": null,
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "name": "Invoke API",
+      "description": "API collection for the Invoke gaming platform",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "fld_users",
+      "parentId": "wrk_invoke_api",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "name": "Users",
+      "description": "User management endpoints",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1704542400000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_games",
+      "parentId": "wrk_invoke_api",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "name": "Games",
+      "description": "Game management endpoints",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1704542400000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_sessions",
+      "parentId": "wrk_invoke_api",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "name": "Sessions",
+      "description": "Session management endpoints",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1704542400000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_campaigns",
+      "parentId": "wrk_invoke_api",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "name": "Campaigns",
+      "description": "Campaign management endpoints",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1704542400000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_feedback",
+      "parentId": "wrk_invoke_api",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "name": "Feedback",
+      "description": "Feedback management endpoints",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1704542400000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "env_development",
+      "parentId": "wrk_invoke_api",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "name": "Development",
+      "data": {
+        "base_url": "http://localhost:3000/api/v1",
+        "user_id": "",
+        "game_id": "",
+        "session_id": "",
+        "campaign_id": "",
+        "feedback_id": "",
+        "target_user_id": ""
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "user_id",
+          "game_id",
+          "session_id",
+          "campaign_id",
+          "feedback_id",
+          "target_user_id"
+        ]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1704542400000,
+      "_type": "environment"
+    },
+    {
+      "_id": "env_production",
+      "parentId": "wrk_invoke_api",
+      "modified": 1704542400000,
+      "created": 1704542400000,
+      "name": "Production",
+      "data": {
+        "base_url": "https://your-production-domain.com/api/v1",
+        "user_id": "",
+        "game_id": "",
+        "session_id": "",
+        "campaign_id": "",
+        "feedback_id": "",
+        "target_user_id": ""
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "base_url",
+          "user_id",
+          "game_id",
+          "session_id",
+          "campaign_id",
+          "feedback_id",
+          "target_user_id"
+        ]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1704542400000,
+      "_type": "environment"
+    }
+  ]
+} 
