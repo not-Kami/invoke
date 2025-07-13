@@ -98,12 +98,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: http://localhost:3000/api/v1/games/686a63033973e80f5f7118cc
+      - url: http://localhost:3000/api/v1/games/686a8518147a59293e969528
         name: Get Game by ID
         meta:
           id: req_c59cce6b02a14f1fa1612146f0beeba3
           created: 1704542400000
-          modified: 1751802641419
+          modified: 1752340126003
           isPrivate: false
           description: Get a specific game by ID
           sortKey: -1704542400000
@@ -229,12 +229,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: http://localhost:3000/api/v1/feedback/686a61f740a5031f43827fd0
+      - url: http://localhost:3000/api/v1/feedback/
         name: Get Feedback by ID
         meta:
           id: req_d5f4fa1bd6ad44d897bbe362cc47b8db
           created: 1704542400000
-          modified: 1751803357852
+          modified: 1752340240168
           isPrivate: false
           description: Get a specific feedback by ID
           sortKey: -1704542400000
@@ -348,12 +348,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: http://localhost:3000/api/v1/sessions/686a64c9e6cbbba01674d814
+      - url: http://localhost:3000/api/v1/sessions/686a8518147a59293e96952e
         name: Get Session by ID
         meta:
           id: req_9085017b78a14318aa79d4b6ab592a1a
           created: 1704542400000
-          modified: 1751803095182
+          modified: 1752340274902
           isPrivate: false
           description: Get a specific session by ID
           sortKey: -1704542400000
@@ -408,27 +408,11 @@ collection:
         meta:
           id: req_5512c0ca1dd1447bad571afbd8b561a3
           created: 1704542400000
-          modified: 1751801904948
+          modified: 1752340863472
           isPrivate: false
           description: Get all users with pagination and filtering
           sortKey: -1704542400000
         method: GET
-        parameters:
-          - name: page
-            value: "1"
-            description: Page number
-          - name: limit
-            value: "10"
-            description: Items per page
-          - name: search
-            value: ""
-            description: Search term for name or email
-          - name: role
-            value: ""
-            description: Filter by role (user/admin)
-          - name: isDM
-            value: ""
-            description: Filter by DM status (true/false)
         settings:
           renderRequestBody: true
           encodeUrl: true
@@ -540,7 +524,7 @@ collection:
     meta:
       id: fld_aa518b8c491846a0bd80492e50bc9837
       created: 1704542400000
-      modified: 1704542400000
+      modified: 1752333197846
       sortKey: -1704542400000
       description: Campaign management endpoints
     children:
@@ -620,30 +604,11 @@ collection:
         meta:
           id: req_843516c7aa414032967e59898b76d067
           created: 1704542400000
-          modified: 1751801651209
+          modified: 1752340882571
           isPrivate: false
           description: Get all campaigns with pagination and filtering
           sortKey: -1704542400000
         method: GET
-        parameters:
-          - name: page
-            value: "1"
-            description: Page number
-          - name: limit
-            value: "10"
-            description: Items per page
-          - name: search
-            value: ""
-            description: Search term for name or description
-          - name: active
-            value: ""
-            description: Filter by active status (true/false)
-          - name: game
-            value: ""
-            description: Filter by game ID
-          - name: dm
-            value: ""
-            description: Filter by DM ID
         settings:
           renderRequestBody: true
           encodeUrl: true
@@ -681,24 +646,195 @@ collection:
             send: true
             store: true
           rebuildPath: true
-  - url: localhost:3000http://localhost:3000/api/v1
-    name: Root
+  - name: Auth
     meta:
-      id: req_faeb8c7fea0f41e38dc93dbf8c6f5bb8
-      created: 1704542400000
-      modified: 1751801666042
-      isPrivate: false
-      description: API root endpoint
-      sortKey: -1704542400000
-    method: GET
-    settings:
-      renderRequestBody: true
-      encodeUrl: true
-      followRedirects: global
-      cookies:
-        send: true
-        store: true
-      rebuildPath: true
+      id: fld_3612f36f1c874a20acb1270c181f990a
+      created: 1752333208173
+      modified: 1752333208173
+      sortKey: -1752333208173
+      description: ""
+    children:
+      - url: " http://localhost:3000/api/v1/auth/signup"
+        name: signup
+        meta:
+          id: req_faeb8c7fea0f41e38dc93dbf8c6f5bb8
+          created: 1704542400000
+          modified: 1752336688022
+          isPrivate: false
+          description: API root endpoint
+          sortKey: -1752336677867
+        method: POST
+        body:
+          mimeType: multipart/form-data
+          params:
+            - name: |2-
+                   {
+                     "firstName": "Test",
+                     "lastName": "User",
+                     "email": "test@user.com",
+                     "password": "test1234"
+                   }
+              value: ""
+        headers:
+          - name: Content-Type
+            value: multipart/form-data
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: " http://localhost:3000/api/v1/auth/login"
+        name: login
+        meta:
+          id: req_3c69f2e0d1474a8085764504449724fb
+          created: 1752336676334
+          modified: 1752336799469
+          isPrivate: false
+          description: ""
+          sortKey: -1752336677767
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+                "email": "test@user.com",
+                "password": "test1234"
+              }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.2.0
+        authentication:
+          type: none
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/auth/me
+        name: user info
+        meta:
+          id: req_a6aafa36db534bdea34e349510c05bff
+          created: 1752336911478
+          modified: 1752340960972
+          isPrivate: false
+          description: ""
+          sortKey: -1752336677967
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.2.0
+            id: pair_73053f22bbdc42b69dad03200f257869
+          - id: pair_588e51f089f94d79b9372cea30efd14a
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        authentication:
+          type: bearer
+          token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzI4NTRjOWI1ZDllMjM4YTgwZTZkNiIsImlhdCI6MTc1MjM0MDk1MiwiZXhwIjoxNzUyOTQ1NzUyfQ.39U2pw46PyS_x_VrBTMYzq_EAHvGxtLMuxUrCcpyOEk
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: uplaods
+    meta:
+      id: fld_9509d10f4e744d3da6409c45db37d7c7
+      created: 1752336979967
+      modified: 1752336979967
+      sortKey: -1752336979967
+      description: ""
+    children:
+      - url: http://localhost:3000/api/v1/users/6872854c9b5d9e238a80e6d6/avatar
+        name: User avatar upload
+        meta:
+          id: req_ff017b681a794e04be94b76802ba5cc8
+          created: 1752336983873
+          modified: 1752340203070
+          isPrivate: false
+          description: ""
+          sortKey: -1752336992435
+        method: POST
+        body:
+          mimeType: multipart/form-data
+          params:
+            - id: pair_59d1ca86bef44c609b12bd48abfd4fe8
+              name: image
+              value: ""
+              description: ""
+              disabled: false
+              type: file
+              fileName: C:\Users\Nacho\Downloads\gg.jpg
+        headers:
+          - name: Content-Type
+            value: multipart/form-data
+          - name: User-Agent
+            value: insomnia/11.2.0
+        authentication:
+          type: bearer
+          token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzI4NTRjOWI1ZDllMjM4YTgwZTZkNiIsImlhdCI6MTc1MjMzNzUxNCwiZXhwIjoxNzUyOTQyMzE0fQ.8k5whhRKq9XCiAIwLTbs6D9YAM2vyYPjA5C5tYWcHcc
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3000/api/v1/characters/687294469ec771486ee496c0/avatar
+        name: Character avatar upload
+        meta:
+          id: req_bc922febfe8746dfa23ec8dc8f628d0a
+          created: 1752339222007
+          modified: 1752340211387
+          isPrivate: false
+          description: ""
+          sortKey: -1752336992535
+        method: POST
+        body:
+          mimeType: multipart/form-data
+          params:
+            - id: pair_760d360197eb4ab5b6b9d7a6c419cf28
+              name: image
+              value: ""
+              description: ""
+              disabled: false
+              type: file
+              fileName: C:\Users\Nacho\Downloads\gan.jpg
+        headers:
+          - name: Content-Type
+            value: multipart/form-data
+          - name: User-Agent
+            value: insomnia/11.2.0
+        authentication:
+          type: bearer
+          token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzI4NTRjOWI1ZDllMjM4YTgwZTZkNiIsImlhdCI6MTc1MjMzNzUxNCwiZXhwIjoxNzUyOTQyMzE0fQ.8k5whhRKq9XCiAIwLTbs6D9YAM2vyYPjA5C5tYWcHcc
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Character
+    meta:
+      id: fld_a0f1a8caf3444e8a8932ffa8efe5aeb5
+      created: 1752339211650
+      modified: 1752340999148
+      sortKey: -1752339211650
+      description: ""
 cookieJar:
   name: Default Jar
   meta:

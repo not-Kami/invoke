@@ -1,13 +1,15 @@
 import { Router } from "express";
 import feedbackController from "./feedback.controller.js";
-import validate from "../../middlewares/validate.js";
+import { validate, validateParams } from "../../middlewares/validate.js";
 import * as feedbackValidation from "./feedback.validation.js";
+import { protect } from "../../middlewares/auth.middleware.js";
 
 const feedbackRouter = Router();
 
-feedbackRouter.post("/", validate(feedbackValidation.createFeedbackSchema), feedbackController.createFeedback);
-feedbackRouter.get("/:id", validate(feedbackValidation.getFeedbackSchema), feedbackController.getFeedback);
-feedbackRouter.put("/:id", validate(feedbackValidation.updateFeedbackSchema), feedbackController.updateFeedback);
-feedbackRouter.delete("/:id", validate(feedbackValidation.deleteFeedbackSchema), feedbackController.deleteFeedback);
+feedbackRouter.post("/", protect, validate(feedbackValidation.createFeedbackSchema), feedbackController.createFeedback);
+feedbackRouter.get("/", validate(feedbackValidation.getFeedbacksSchema), feedbackController.getFeedbacks);
+feedbackRouter.get("/:id", validateParams(feedbackValidation.getFeedbackSchema), feedbackController.getFeedback);
+feedbackRouter.put("/:id", protect, validateParams(feedbackValidation.getFeedbackSchema), validate(feedbackValidation.updateFeedbackSchema), feedbackController.updateFeedback);
+feedbackRouter.delete("/:id", protect, validateParams(feedbackValidation.getFeedbackSchema), feedbackController.deleteFeedback);
 
 export default feedbackRouter;

@@ -23,6 +23,19 @@ const userController = {
         const user = await User.findByIdAndDelete(req.params.id);
         res.status(200).json(user);
         return;
+    },
+    uploadAvatar: async (req, res) => {
+        try {
+            // req.file contient les infos du fichier uploadé
+            // req.params.id = id du user
+            // Tu peux mettre à jour le champ avatar du user ici
+            res.json({
+                success: true,
+                file: req.file
+            });
+        } catch (error) {
+            res.status(500).json({ success: false, message: "Upload failed", error: error.message });
+        }
     }
 }
 
