@@ -2,13 +2,14 @@
   "name": "invoke-backend",
   "version": "0.1.0",
   "description": "",
-  "main": "app.js",
+  "main": "src/app.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon app.js",
-    "start": "node app.js",
-    "build": "npm install"
+    "dev": "nodemon src/app.js",
+    "start": "node src/app.js",
+    "build": "npm install",
+    "seed": "node src/seeders/index.js"
   },
   "author": "Kami",
   "license": "ISC",
@@ -16,10 +17,17 @@
     "nodemon": "^3.1.10"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
     "dotenv": "^16.5.0",
-    "express": "^5.1.0",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.5.1",
     "helmet": "^8.1.0",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.14.0",
-    "winston": "^3.17.0"
+    "multer": "^2.0.1",
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0"
   }
 }
