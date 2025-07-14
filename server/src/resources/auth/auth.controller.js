@@ -1,5 +1,5 @@
 import User from '../user/user.model.js';
-import { generateToken, hashPassword, comparePassword } from '../../middlewares/auth.middleware.js';
+import { generateToken, hashPassword, comparePassword, COOKIE_CONFIG } from '../../middlewares/auth.middleware.js';
 import logger from '../../config/logger.config.js';
 
 // @desc    Register user
@@ -33,6 +33,9 @@ export const signup = async (req, res) => {
         // Générer le token
         const token = generateToken(user._id);
 
+        // Définir le cookie avec le token
+        res.cookie('token', token, COOKIE_CONFIG);
+
         // Retourner la réponse sans le mot de passe
         const userResponse = {
             _id: user._id,
@@ -49,8 +52,7 @@ export const signup = async (req, res) => {
             success: true,
             message: 'User registered successfully',
             data: {
-                user: userResponse,
-                token
+                user: userResponse
             }
         });
     } catch (error) {
@@ -91,6 +93,9 @@ export const login = async (req, res) => {
         // Générer le token
         const token = generateToken(user._id);
 
+        // Définir le cookie avec le token
+        res.cookie('token', token, COOKIE_CONFIG);
+
         // Retourner la réponse sans le mot de passe
         const userResponse = {
             _id: user._id,
@@ -107,8 +112,7 @@ export const login = async (req, res) => {
             success: true,
             message: 'Login successful',
             data: {
-                user: userResponse,
-                token
+                user: userResponse
             }
         });
     } catch (error) {
@@ -127,6 +131,12 @@ export const login = async (req, res) => {
 export const getMe = async (req, res) => {
     try {
         const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
         
         res.status(200).json({
             success: true,
@@ -188,6 +198,35 @@ export const updatePassword = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error updating password',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Logout user
+// @route   POST /api/v1/auth/logout
+// @access  Private
+export const logout = async (req, res) => {
+    try {
+        // Supprimer le cookie
+        res.clearCookie('token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            path: '/'
+        });
+
+        logger.info(`User logged out: ${req.user.email}`);
+
+        res.status(200).json({
+            success: true,
+            message: 'Logout successful'
+        });
+    } catch (error) {
+        logger.error('Logout error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error during logout',
             error: error.message
         });
     }

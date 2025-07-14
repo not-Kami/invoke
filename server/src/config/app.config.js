@@ -10,6 +10,7 @@ import gameRouter from "../resources/game/game.route.js";
 import campaignRouter from "../resources/campaign/campaign.route.js";
 import authRouter from "../resources/auth/auth.route.js";
 import characterRouter from "../resources/character/character.route.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -17,6 +18,7 @@ const app = express();
 app.use(corsMiddleware);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
 
 // Rate limiting global
 app.use('/api/v1', globalLimiter);
