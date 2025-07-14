@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import { Card, CardContent, CardHeader } from '@/components/ui/Card';
-import Avatar from '@/components/ui/Avatar';
-import Badge from '@/components/ui/Badge';
-import { usersApi } from '@/lib/api';
+import { useAuth } from '../../contexts/AuthContext';
+import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
+import { Card, CardContent, CardHeader } from '../../components/ui/Card';
+import Avatar from '../../components/ui/Avatar';
+import Badge from '../../components/ui/Badge';
+import { usersApi } from '../../lib/api';
 import { User, Edit, Shield, Mail, Calendar } from 'lucide-react';
 
 export default function ProfilePage() {

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { Session, Game } from '@/types';
-import { sessionsApi, gamesApi } from '@/lib/api';
-import Button from '@/components/ui/Button';
-import { Card, CardContent, CardHeader } from '@/components/ui/Card';
-import Badge from '@/components/ui/Badge';
-import Avatar from '@/components/ui/Avatar';
-import { formatDateShort } from '@/lib/utils';
+import { useAuth } from '../contexts/AuthContext';
+import { Session, Game } from '../types';
+import { sessionsApi, gamesApi } from '../lib/api';
+import Button from '../components/ui/Button';
+import { Card, CardContent, CardHeader } from '../components/ui/Card';
+import Badge from '../components/ui/Badge';
+import Avatar from '../components/ui/Avatar';
+import { formatDateShort } from '../lib/utils';
 import { Calendar, Users, Gamepad2, Plus, ArrowRight } from 'lucide-react';
 
 export default function HomePage() {

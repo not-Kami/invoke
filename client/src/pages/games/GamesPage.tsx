@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Game } from '@/types';
-import { gamesApi } from '@/lib/api';
-import { Card, CardContent, CardHeader } from '@/components/ui/Card';
-import Badge from '@/components/ui/Badge';
-import Input from '@/components/ui/Input';
+import { Game } from '../../types';
+import { gamesApi } from '../../lib/api';
+import { Card, CardContent, CardHeader } from '../../components/ui/Card';
+import Badge from '../../components/ui/Badge';
+import Input from '../../components/ui/Input';
 import { Search, Gamepad2 } from 'lucide-react';
 
 export default function GamesPage() {
