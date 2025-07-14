@@ -1,6 +1,6 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
-import { getInitials } from '@/lib/utils';
+import { cn } from '../../lib/utils';
+import { getInitials } from '../../lib/utils';
 
 interface AvatarProps {
   src?: string;

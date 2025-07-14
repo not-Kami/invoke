@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import Avatar from '@/components/ui/Avatar';
-import Button from '@/components/ui/Button';
+import { useAuth } from '../../contexts/AuthContext';
+import Avatar from '../ui/Avatar';
+import Button from '../ui/Button';
 import { Menu, X, Dice6, Users, Calendar, Gamepad2, User, LogOut } from 'lucide-react';
 
 export default function Navbar() {

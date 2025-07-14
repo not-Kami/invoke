@@ -1,18 +1,18 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from '@/contexts/AuthContext';
-import Layout from '@/components/layout/Layout';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import { AuthProvider } from './contexts/AuthContext';
+import Layout from './components/layout/Layout';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // Pages
-import HomePage from '@/pages/HomePage';
-import LoginPage from '@/pages/auth/LoginPage';
-import SignupPage from '@/pages/auth/SignupPage';
-import SessionsPage from '@/pages/sessions/SessionsPage';
-import GamesPage from '@/pages/games/GamesPage';
-import CampaignsPage from '@/pages/campaigns/CampaignsPage';
-import PlayersPage from '@/pages/players/PlayersPage';
-import ProfilePage from '@/pages/profile/ProfilePage';
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/auth/LoginPage';
+import SignupPage from './pages/auth/SignupPage';
+import SessionsPage from './pages/sessions/SessionsPage';
+import GamesPage from './pages/games/GamesPage';
+import CampaignsPage from './pages/campaigns/CampaignsPage';
+import PlayersPage from './pages/players/PlayersPage';
+import ProfilePage from './pages/profile/ProfilePage';
 
 function App() {
   return (
