@@ -34,6 +34,20 @@ Veux-tu que je te propose un diff précis à appliquer à ton `TODO.md` pour ref
 * [ ] Configurer **Multer** pour les uploads d’images
 * [ ] Activer les middlewares de **sécurité** (Helmet, CORS)
 
+* [ ] Implémenter les **filtres, pagination, tri et projection** sur les endpoints de liste :
+  * /api/v1/users
+  * /api/v1/games
+  * /api/v1/sessions
+  * /api/v1/campaigns
+
+* [ ] Implémenter les filtres sur /api/v1/users :
+    * Recherche texte (q) sur firstName, lastName, nickname, bio
+    * Filtre par rôle (role)
+    * Filtre par isDM
+    * Pagination (page, limit)
+    * Tri (sort)
+
+
 ### Tâches Backend Générales
 
 * [x] Mettre à jour `.env.example` et documenter toutes les variables

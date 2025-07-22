@@ -6,8 +6,36 @@ const gameController = {
         res.status(201).json(game);
     },
     getGames: async (req, res) => {
-        const games = await Game.find();
-        res.status(200).json(games);
+        try {
+            const { q, system, genre, page = 1, limit = 10, sort } = req.query;
+            const filter = {};
+            if (q) {
+                filter.$or = [
+                    { name: { $regex: q, $options: 'i' } },
+                    { description: { $regex: q, $options: 'i' } }
+                ];
+            }
+            if (system) filter.system = system;
+            if (genre) filter.genre = genre;
+
+            const sortOption = sort ? (sort.startsWith('-') ? { [sort.slice(1)]: -1 } : { [sort]: 1 }) : { createdAt: -1 };
+            const skip = (parseInt(page) - 1) * parseInt(limit);
+            const games = await Game.find(filter)
+                .sort(sortOption)
+                .skip(skip)
+                .limit(parseInt(limit))
+                .select('name description genre system image isActive createdAt');
+            const total = await Game.countDocuments(filter);
+            res.status(200).json({
+                success: true,
+                data: games,
+                page: parseInt(page),
+                limit: parseInt(limit),
+                total
+            });
+        } catch (error) {
+            res.status(500).json({ success: false, message: 'Failed to fetch games', error: error.message });
+        }
     },
     getGame: async (req, res) => {
         const game = await Game.findById(req.params.id);

@@ -10,6 +10,7 @@ import gameRouter from "../resources/game/game.route.js";
 import campaignRouter from "../resources/campaign/campaign.route.js";
 import authRouter from "../resources/auth/auth.route.js";
 import characterRouter from "../resources/character/character.route.js";
+import tableRouter from "../resources/table/table.route.js";
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use('/api/v1/feedback', sensitiveOperationLimiter, feedbackRouter);
 app.use('/api/v1/games', sensitiveOperationLimiter, gameRouter);
 app.use('/api/v1/campaigns', sensitiveOperationLimiter, campaignRouter);
 app.use('/api/v1/characters', characterRouter);
+app.use('/api/v1/tables', sensitiveOperationLimiter, tableRouter);
 
 // Health check endpoint
 app.get('/api/v1/health', (req, res) => {
