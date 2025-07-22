@@ -1,12 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=UnifrakturCook:wght@700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 @layer base {
   html {
     font-family: 'Inter', system-ui, sans-serif;
+    background-color: #181825;
+  }
+  h1, h2, h3 {
+    font-family: 'UnifrakturCook', cursive;
+    letter-spacing: 0.01em;
+    color: #a259f4;
+  }
+  body {
+    @apply bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100;
   }
 }
 
@@ -17,7 +26,6 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
   }
-  
   .line-clamp-3 {
     overflow: hidden;
     display: -webkit-box;
