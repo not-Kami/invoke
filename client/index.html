@@ -1,26 +1,14 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-  <title>Test CORS API</title>
-</head>
-
-<body>
-  <h1>Test CORS API</h1>
-  <button id="test">Tester l'API</button>
-  <pre id="result"></pre>
-  <script>
-    document.getElementById('test').onclick = function () {
-      fetch('http://localhost:3000/api/v1/health')
-        .then(r => r.json())
-        .then(data => {
-          document.getElementById('result').textContent = JSON.stringify(data, null, 2);
-        })
-        .catch(e => {
-          document.getElementById('result').textContent = 'Erreur CORS ou réseau : ' + e;
-        });
-    };
-  </script>
-</body>
-
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Invoke - Find Your Next Adventure</title>
+    <meta name="description" content="Connect with dungeon masters and players. Find gaming sessions, join campaigns, and embark on epic tabletop RPG adventures." />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
