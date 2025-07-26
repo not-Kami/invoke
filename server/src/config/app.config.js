@@ -1,4 +1,5 @@
 import express from "express";
+import cookieParser from "cookie-parser";
 import env from "./dotenv.config.js";
 import corsMiddleware from "../middlewares/cors.middleware.js";
 import { globalLimiter, sensitiveOperationLimiter } from "../middlewares/rateLimiter.middleware.js";
@@ -16,6 +17,7 @@ const app = express();
 
 // Middleware de sécurité et logging
 app.use(corsMiddleware);
+app.use(cookieParser()); // Parser les cookies
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 

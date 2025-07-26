@@ -14,5 +14,6 @@ authRouter.post("/login", authLimiter, validate(authValidation.loginSchema), aut
 // Routes protégées
 authRouter.get("/me", protect, authController.getMe);
 authRouter.put("/update-password", protect, validate(authValidation.updatePasswordSchema), authController.updatePassword);
+authRouter.post("/logout", protect, authController.logout);
 
 export default authRouter; 

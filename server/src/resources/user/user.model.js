@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
     verified: { type: Boolean, default: false },
     role: { type: String, enum: Object.values(UserRole), default: UserRole.USER },
     isDM: { type: Boolean, default: false },
+    featured: { type: Boolean, default: false }, // Uniquement pour les MJ
     avatar: { type: String, default: null },
     bio: { type: String, default: null },
     favorite_games: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Game' }],

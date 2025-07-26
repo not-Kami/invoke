@@ -54,6 +54,22 @@ const sessionController = {
     deleteSession: async (req, res) => {
         const session = await Session.findByIdAndDelete(req.params.id);
         res.status(200).json(session);
+    },
+    getFeaturedSessions: async (req, res) => {
+        try {
+            const sessions = await Session.find({ featured: true, status: 'open' })
+                .populate('game', 'name system')
+                .populate('dm', 'firstName lastName avatar')
+                .sort({ createdAt: -1 })
+                .limit(6);
+            
+            res.status(200).json({
+                success: true,
+                data: sessions
+            });
+        } catch (error) {
+            res.status(500).json({ success: false, message: 'Failed to fetch featured sessions', error: error.message });
+        }
     }
 }
 

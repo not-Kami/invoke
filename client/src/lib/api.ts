@@ -1,129 +1,200 @@
-import axios from 'axios';
-import { AuthResponse, User, Game, Session, Campaign, Character, Feedback } from '../types';
+// Types pour les réponses API
 
 const API_BASE_URL = 'http://localhost:3000/api/v1';
 
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+// Types pour les réponses API
+interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  error?: string;
+}
 
-// Request interceptor to add auth token
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+interface User {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: 'user' | 'admin';
+  isDM: boolean;
+  featured: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
-// Response interceptor for error handling
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+interface Session {
+  _id: string;
+  title: string;
+  game: string;
+  dm: string;
+  status: 'open' | 'full' | 'closed';
+  players: number;
+  maxPlayers: number;
+  featured: boolean;
+  date: string;
+  createdAt: string;
+}
+
+interface Campaign {
+  _id: string;
+  title: string;
+  game: string;
+  dm: string;
+  status: 'active' | 'paused' | 'completed';
+  players: number;
+  maxPlayers: number;
+  featured: boolean;
+  createdAt: string;
+}
+
+interface Game {
+  _id: string;
+  name: string;
+  system: string;
+  featured: boolean;
+  sessionsCount: number;
+  createdAt: string;
+}
+
+// Fonction utilitaire pour les appels API
+async function apiCall<T>(
+  endpoint: string, 
+  options: RequestInit = {}
+): Promise<ApiResponse<T>> {
+  try {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    };
+
+    console.log('API Debug - Making request to:', `${API_BASE_URL}${endpoint}`);
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+      credentials: 'include', // Inclure les cookies dans les requêtes
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Erreur API');
     }
-    return Promise.reject(error);
+
+    return data; // Retourner directement la réponse du serveur
+  } catch (error) {
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Erreur inconnue' 
+    };
   }
-);
+}
 
-// Auth API
-export const authApi = {
-  signup: (data: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-  }) => api.post<AuthResponse>('/auth/signup', data),
+// ===== ENDPOINTS ADMIN =====
+
+// Users
+export const adminAPI = {
+  // Récupérer tous les utilisateurs
+  getUsers: () => apiCall<User[]>('/users'),
   
-  login: (data: { email: string; password: string }) =>
-    api.post<AuthResponse>('/auth/login', data),
+  // Récupérer les MJ mis en avant
+  getFeaturedDMs: () => apiCall<User[]>('/users/featured-dms'),
   
-  getMe: () => api.get<{ success: boolean; data: { user: User } }>('/auth/me'),
+  // Mettre à jour un utilisateur
+  updateUser: (id: string, data: Partial<User>) => 
+    apiCall<User>(`/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
   
-  updatePassword: (data: { currentPassword: string; newPassword: string }) =>
-    api.put('/auth/update-password', data),
+  // Supprimer un utilisateur
+  deleteUser: (id: string) => 
+    apiCall(`/users/${id}`, { method: 'DELETE' }),
+
+  // Sessions
+  getSessions: () => apiCall<Session[]>('/sessions'),
+  getFeaturedSessions: () => apiCall<Session[]>('/sessions/featured'),
+  updateSession: (id: string, data: Partial<Session>) => 
+    apiCall<Session>(`/sessions/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  deleteSession: (id: string) => 
+    apiCall(`/sessions/${id}`, { method: 'DELETE' }),
+
+  // Games
+  getGames: () => apiCall<Game[]>('/games'),
+  getFeaturedGames: () => apiCall<Game[]>('/games/featured'),
+  createGame: (data: Partial<Game>) => 
+    apiCall<Game>('/games', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  updateGame: (id: string, data: Partial<Game>) => 
+    apiCall<Game>(`/games/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  deleteGame: (id: string) => 
+    apiCall(`/games/${id}`, { method: 'DELETE' }),
+
+  // Campaigns
+  getCampaigns: () => apiCall<Campaign[]>('/campaigns'),
+  getFeaturedCampaigns: () => apiCall<Campaign[]>('/campaigns/featured'),
+  updateCampaign: (id: string, data: Partial<Campaign>) => 
+    apiCall<Campaign>(`/campaigns/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  deleteCampaign: (id: string) => 
+    apiCall(`/campaigns/${id}`, { method: 'DELETE' }),
 };
 
-// Users API
-export const usersApi = {
-  getUsers: () => api.get<User[]>('/users'),
-  getUser: (id: string) => api.get<User>(`/users/${id}`),
-  updateUser: (id: string, data: Partial<User>) => api.put<User>(`/users/${id}`, data),
-  deleteUser: (id: string) => api.delete(`/users/${id}`),
-  uploadAvatar: (id: string, file: File) => {
-    const formData = new FormData();
-    formData.append('image', file);
-    return api.post(`/users/${id}/avatar`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-  },
+// ===== ENDPOINTS AUTH =====
+
+interface LoginData {
+  email: string;
+  password: string;
+}
+
+interface SignupData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  isDM?: boolean;
+}
+
+interface AuthResponse {
+  data: {
+    user: User;
+  };
+}
+
+export const authAPI = {
+  login: (data: LoginData) => 
+    apiCall<AuthResponse>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  
+  signup: (data: SignupData) => 
+    apiCall<AuthResponse>('/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  
+  getCurrentUser: () => apiCall<{ user: User }>('/auth/me'),
+  
+  logout: () => apiCall('/auth/logout', { method: 'POST' }),
 };
 
-// Games API
-export const gamesApi = {
-  getGames: () => api.get<Game[]>('/games'),
-  getGame: (id: string) => api.get<Game>(`/games/${id}`),
-  createGame: (data: Omit<Game, '_id' | 'createdAt' | 'updatedAt'>) =>
-    api.post<Game>('/games', data),
-  updateGame: (id: string, data: Partial<Game>) => api.put<Game>(`/games/${id}`, data),
-  deleteGame: (id: string) => api.delete(`/games/${id}`),
+// ===== ENDPOINTS PUBLIC =====
+
+export const publicAPI = {
+  getFeaturedSessions: () => apiCall<Session[]>('/sessions/featured'),
+  getFeaturedGames: () => apiCall<Game[]>('/games/featured'),
+  getFeaturedDMs: () => apiCall<User[]>('/users/featured-dms'),
 };
 
-// Sessions API
-export const sessionsApi = {
-  getSessions: () => api.get<Session[]>('/sessions'),
-  getSession: (id: string) => api.get<Session>(`/sessions/${id}`),
-  createSession: (data: Omit<Session, '_id' | 'createdAt' | 'updatedAt'>) =>
-    api.post<Session>('/sessions', data),
-  updateSession: (id: string, data: Partial<Session>) =>
-    api.put<Session>(`/sessions/${id}`, data),
-  deleteSession: (id: string) => api.delete(`/sessions/${id}`),
-};
-
-// Campaigns API
-export const campaignsApi = {
-  getCampaigns: () => api.get<Campaign[]>('/campaigns'),
-  getCampaign: (id: string) => api.get<Campaign>(`/campaigns/${id}`),
-  createCampaign: (data: Omit<Campaign, '_id' | 'createdAt' | 'updatedAt'>) =>
-    api.post<Campaign>('/campaigns', data),
-  updateCampaign: (id: string, data: Partial<Campaign>) =>
-    api.put<Campaign>(`/campaigns/${id}`, data),
-  deleteCampaign: (id: string) => api.delete(`/campaigns/${id}`),
-};
-
-// Characters API
-export const charactersApi = {
-  getMyCharacters: () => api.get<{ success: boolean; characters: Character[] }>('/characters'),
-  getCharacter: (id: string) => api.get<{ success: boolean; character: Character }>(`/characters/${id}`),
-  createCharacter: (data: { name: string; meta?: Record<string, any> }) =>
-    api.post<{ success: boolean; character: Character }>('/characters', data),
-  updateCharacter: (id: string, data: Partial<Character>) =>
-    api.put<{ success: boolean; character: Character }>(`/characters/${id}`, data),
-  deleteCharacter: (id: string) => api.delete(`/characters/${id}`),
-  uploadAvatar: (id: string, file: File) => {
-    const formData = new FormData();
-    formData.append('image', file);
-    return api.post(`/characters/${id}/avatar`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-  },
-};
-
-// Feedback API
-export const feedbackApi = {
-  getFeedback: () => api.get<Feedback[]>('/feedback'),
-  getFeedbackById: (id: string) => api.get<Feedback>(`/feedback/${id}`),
-  createFeedback: (data: Omit<Feedback, '_id' | 'createdAt' | 'updatedAt'>) =>
-    api.post<Feedback>('/feedback', data),
-  updateFeedback: (id: string, data: Partial<Feedback>) =>
-    api.put<Feedback>(`/feedback/${id}`, data),
-  deleteFeedback: (id: string) => api.delete(`/feedback/${id}`),
-};
-
-export default api;
+export type { User, Session, Campaign, Game, ApiResponse };

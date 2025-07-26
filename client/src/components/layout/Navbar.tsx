@@ -1,170 +1,150 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import Avatar from '../ui/Avatar';
+import { Link } from 'react-router-dom';
 import Button from '../ui/Button';
-import { Menu, X, Dice6, Users, Calendar, Gamepad2, User, LogOut } from 'lucide-react';
-
-function toggleDarkMode() {
-  const html = document.documentElement;
-  html.classList.toggle('dark');
-}
+import { useAuth } from '../../contexts/AuthContext';
+import { 
+  Menu, 
+  X, 
+  Sword, 
+  User, 
+  LogIn, 
+  UserPlus,
+  Search,
+  Bell,
+  Settings
+} from 'lucide-react';
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
-  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   const navigation = [
-    { name: 'Sessions', href: '/sessions', icon: Calendar },
-    { name: 'Campaigns', href: '/campaigns', icon: Gamepad2 },
-    { name: 'Games', href: '/games', icon: Dice6 },
-    { name: 'Players', href: '/players', icon: Users },
+    { name: 'Sessions', href: '/sessions' },
+    { name: 'Games', href: '/games' },
+    { name: 'Campaigns', href: '/campaigns' },
+    { name: 'Players', href: '/players' },
   ];
 
-  const isActive = (path: string) => location.pathname === path;
-
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200 dark:bg-background dark:border-gray-700">
+    <nav className="bg-white/10 backdrop-blur-md border-b border-white/20 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <Dice6 className="h-8 w-8 text-primary-600" />
-              <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Invoke</span>
-            </Link>
-          </div>
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-2">
+            <Sword className="h-8 w-8 text-purple-400" />
+            <span className="font-display text-xl font-bold text-white">Invoke</span>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    isActive(item.href)
-                      ? 'text-primary-600 bg-primary-50 dark:bg-primary-900 dark:text-primary-300'
-                      : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50 dark:text-gray-200 dark:hover:text-primary-400 dark:hover:bg-gray-800'
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span>{item.name}</span>
-                </Link>
-              );
-            })}
+            {navigation.map((item) => (
+              <Link
+                key={item.name}
+                to={item.href}
+                className="text-gray-300 hover:text-white transition-colors font-medium"
+              >
+                {item.name}
+              </Link>
+            ))}
           </div>
 
-          {/* User Menu + Dark Mode Switch */}
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={toggleDarkMode}
-              className="p-2 rounded-md border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
-              title="Toggle dark mode"
-            >
-              🌓
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center space-x-4">
+            <button className="text-gray-300 hover:text-white transition-colors">
+              <Search className="h-5 w-5" />
             </button>
+            
             {user ? (
-              <div className="relative">
-                <button
-                  onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                  className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-50"
-                >
-                  <Avatar
-                    firstName={user.firstName}
-                    lastName={user.lastName}
-                    src={user.avatar}
-                    size="sm"
-                  />
-                  <span className="hidden md:block text-sm font-medium text-gray-700">
-                    {user.firstName}
-                  </span>
+              <>
+                <button className="text-gray-300 hover:text-white transition-colors relative">
+                  <Bell className="h-5 w-5" />
+                  <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
                 </button>
-
-                {isProfileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-                    <Link
-                      to="/profile"
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      onClick={() => setIsProfileMenuOpen(false)}
-                    >
-                      <User className="h-4 w-4 mr-2" />
-                      Profile
-                    </Link>
-                    <Link
-                      to="/characters"
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      onClick={() => setIsProfileMenuOpen(false)}
-                    >
-                      <Users className="h-4 w-4 mr-2" />
-                      My Characters
-                    </Link>
-                    <button
-                      onClick={() => {
-                        logout();
-                        setIsProfileMenuOpen(false);
-                      }}
-                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                    >
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Sign out
-                    </button>
-                  </div>
+                {user.role === 'admin' && (
+                  <Link to="/admin">
+                    <Button variant="ghost" className="text-gray-300 hover:text-white">
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </Link>
                 )}
-              </div>
+                <Link to="/profile">
+                  <Button variant="ghost" className="text-gray-300 hover:text-white">
+                    <User className="h-4 w-4 mr-2" />
+                    {user.firstName}
+                  </Button>
+                </Link>
+                <Button 
+                  variant="ghost" 
+                  className="text-gray-300 hover:text-white"
+                  onClick={logout}
+                >
+                  Logout
+                </Button>
+              </>
             ) : (
-              <div className="flex items-center space-x-2">
+              <>
                 <Link to="/login">
-                  <Button variant="ghost" size="sm">
-                    Sign in
+                  <Button variant="ghost" className="text-gray-300 hover:text-white">
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Login
                   </Button>
                 </Link>
                 <Link to="/signup">
-                  <Button size="sm">
-                    Sign up
+                  <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0">
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Sign Up
                   </Button>
                 </Link>
-              </div>
+              </>
             )}
+          </div>
 
-            {/* Mobile menu button */}
+          {/* Mobile menu button */}
+          <div className="md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-50"
+              className="text-gray-300 hover:text-white transition-colors"
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
-      </div>
 
-      {/* Mobile Navigation */}
-      {isMenuOpen && (
-        <div className="md:hidden border-t border-gray-200">
-          <div className="px-2 pt-2 pb-3 space-y-1">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              return (
+        {/* Mobile Navigation */}
+        {isMenuOpen && (
+          <div className="md:hidden">
+            <div className="px-2 pt-2 pb-3 space-y-1 bg-white/10 backdrop-blur-md rounded-lg mt-2">
+              {navigation.map((item) => (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium ${
-                    isActive(item.href)
-                      ? 'text-primary-600 bg-primary-50'
-                      : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
-                  }`}
+                  className="block px-3 py-2 text-gray-300 hover:text-white transition-colors font-medium"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <Icon className="h-5 w-5" />
-                  <span>{item.name}</span>
+                  {item.name}
                 </Link>
-              );
-            })}
+              ))}
+              
+              {!user && (
+                <div className="pt-4 space-y-2">
+                  <Link to="/login">
+                    <Button variant="ghost" className="w-full text-gray-300 hover:text-white">
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Login
+                    </Button>
+                  </Link>
+                  <Link to="/signup">
+                    <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0">
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Sign Up
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </nav>
   );
 }

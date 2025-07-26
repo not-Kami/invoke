@@ -36,6 +36,25 @@ const userController = {
         } catch (error) {
             res.status(500).json({ success: false, message: "Upload failed", error: error.message });
         }
+    },
+    getFeaturedDMs: async (req, res) => {
+        try {
+            const dms = await User.find({ 
+                isDM: true, 
+                featured: true,
+                deletedAt: null 
+            })
+            .select('firstName lastName avatar bio nickname')
+            .sort({ createdAt: -1 })
+            .limit(6);
+            
+            res.status(200).json({
+                success: true,
+                data: dms
+            });
+        } catch (error) {
+            res.status(500).json({ success: false, message: 'Failed to fetch featured DMs', error: error.message });
+        }
     }
 }
 

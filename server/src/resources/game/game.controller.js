@@ -75,6 +75,20 @@ const gameController = {
     deleteGame: async (req, res) => {
         const game = await Game.findByIdAndDelete(req.params.id);
         res.status(200).json(game);
+    },
+    getFeaturedGames: async (req, res) => {
+        try {
+            const games = await Game.find({ featured: true })
+                .sort({ createdAt: -1 })
+                .limit(4);
+            
+            res.status(200).json({
+                success: true,
+                data: games
+            });
+        } catch (error) {
+            res.status(500).json({ success: false, message: 'Failed to fetch featured games', error: error.message });
+        }
     }
 }
 

@@ -10,6 +10,7 @@ const sessionSchema = new mongoose.Schema({
     dm: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     players: { type: [mongoose.Schema.Types.ObjectId], ref: "User", default: [] },
     status: { type: String, enum: ["open", "full", "finished", "cancelled"], default: "open" },
+    featured: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
 })

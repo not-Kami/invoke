@@ -8,6 +8,7 @@ const gameRouter = Router();
 
 gameRouter.post("/", protect, validate(gameValidation.createGameSchema), gameController.createGame);
 gameRouter.get("/", validate(gameValidation.getGamesSchema), gameController.getGames);
+gameRouter.get("/featured", gameController.getFeaturedGames);
 gameRouter.get("/:id", validateParams(gameValidation.getGameSchema), gameController.getGame);
 gameRouter.put("/:id", protect, validateParams(gameValidation.getGameSchema), validate(gameValidation.updateGameSchema), gameController.updateGame);
 gameRouter.delete("/:id", protect, validateParams(gameValidation.getGameSchema), gameController.deleteGame);

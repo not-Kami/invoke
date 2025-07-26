@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=UnifrakturCook:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -10,7 +10,7 @@
     background-color: #181825;
   }
   h1, h2, h3 {
-    font-family: 'UnifrakturCook', cursive;
+    font-family: 'Cinzel', cursive;
     letter-spacing: 0.01em;
     color: #a259f4;
   }

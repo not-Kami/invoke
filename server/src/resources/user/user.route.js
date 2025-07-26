@@ -10,6 +10,7 @@ const userRouter = Router();
 
 userRouter.post("/",validate(userValidation.createUserSchema), userController.createUser);
 userRouter.get("/", protect, restrictTo("admin"), userController.getUsers); // admin only
+userRouter.get("/featured-dms", userController.getFeaturedDMs); // public
 userRouter.get("/:id", protect, userController.getUser); // user ou admin
 userRouter.put("/:id", protect, userController.updateUser); // user ou admin
 userRouter.delete("/:id", protect, userController.deleteUser); // user ou admin

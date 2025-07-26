@@ -9,12 +9,21 @@ export const protect = async (req, res, next) => {
     try {
         let token;
 
-        // Vérifier si le token est dans les headers
-        if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        // Debug logs (temporaire)
+        // console.log('Auth Debug - Cookies:', req.cookies);
+        // console.log('Auth Debug - Headers:', req.headers.authorization);
+
+        // Vérifier si le token est dans les cookies (priorité) ou headers
+        if (req.cookies && req.cookies.token) {
+            token = req.cookies.token;
+            // console.log('Auth Debug - Token from cookie:', token ? 'Present' : 'Missing');
+        } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
             token = req.headers.authorization.split(' ')[1];
+            // console.log('Auth Debug - Token from header:', token ? 'Present' : 'Missing');
         }
 
         if (!token) {
+            // console.log('Auth Debug - No token found');
             return res.status(401).json({
                 success: false,
                 message: 'Not authorized to access this route'
@@ -80,7 +89,9 @@ export const optionalAuth = async (req, res, next) => {
     try {
         let token;
 
-        if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        if (req.cookies && req.cookies.token) {
+            token = req.cookies.token;
+        } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
             token = req.headers.authorization.split(' ')[1];
         }
 
@@ -106,9 +117,15 @@ export const optionalAuth = async (req, res, next) => {
 
 // Utilitaires pour l'authentification
 export const generateToken = (userId) => {
-    return jwt.sign({ id: userId }, env.JWT_SECRET, {
+    console.log('GenerateToken Debug - JWT_SECRET:', env.JWT_SECRET ? 'Present' : 'Missing');
+    console.log('GenerateToken Debug - userId:', userId);
+    
+    const token = jwt.sign({ id: userId }, env.JWT_SECRET, {
         expiresIn: env.JWT_EXPIRES_IN || '30d'
     });
+    
+    console.log('GenerateToken Debug - Generated token:', token ? 'Present' : 'Missing');
+    return token;
 };
 
 export const hashPassword = async (password) => {

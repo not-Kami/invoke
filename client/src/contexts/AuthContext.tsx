@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User } from '../types';
-import { authApi } from '../lib/api';
+import { User, authAPI } from '../lib/api';
 
 interface AuthContextType {
   user: User | null;
@@ -24,34 +23,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-      // Verify token is still valid
-      authApi.getMe().catch(() => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setToken(null);
-        setUser(null);
-      });
-    }
-    setLoading(false);
+    // Vérifier si l'utilisateur est connecté via le cookie
+    console.log('AuthContext Debug - Checking authentication via cookie');
+    
+          authAPI.getCurrentUser().then((response) => {
+        console.log('AuthContext Debug - getCurrentUser response:', response);
+        console.log('AuthContext Debug - response.data:', response.data);
+        console.log('AuthContext Debug - response.data.user:', response.data?.user);
+        
+        if (response.success && response.data && response.data.user) {
+          setToken('cookie');
+          setUser(response.data.user);
+          console.log('AuthContext Debug - User authenticated via cookie:', response.data.user);
+        } else {
+          console.log('AuthContext Debug - No valid session found');
+          setToken(null);
+          setUser(null);
+        }
+        setLoading(false);
+      }).catch((error) => {
+      console.log('AuthContext Debug - getCurrentUser error:', error);
+      setToken(null);
+      setUser(null);
+      setLoading(false);
+    });
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await authApi.login({ email, password });
-      const { user: userData, token: userToken } = response.data.data;
+      const response = await authAPI.login({ email, password });
       
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Login failed');
+      }
+      
+      console.log('Login Debug - Response data:', response.data);
+      const userData = response.data.data?.user;
+      
+      if (!userData) {
+        throw new Error('No user data received from server');
+      }
+      
+      setToken('cookie'); // Le token est maintenant dans un cookie HTTP-only
       setUser(userData);
-      setToken(userToken);
-      localStorage.setItem('token', userToken);
-      localStorage.setItem('user', JSON.stringify(userData));
+      console.log('Login Debug - User authenticated via cookie');
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Login failed');
+      throw new Error(error.message || 'Login failed');
     }
   };
 
@@ -62,23 +79,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     password: string;
   }) => {
     try {
-      const response = await authApi.signup(data);
-      const { user: userData, token: userToken } = response.data.data;
+      const response = await authAPI.signup(data);
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Signup failed');
+      }
       
+      const userData = response.data.data?.user;
+      setToken('cookie'); // Le token est maintenant dans un cookie HTTP-only
       setUser(userData);
-      setToken(userToken);
-      localStorage.setItem('token', userToken);
-      localStorage.setItem('user', JSON.stringify(userData));
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Signup failed');
+      throw new Error(error.message || 'Signup failed');
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  const logout = async () => {
+    try {
+      // Appeler l'API de logout pour supprimer le cookie
+      await authAPI.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      setToken(null);
+    }
   };
 
   return (
