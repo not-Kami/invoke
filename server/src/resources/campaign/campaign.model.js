@@ -8,6 +8,7 @@ const campaignSchema = new mongoose.Schema({
     players: { type: [mongoose.Schema.Types.ObjectId], ref: "User", default: [] },
     sessions: { type: [mongoose.Schema.Types.ObjectId], ref: "Session", default: [] },
     active: { type: Boolean, default: true },
+    featured: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
     deletedAt: { type: Date, default: null },

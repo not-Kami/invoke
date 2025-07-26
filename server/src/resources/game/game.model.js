@@ -6,6 +6,7 @@ const gameSchema = new mongoose.Schema({
     genre: { type: String, required: true },
     system: { type: String, required: true },
     image: { type: String, required: true },
+    featured: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
 })
