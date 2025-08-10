@@ -421,6 +421,10 @@ export default function DashboardPage() {
                     Edit Profile
                   </Button>
                   <Button variant="glass" className="w-full justify-start">
+                    <Globe className="h-4 w-4 mr-2" />
+                    Browse Adventure
+                  </Button>
+                  <Button variant="glass" className="w-full justify-start">
                     <Users className="h-4 w-4 mr-2" />
                     Find Groups
                   </Button>
@@ -662,7 +666,7 @@ export default function DashboardPage() {
                     Manage Players
                   </Button>
                   <Button variant="glass" className="w-full justify-start">
-                                         <Calendar className="h-4 w-4 mr-2" />
+                    <Calendar className="h-4 w-4 mr-2" />
                     Schedule Events
                   </Button>
                   <Button variant="glass" className="w-full justify-start">

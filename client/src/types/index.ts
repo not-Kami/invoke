@@ -19,6 +19,7 @@ export interface Game {
   genre: string;
   system: string;
   image: string;
+  feature?: boolean; // Jeux en tendance
   createdAt: string;
   updatedAt: string;
 }

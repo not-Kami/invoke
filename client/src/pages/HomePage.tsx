@@ -1,73 +1,166 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Button from '../components/ui/Button';
-import { Card, CardContent } from '../components/ui/Card';
-import Badge from '../components/ui/Badge';
 import { 
   Sword, 
+  Crown, 
   Users, 
   Calendar, 
   Gamepad2, 
   Plus, 
-  ArrowRight,
-  Crown,
-  Sparkles
+  ArrowRight, 
+  Sparkles, 
+  ChevronLeft, 
+  ChevronRight, 
+  TrendingUp, 
+  Eye, 
+  Heart 
 } from 'lucide-react';
+import Button from '../components/ui/Button';
+import { Card, CardContent } from '../components/ui/Card';
+import Badge from '../components/ui/Badge';
 import HeroImage from '../assets/hero_section.webp';
 
 export default function HomePage() {
-  // Données mockées pour le moment
-  const stats = [
-    { label: 'Active Sessions', value: '24', icon: Calendar, color: 'text-blue-500' },
-    { label: 'Dungeon Masters', value: '12', icon: Crown, color: 'text-purple-500' },
-    { label: 'Adventurers', value: '156', icon: Users, color: 'text-green-500' },
-  ];
+  const [currentGameIndex, setCurrentGameIndex] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const recentSessions = [
+  // Détection mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Recalculer le centrage quand la taille change
+  useEffect(() => {
+    const handleResize = () => {
+      // Force re-render pour recalculer le centrage
+      setCurrentGameIndex(prev => prev);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Données mockées pour le moment
+  const trendingGames = [
     {
       id: 1,
-      title: "Les Ombres de Valoria",
-      subtitle: "Une Quête Épique dans un Monde Fracturé",
-      dm: "Alex 'DragonMaster' Lenop",
-      game: "Dungeons & Dragons 5e",
-      date: "2024-01-15",
-      players: 4,
-      maxPlayers: 6,
-      status: "open",
-      image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=200&fit=crop"
+      name: "Dungeons & Dragons 5e",
+      genre: "Fantasy",
+      system: "D&D 5e",
+      feature: true
     },
     {
       id: 2,
-      title: "Cyberpunk Chronicles",
-      subtitle: "Neon Nights & Digital Dreams",
-      dm: "Sarah 'Netrunner' Chen",
-      game: "Cyberpunk Red",
-      date: "2024-01-18",
-      players: 5,
-      maxPlayers: 5,
-      status: "full",
-      image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=200&fit=crop"
+      name: "Call of Cthulhu",
+      genre: "Horreur",
+      system: "CoC 7e",
+      feature: true
     },
     {
       id: 3,
-      title: "Mystic Realms",
-      subtitle: "Ancient Magic Awakens",
-      dm: "Marcus 'Mage' Thompson",
-      game: "Pathfinder 2e",
-      date: "2024-01-20",
-      players: 3,
-      maxPlayers: 6,
-      status: "open",
-      image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=200&fit=crop"
+      name: "Pathfinder 2e",
+      genre: "Fantasy",
+      system: "PF2e",
+      feature: false
+    },
+    {
+      id: 4,
+      name: "Vampire: The Masquerade",
+      genre: "Horreur",
+      system: "V5",
+      feature: false
     }
   ];
 
-  const popularGames = [
-    { name: "Dungeons & Dragons 5e", genre: "Fantasy", system: "D&D", icon: Sword },
-    { name: "Cyberpunk Red", genre: "Sci-Fi", system: "Cyberpunk", icon: Gamepad2 },
-    { name: "Pathfinder 2e", genre: "Fantasy", system: "Pathfinder", icon: Crown },
-    { name: "Call of Cthulhu", genre: "Horror", system: "BRP", icon: Sparkles },
-  ];
+  const allGames = [...trendingGames];
+
+  // Fonction pour aller au jeu suivant
+  const nextGame = () => {
+    setCurrentGameIndex((prev) => 
+      prev === allGames.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  // Fonction pour aller au jeu précédent
+  const prevGame = () => {
+    setCurrentGameIndex((prev) => 
+      prev === 0 ? allGames.length - 1 : prev - 1
+    );
+  };
+
+  // Fonction pour aller directement à une carte spécifique
+  const goToGame = (index: number) => {
+    setCurrentGameIndex(index);
+  };
+
+  // Calcul simple du centrage
+  const getSliderTransform = () => {
+    const cardWidth = isMobile ? 240 : 296;
+    const gap = isMobile ? 8 : 16;
+    const totalWidth = cardWidth + gap;
+    
+    // Centrer la carte active
+    const centerOffset = (window.innerWidth - cardWidth) / 2;
+    return -currentGameIndex * totalWidth + centerOffset;
+  };
+
+  // Fonctions pour le drag & drop simple
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setStartX(e.pageX - (containerRef.current?.offsetLeft || 0));
+    setScrollLeft(currentGameIndex * (isMobile ? 240 : 296));
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - (containerRef.current?.offsetLeft || 0);
+    const walk = (x - startX) * 2;
+    const cardWidth = isMobile ? 240 : 296;
+    const newIndex = Math.round((-walk + scrollLeft) / cardWidth);
+    
+    // Limiter aux bornes du slider
+    const clampedIndex = Math.max(0, Math.min(allGames.length - 1, newIndex));
+    setCurrentGameIndex(clampedIndex);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Support tactile pour mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true);
+    setStartX(e.touches[0].pageX - (containerRef.current?.offsetLeft || 0));
+    setScrollLeft(currentGameIndex * (isMobile ? 240 : 296));
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return;
+    const x = e.touches[0].pageX - (containerRef.current?.offsetLeft || 0);
+    const walk = (x - startX) * 2;
+    const cardWidth = isMobile ? 240 : 296;
+    const newIndex = Math.round((-walk + scrollLeft) / cardWidth);
+    
+    // Limiter aux bornes du slider
+    const clampedIndex = Math.max(0, Math.min(allGames.length - 1, newIndex));
+    setCurrentGameIndex(clampedIndex);
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900">
@@ -109,18 +202,22 @@ export default function HomePage() {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-end">
-                <Link to="/sessions">
-                  <Button size="lg" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0 shadow-2xl transform hover:scale-105 transition-all duration-200">
-                    <Sword className="h-5 w-5 mr-2" />
-                    Browse Adventures
-                  </Button>
-                </Link>
                 <Link to="/sessions/create">
                   <Button variant="glass" size="lg">
                     <Plus className="h-5 w-5 mr-2" />
-                    Create Session
+                    Find an Adventure
                   </Button>
                 </Link>
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white border-0 shadow-2xl opacity-50 cursor-not-allowed"
+                  disabled
+                  title="Fonctionnalité à venir"
+                >
+                  <Users className="h-5 w-5 mr-2" />
+                  Onto your next adventure
+                  <span className="ml-2 text-sm text-gray-300">(À venir)</span>
+                </Button>
               </div>
               
               {/* Quick Stats */}
@@ -143,47 +240,112 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Game Systems Section */}
+      {/* Section Jeux en Tendance */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="font-display text-3xl font-bold text-white mb-4">Explore Game Systems</h2>
-            <p className="text-gray-300 text-lg">Click on a game to see available sessions and campaigns</p>
+            <div className="flex items-center justify-center space-x-2 mb-4">
+              <TrendingUp className="h-6 w-6 text-purple-400" />
+              <h2 className="font-display text-3xl font-bold text-white">Tous les Jeux</h2>
+            </div>
+            <p className="text-gray-300 text-lg">Découvrez notre collection complète de jeux de rôle</p>
+          </div>
+        </div>
+        
+        {/* Slider en pleine largeur */}
+        <div className="relative group w-full">
+          {/* Boutons de navigation */}
+          <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <button
+              onClick={prevGame}
+              className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-200 shadow-lg hover:scale-110"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {popularGames.map((game, index) => (
-              <Link key={index} to={`/games/${game.name.toLowerCase().replace(/\s+/g, '-')}`}>
-                <Card className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 transition-all duration-300 group cursor-pointer transform hover:scale-105">
-                  <CardContent className="text-center p-6">
-                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl mx-auto mb-4 flex items-center justify-center group-hover:from-purple-400 group-hover:to-blue-400 transition-all duration-300">
-                      <game.icon className="h-8 w-8 text-white" />
+          <div className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <button
+              onClick={nextGame}
+              className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-200 shadow-lg hover:scale-110"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+          </div>
+
+          {/* Container des cartes avec scroll horizontal */}
+          <div 
+            ref={containerRef}
+            className={`relative overflow-hidden w-full px-4 sm:px-8 py-4 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div 
+              ref={sliderRef}
+              className="flex space-x-2 sm:space-x-4 transition-transform duration-500 ease-in-out"
+              style={{ 
+                transform: `translateX(${getSliderTransform()}px)`,
+                width: `${allGames.length * (isMobile ? 256 : 280) + (allGames.length - 1) * (isMobile ? 8 : 16)}px`
+              }}
+            >
+              {allGames.map((game, index) => (
+                <div 
+                  key={`${game.id}-${index}`}
+                  className={`flex-shrink-0 w-60 sm:w-64 transition-all duration-300 transform card-hover ${
+                    index === currentGameIndex ? 'scale-105' : 'scale-100'
+                  }`}
+                >
+                  <Card className="relative bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 transition-all duration-300 overflow-hidden group h-72 sm:h-80">
+                    {/* Image de fond avec gradient overlay */}
+                    <div className="absolute inset-0 w-full h-full">
+                      <div className="w-full h-full bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center">
+                        <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-xl">
+                          <Gamepad2 className="h-8 w-8 text-white" />
+                        </div>
+                      </div>
+                      {/* Gradient overlay transparent -> opaque de haut en bas */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
                     </div>
-                    <h3 className="font-display text-lg font-semibold text-white mb-2 group-hover:text-purple-300 transition-colors">{game.name}</h3>
-                    <p className="text-gray-300 text-sm mb-3">{game.genre}</p>
-                    <div className="flex justify-center space-x-2">
-                      <Badge variant="info" size="sm">{game.system}</Badge>
+
+                    {/* Bouton favori en haut à droite */}
+                    <div className="absolute top-3 right-3 z-10">
+                      <button className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-200 hover:scale-110">
+                        <Heart className="h-4 w-4" />
+                      </button>
                     </div>
-                    <div className="mt-4 pt-4 border-t border-white/20">
-                      <div className="flex justify-between text-xs text-gray-400">
-                        <span>12 Sessions</span>
-                        <span>3 Campaigns</span>
+
+                    {/* Badge Tendance uniquement pour les jeux en tendance */}
+                    {game.feature && (
+                      <div className="absolute top-3 left-3 z-10">
+                        <Badge variant="success" size="sm">Tendance</Badge>
+                      </div>
+                    )}
+
+                    {/* Contenu en bas de la carte */}
+                    <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+                      <h3 className="font-display text-xl font-bold text-white mb-2">{game.name}</h3>
+                      
+                      {/* Métadonnées compactes */}
+                      <div className="flex items-center justify-between text-xs text-gray-300">
+                        <span className="bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
+                          {game.genre}
+                        </span>
+                        <span className="bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
+                          {game.system}
+                        </span>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+                  </Card>
+                </div>
+              ))}
+            </div>
           </div>
-          
-          <div className="text-center mt-8">
-            <Link to="/games">
-              <Button variant="glass">
-                View All Game Systems
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            </Link>
-          </div>
+
+          {/* Indicateurs de navigation supprimés pour un design plus épuré */}
         </div>
       </section>
 
@@ -201,40 +363,12 @@ export default function HomePage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recentSessions.map((session) => (
-              <Card key={session.id} className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 transition-all duration-300 group">
-                <div className="relative h-48 overflow-hidden rounded-t-lg">
-                  <img 
-                    src={session.image} 
-                    alt={session.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                  <div className="absolute top-4 right-4">
-                    <Badge variant={session.status === 'open' ? 'success' : 'warning'}>
-                      {session.status}
-                    </Badge>
-                  </div>
-                </div>
-                <CardContent className="p-6">
-                  <h3 className="font-display text-xl font-semibold text-white mb-2">{session.title}</h3>
-                  <p className="text-gray-300 text-sm mb-3">{session.subtitle}</p>
-                  <div className="space-y-2 text-sm text-gray-400">
-                    <div>DM: {session.dm}</div>
-                    <div>{session.game}</div>
-                    <div className="flex items-center justify-between">
-                      <span>{session.date}</span>
-                      <span>{session.players}/{session.maxPlayers} players</span>
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0">
-                      Join Adventure
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {/* recentSessions data removed as per new_code */}
+            {/* The original code had a 'recentSessions' array, but the new_code removed it.
+                 Since the new_code didn't provide a replacement for this section,
+                 and the 'recentSessions' array was not used in the new_code's slider logic,
+                 I will remove the 'recentSessions' section as it's no longer relevant
+                 to the new slider implementation. */}
           </div>
         </div>
       </section>
