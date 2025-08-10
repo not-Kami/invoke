@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Session } from '../../types';
-import { sessionsApi } from '../../lib/api';
+import { Session, adminAPI } from '../../lib/api';
 import Button from '../../components/ui/Button';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
@@ -21,13 +20,21 @@ export default function SessionsPage() {
   const [typeFilter, setTypeFilter] = useState('all');
 
   useEffect(() => {
+    // Simuler un chargement API avec des données mockées
     const fetchSessions = async () => {
       try {
-        const response = await sessionsApi.getSessions();
-        setSessions(response.data);
-        setFilteredSessions(response.data);
+        // Simuler un délai de chargement
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Pour l'instant, on utilise un tableau vide en attendant l'API
+        const mockSessions: Session[] = [];
+        
+        setSessions(mockSessions);
+        setFilteredSessions(mockSessions);
       } catch (error) {
         console.error('Error fetching sessions:', error);
+        setSessions([]);
+        setFilteredSessions([]);
       } finally {
         setLoading(false);
       }
@@ -43,8 +50,7 @@ export default function SessionsPage() {
     if (searchTerm) {
       filtered = filtered.filter(session =>
         session.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        session.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        session.game.name.toLowerCase().includes(searchTerm.toLowerCase())
+        session.game.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -53,10 +59,10 @@ export default function SessionsPage() {
       filtered = filtered.filter(session => session.status === statusFilter);
     }
 
-    // Type filter
-    if (typeFilter !== 'all') {
-      filtered = filtered.filter(session => session.sessionType === typeFilter);
-    }
+    // Type filter (désactivé pour le moment car pas dans l'API)
+    // if (typeFilter !== 'all') {
+    //   filtered = filtered.filter(session => session.sessionType === typeFilter);
+    // }
 
     setFilteredSessions(filtered);
   }, [sessions, searchTerm, statusFilter, typeFilter]);
@@ -65,8 +71,7 @@ export default function SessionsPage() {
     switch (status) {
       case 'open': return 'success';
       case 'full': return 'warning';
-      case 'finished': return 'default';
-      case 'cancelled': return 'danger';
+      case 'closed': return 'default';
       default: return 'default';
     }
   };
@@ -80,29 +85,30 @@ export default function SessionsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gaming Sessions</h1>
-          <p className="mt-2 text-gray-600">
-            Find and join gaming sessions in your area or online
-          </p>
-        </div>
-        {user && (
-          <div className="mt-4 sm:mt-0">
-            <Link to="/sessions/create">
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Session
-              </Button>
-            </Link>
+    <div className="min-h-screen py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white">Gaming Sessions</h1>
+            <p className="mt-2 text-gray-300">
+              Find and join gaming sessions in your area or online
+            </p>
           </div>
-        )}
-      </div>
+          {user && (
+            <div className="mt-4 sm:mt-0">
+              <Link to="/sessions/create">
+                <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Session
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
 
-      {/* Filters */}
-      <Card>
+        {/* Filters */}
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-2">
@@ -146,29 +152,29 @@ export default function SessionsPage() {
         </CardContent>
       </Card>
 
-      {/* Sessions Grid */}
-      {filteredSessions.length === 0 ? (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No sessions found
-            </h3>
-            <p className="text-gray-600 mb-4">
-              {searchTerm || statusFilter !== 'all' || typeFilter !== 'all'
-                ? 'Try adjusting your filters to see more sessions.'
-                : 'Be the first to create a session!'}
-            </p>
-            {user && (
-              <Link to="/sessions/create">
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Session
-                </Button>
-              </Link>
-            )}
-          </CardContent>
-        </Card>
+        {/* Sessions Grid */}
+        {filteredSessions.length === 0 ? (
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <CardContent className="p-12 text-center">
+              <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-white mb-2">
+                No sessions found
+              </h3>
+              <p className="text-gray-300 mb-4">
+                {searchTerm || statusFilter !== 'all' || typeFilter !== 'all'
+                  ? 'Try adjusting your filters to see more sessions.'
+                  : 'Be the first to create a session!'}
+              </p>
+              {user && (
+                <Link to="/sessions/create">
+                  <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Session
+                  </Button>
+                </Link>
+              )}
+            </CardContent>
+          </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredSessions.map((session) => (
@@ -243,7 +249,8 @@ export default function SessionsPage() {
             </Card>
           ))}
         </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

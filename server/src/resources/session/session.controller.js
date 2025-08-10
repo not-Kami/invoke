@@ -44,16 +44,64 @@ const sessionController = {
         }
     },
     getSession: async (req, res) => {
-        const session = await Session.findById(req.params.id);
-        res.status(200).json(session);
+        try {
+            const session = await Session.findById(req.params.id);
+            if (!session) {
+                return res.status(404).json({
+                    success: false,
+                    error: 'Session not found'
+                });
+            }
+            res.status(200).json({
+                success: true,
+                data: session
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
     },
     updateSession: async (req, res) => {
-        const session = await Session.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.status(200).json(session);
+        try {
+            const session = await Session.findByIdAndUpdate(req.params.id, req.body, { new: true });
+            if (!session) {
+                return res.status(404).json({
+                    success: false,
+                    error: 'Session not found'
+                });
+            }
+            res.status(200).json({
+                success: true,
+                data: session
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
     },
     deleteSession: async (req, res) => {
-        const session = await Session.findByIdAndDelete(req.params.id);
-        res.status(200).json(session);
+        try {
+            const session = await Session.findByIdAndDelete(req.params.id);
+            if (!session) {
+                return res.status(404).json({
+                    success: false,
+                    error: 'Session not found'
+                });
+            }
+            res.status(200).json({
+                success: true,
+                data: session
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
     },
     getFeaturedSessions: async (req, res) => {
         try {

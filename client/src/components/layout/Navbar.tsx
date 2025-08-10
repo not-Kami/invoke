@@ -1,42 +1,50 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '../ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import { 
   Menu, 
   X, 
-  Sword, 
   User, 
   LogIn, 
   UserPlus,
-  Search,
   Bell,
-  Settings
+  Settings,
+  LayoutDashboard
 } from 'lucide-react';
+import InvokeLogo from '../../assets/invoke-logo.svg';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, logout } = useAuth();
 
   const navigation = [
-    { name: 'Sessions', href: '/sessions' },
     { name: 'Games', href: '/games' },
+    { name: 'Sessions', href: '/sessions' },
     { name: 'Campaigns', href: '/campaigns' },
-    { name: 'Players', href: '/players' },
   ];
 
   return (
-    <nav className="bg-white/10 backdrop-blur-md border-b border-white/20 sticky top-0 z-50">
+    <nav className="sticky top-0 z-50 bg-gradient-to-r from-black/60 via-black/40 to-black/60 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <Sword className="h-8 w-8 text-purple-400" />
+            <img src={InvokeLogo} alt="Invoke" className="h-12 w-12" />
             <span className="font-display text-xl font-bold text-white">Invoke</span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
+            {user && (
+              <Link
+                to="/dashboard"
+                className="text-gray-300 hover:text-white transition-colors font-medium flex items-center"
+              >
+                <LayoutDashboard className="h-4 w-4 mr-2" />
+                Dashboard
+              </Link>
+            )}
             {navigation.map((item) => (
               <Link
                 key={item.name}
@@ -50,10 +58,6 @@ export default function Navbar() {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <button className="text-gray-300 hover:text-white transition-colors">
-              <Search className="h-5 w-5" />
-            </button>
-            
             {user ? (
               <>
                 <button className="text-gray-300 hover:text-white transition-colors relative">
@@ -113,7 +117,17 @@ export default function Navbar() {
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-white/10 backdrop-blur-md rounded-lg mt-2">
+            <div className="px-2 pt-2 pb-3 space-y-1 rounded-lg mt-2">
+              {user && (
+                <Link
+                  to="/dashboard"
+                  className="block px-3 py-2 text-gray-300 hover:text-white transition-colors font-medium flex items-center"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <LayoutDashboard className="h-4 w-4 mr-2" />
+                  Dashboard
+                </Link>
+              )}
               {navigation.map((item) => (
                 <Link
                   key={item.name}

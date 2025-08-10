@@ -13,6 +13,7 @@ import {
   Crown,
   Sparkles
 } from 'lucide-react';
+import HeroImage from '../assets/hero_section.webp';
 
 export default function HomePage() {
   // Données mockées pour le moment
@@ -71,48 +72,117 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900">
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="text-center">
-            <h1 className="font-display text-5xl md:text-7xl font-bold text-white mb-6">
-              Welcome to the Realm of Adventure!
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
-              Embark on epic quests, forge legendary characters, and discover master dungeon masters 
-              in a world where every roll of the dice tells a story.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/sessions">
-                <Button size="lg" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0">
-                  <Sword className="h-5 w-5 mr-2" />
-                  Browse Sessions
-                </Button>
-              </Link>
-              <Link to="/sessions/create">
-                <Button variant="outline" size="lg" className="border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white">
-                  <Plus className="h-5 w-5 mr-2" />
-                  Create Session
-                </Button>
-              </Link>
+      <section className="relative overflow-hidden min-h-screen flex items-center">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url(${HeroImage})`
+          }}
+        ></div>
+        
+        {/* Overlay Filters */}
+        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-900/60 via-transparent to-blue-900/60"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+        
+        {/* Content */}
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 z-10">
+          <div className="flex justify-end">
+            {/* Main Content - Aligned Right */}
+            <div className="text-right max-w-3xl">
+              <div className="inline-flex items-center bg-purple-500/20 backdrop-blur-sm border border-purple-400/30 rounded-full px-4 py-2 mb-6">
+                <Sparkles className="h-4 w-4 text-purple-400 mr-2" />
+                <span className="text-purple-300 text-sm font-medium">Your Next Adventure Awaits</span>
+              </div>
+              
+              <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+                Roll the Dice,<br />
+                <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                  Write Your Legend
+                </span>
+              </h1>
+              
+              <p className="text-xl md:text-2xl text-gray-200 mb-8 max-w-2xl ml-auto">
+                Connect with legendary dungeon masters, join epic campaigns, and forge unforgettable stories 
+                in the ultimate tabletop RPG community.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-end">
+                <Link to="/sessions">
+                  <Button size="lg" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0 shadow-2xl transform hover:scale-105 transition-all duration-200">
+                    <Sword className="h-5 w-5 mr-2" />
+                    Browse Adventures
+                  </Button>
+                </Link>
+                <Link to="/sessions/create">
+                  <Button variant="glass" size="lg">
+                    <Plus className="h-5 w-5 mr-2" />
+                    Create Session
+                  </Button>
+                </Link>
+              </div>
+              
+              {/* Quick Stats */}
+              <div className="mt-12 grid grid-cols-3 gap-6 max-w-md ml-auto">
+                <div className="text-right">
+                  <div className="font-display text-2xl font-bold text-white">156+</div>
+                  <div className="text-gray-300 text-sm">Adventurers</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-display text-2xl font-bold text-white">24</div>
+                  <div className="text-gray-300 text-sm">Active Sessions</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-display text-2xl font-bold text-white">12</div>
+                  <div className="text-gray-300 text-sm">Master DMs</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
+      {/* Game Systems Section */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {stats.map((stat, index) => (
-              <Card key={index} className="bg-white/10 backdrop-blur-sm border-white/20">
-                <CardContent className="text-center p-6">
-                  <stat.icon className={`h-12 w-12 mx-auto mb-4 ${stat.color}`} />
-                  <div className="font-display text-3xl font-bold text-white mb-2">{stat.value}</div>
-                  <div className="text-gray-300">{stat.label}</div>
-                </CardContent>
-              </Card>
+          <div className="text-center mb-12">
+            <h2 className="font-display text-3xl font-bold text-white mb-4">Explore Game Systems</h2>
+            <p className="text-gray-300 text-lg">Click on a game to see available sessions and campaigns</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {popularGames.map((game, index) => (
+              <Link key={index} to={`/games/${game.name.toLowerCase().replace(/\s+/g, '-')}`}>
+                <Card className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 transition-all duration-300 group cursor-pointer transform hover:scale-105">
+                  <CardContent className="text-center p-6">
+                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl mx-auto mb-4 flex items-center justify-center group-hover:from-purple-400 group-hover:to-blue-400 transition-all duration-300">
+                      <game.icon className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="font-display text-lg font-semibold text-white mb-2 group-hover:text-purple-300 transition-colors">{game.name}</h3>
+                    <p className="text-gray-300 text-sm mb-3">{game.genre}</p>
+                    <div className="flex justify-center space-x-2">
+                      <Badge variant="info" size="sm">{game.system}</Badge>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-white/20">
+                      <div className="flex justify-between text-xs text-gray-400">
+                        <span>12 Sessions</span>
+                        <span>3 Campaigns</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
+          </div>
+          
+          <div className="text-center mt-8">
+            <Link to="/games">
+              <Button variant="glass">
+                View All Game Systems
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -169,33 +239,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Popular Games */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="font-display text-3xl font-bold text-white">Popular Realms</h2>
-            <Link to="/games">
-              <Button variant="ghost" className="text-purple-400 hover:text-white">
-                View all
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            </Link>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {popularGames.map((game, index) => (
-              <Card key={index} className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 transition-all duration-300 text-center">
-                <CardContent className="p-6">
-                  <game.icon className="h-12 w-12 mx-auto mb-4 text-purple-400" />
-                  <h3 className="font-display text-lg font-semibold text-white mb-2">{game.name}</h3>
-                  <p className="text-gray-300 text-sm mb-2">{game.genre}</p>
-                  <Badge variant="info" size="sm">{game.system}</Badge>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+
     </div>
   );
 }

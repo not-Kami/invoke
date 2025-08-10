@@ -21,6 +21,10 @@ export const signupSchema = Joi.object({
     }),
     role: Joi.string().valid('user', 'admin', 'moderator').default('user').messages({
         'any.only': 'Role must be one of: user, admin, moderator'
+    }),
+    isDM: Joi.boolean().default(false),
+    avatar: Joi.string().uri().optional().allow('').messages({
+        'string.uri': 'Avatar must be a valid URL'
     })
 });
 

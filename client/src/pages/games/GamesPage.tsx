@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Game } from '../../types';
-import { gamesApi } from '../../lib/api';
+import { Game, adminAPI } from '../../lib/api';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Input from '../../components/ui/Input';
@@ -14,13 +13,21 @@ export default function GamesPage() {
   const [genreFilter, setGenreFilter] = useState('all');
 
   useEffect(() => {
+    // Simuler un chargement API avec des données mockées
     const fetchGames = async () => {
       try {
-        const response = await gamesApi.getGames();
-        setGames(response.data);
-        setFilteredGames(response.data);
+        // Simuler un délai de chargement
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Pour l'instant, on utilise un tableau vide en attendant l'API
+        const mockGames: Game[] = [];
+        
+        setGames(mockGames);
+        setFilteredGames(mockGames);
       } catch (error) {
         console.error('Error fetching games:', error);
+        setGames([]);
+        setFilteredGames([]);
       } finally {
         setLoading(false);
       }
@@ -36,16 +43,14 @@ export default function GamesPage() {
     if (searchTerm) {
       filtered = filtered.filter(game =>
         game.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        game.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        game.genre.toLowerCase().includes(searchTerm.toLowerCase()) ||
         game.system.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    // Genre filter
-    if (genreFilter !== 'all') {
-      filtered = filtered.filter(game => game.genre === genreFilter);
-    }
+    // Genre filter (désactivé pour le moment car pas dans l'API actuelle)
+    // if (genreFilter !== 'all') {
+    //   filtered = filtered.filter(game => game.genre === genreFilter);
+    // }
 
     setFilteredGames(filtered);
   }, [games, searchTerm, genreFilter]);
@@ -62,17 +67,18 @@ export default function GamesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Game Systems</h1>
-        <p className="mt-2 text-gray-600">
-          Explore different tabletop RPG systems and find your next adventure
-        </p>
-      </div>
+    <div className="min-h-screen py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold text-white">Game Systems</h1>
+          <p className="mt-2 text-gray-300">
+            Explore different tabletop RPG systems and find your next adventure
+          </p>
+        </div>
 
-      {/* Filters */}
-      <Card>
+        {/* Filters */}
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
@@ -103,19 +109,19 @@ export default function GamesPage() {
         </CardContent>
       </Card>
 
-      {/* Games Grid */}
-      {filteredGames.length === 0 ? (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <Gamepad2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No games found
-            </h3>
-            <p className="text-gray-600">
-              Try adjusting your search or filter criteria.
-            </p>
-          </CardContent>
-        </Card>
+        {/* Games Grid */}
+        {filteredGames.length === 0 ? (
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <CardContent className="p-12 text-center">
+              <Gamepad2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-white mb-2">
+                No games found
+              </h3>
+              <p className="text-gray-300">
+                {searchTerm ? 'Try adjusting your search criteria.' : 'Game systems will appear here when available.'}
+              </p>
+            </CardContent>
+          </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredGames.map((game) => (
@@ -154,7 +160,8 @@ export default function GamesPage() {
             </Card>
           ))}
         </div>
-      )}
+              )}
+      </div>
     </div>
   );
 }
