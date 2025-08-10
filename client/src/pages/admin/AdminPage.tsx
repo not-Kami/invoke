@@ -4,7 +4,11 @@ import DataTable from '../../components/admin/DataTable';
 import FeaturedToggle from '../../components/admin/FeaturedToggle';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
+import NotificationContainer from '../../components/ui/NotificationContainer';
+
 import { adminAPI, User, Session, Campaign, Game } from '../../lib/api';
+import { usePermissions } from '../../hooks/usePermissions';
+import { useNotifications } from '../../hooks/useNotifications';
 import { 
   Users, 
   Calendar, 
@@ -14,54 +18,203 @@ import {
   Plus,
   Edit,
   Trash2,
-  Star
+  Star,
+  Shield,
+  AlertTriangle,
+  RefreshCw,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 
 type TabType = 'users' | 'sessions' | 'campaigns' | 'games';
 
 const AdminPage: React.FC = () => {
+  const { canViewAdminPanel, canManageUsers, canManageSessions, canManageCampaigns } = usePermissions();
+  const { notifications, addSuccess, addError, addInfo, removeNotification } = useNotifications();
   const [activeTab, setActiveTab] = useState<TabType>('users');
   const [users, setUsers] = useState<User[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isLoadingData, setIsLoadingData] = useState(false); // Protection contre les appels multiples
 
-  // Charger les données au montage du composant
+  // Vérification de sécurité - double protection
   useEffect(() => {
+    if (!canViewAdminPanel()) {
+      console.log('AdminPage: Access denied - user is not admin');
+      return;
+    }
+    
+    console.log('AdminPage: User has admin access, loading data...');
     loadData();
-  }, []);
+  }, []); // Charger une seule fois au montage du composant
+
+  // Recharger les données quand l'onglet change
+  useEffect(() => {
+    if (canViewAdminPanel()) {
+      loadData();
+    }
+  }, [activeTab]);
 
   const loadData = async () => {
+    // Protection contre les appels multiples
+    if (isLoadingData) {
+      console.log('AdminPage: Chargement déjà en cours, ignoré');
+      return;
+    }
+    
+    setIsLoadingData(true);
     setLoading(true);
+    
     try {
-      const [usersRes, sessionsRes, campaignsRes, gamesRes] = await Promise.all([
-        adminAPI.getUsers(),
-        adminAPI.getSessions(),
-        adminAPI.getCampaigns(),
-        adminAPI.getGames(),
-      ]);
+      console.log('AdminPage: Chargement des données...');
+      
+      // Charger seulement l'onglet actif pour plus de rapidité
+      let usersRes: any = null, sessionsRes: any = null, campaignsRes: any = null, gamesRes: any = null;
+      
+      switch (activeTab) {
+        case 'users':
+          usersRes = await adminAPI.getUsers();
+          // Filtrer les utilisateurs supprimés côté frontend
+          if (usersRes.success && usersRes.data) {
+            const activeUsers = usersRes.data.filter((user: any) => !user.deletedAt);
+            usersRes.data = activeUsers;
+          }
+          break;
+        case 'sessions':
+          sessionsRes = await adminAPI.getSessions();
+          break;
+        case 'campaigns':
+          campaignsRes = await adminAPI.getCampaigns();
+          break;
+        case 'games':
+          gamesRes = await adminAPI.getGames();
+          break;
+      }
 
-      if (usersRes.success && usersRes.data) setUsers(usersRes.data);
-      if (sessionsRes.success && sessionsRes.data) setSessions(sessionsRes.data);
-      if (campaignsRes.success && campaignsRes.data) setCampaigns(campaignsRes.data);
-      if (gamesRes.success && gamesRes.data) setGames(gamesRes.data);
+      console.log('AdminPage: Réponses API reçues:', {
+        users: usersRes,
+        sessions: sessionsRes,
+        campaigns: campaignsRes,
+        games: gamesRes
+      });
+
+      // Traitement des utilisateurs
+      if (usersRes.success && usersRes.data) {
+        setUsers(usersRes.data);
+        console.log('AdminPage: Utilisateurs chargés:', usersRes.data.length);
+      } else if (Array.isArray(usersRes)) {
+        // Fallback : si l'API retourne directement un tableau
+        setUsers(usersRes);
+        console.log('AdminPage: Utilisateurs chargés (format direct):', usersRes.length);
+      } else {
+        console.error('AdminPage: Erreur lors du chargement des utilisateurs:', usersRes.error);
+        // Ne pas afficher d'erreur si c'est juste une absence de données
+        if (usersRes.error && !usersRes.error.includes('Données invalides')) {
+          addError(`Erreur utilisateurs: ${usersRes.error}`);
+        }
+      }
+
+      // Traitement des sessions
+      if (sessionsRes && sessionsRes.success && sessionsRes.data) {
+        setSessions(sessionsRes.data);
+        console.log('AdminPage: Sessions chargées:', sessionsRes.data.length);
+      } else if (sessionsRes && Array.isArray(sessionsRes)) {
+        // Fallback : si l'API retourne directement un tableau
+        setSessions(sessionsRes);
+        console.log('AdminPage: Sessions chargées (format direct):', sessionsRes.length);
+      } else if (sessionsRes && sessionsRes.error) {
+        console.error('AdminPage: Erreur lors du chargement des sessions:', sessionsRes.error);
+        if (!sessionsRes.error.includes('Données invalides')) {
+          addError(`Erreur sessions: ${sessionsRes.error}`);
+        }
+      }
+
+      // Traitement des campagnes
+      if (campaignsRes && campaignsRes.success && campaignsRes.data) {
+        setCampaigns(campaignsRes.data);
+        console.log('AdminPage: Campagnes chargées:', campaignsRes.data.length);
+      } else if (campaignsRes && Array.isArray(campaignsRes)) {
+        // Fallback : si l'API retourne directement un tableau
+        setCampaigns(campaignsRes);
+        console.log('AdminPage: Campagnes chargées (format direct):', campaignsRes.length);
+      } else if (campaignsRes && campaignsRes.error) {
+        console.error('AdminPage: Erreur lors du chargement des campagnes:', campaignsRes.error);
+        if (!campaignsRes.error.includes('Données invalides')) {
+          addError(`Erreur campagnes: ${campaignsRes.error}`);
+        }
+      }
+
+      // Traitement des jeux
+      if (gamesRes && gamesRes.success && gamesRes.data) {
+        setGames(gamesRes.data);
+        console.log('AdminPage: Jeux chargés:', gamesRes.data.length);
+      } else if (gamesRes && Array.isArray(gamesRes)) {
+        // Fallback : si l'API retourne directement un tableau
+        setGames(gamesRes);
+        console.log('AdminPage: Jeux chargés (format direct):', gamesRes.length);
+      } else if (gamesRes && gamesRes.error) {
+        console.error('AdminPage: Erreur lors du chargement des jeux:', gamesRes.error);
+        if (!gamesRes.error.includes('Données invalides')) {
+          addError(`Erreur jeux: ${gamesRes.error}`);
+        }
+      }
+
+      addSuccess('Données chargées avec succès');
     } catch (error) {
-      console.error('Erreur lors du chargement des données:', error);
+      console.error('AdminPage: Erreur lors du chargement des données:', error);
+      addError(`Erreur de connexion: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     } finally {
       setLoading(false);
+      setIsLoadingData(false);
     }
   };
 
-  const tabs = [
-    { id: 'users', label: 'Utilisateurs', icon: Users },
-    { id: 'sessions', label: 'Sessions', icon: Calendar },
-    { id: 'campaigns', label: 'Campagnes', icon: BookOpen },
-    { id: 'games', label: 'Jeux', icon: Gamepad2 },
-  ];
+  // Vérification de sécurité au rendu
+  if (!canViewAdminPanel) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <Shield className="h-16 w-16 text-red-400 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-white mb-2">Accès refusé</h1>
+          <p className="text-gray-300 mb-4">
+            Cette page est réservée aux administrateurs uniquement.
+          </p>
+          <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
+            <div className="flex items-center space-x-2 text-red-300">
+              <AlertTriangle className="h-4 w-4" />
+              <span className="text-sm">Redirection en cours...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+      return;
+    }
+    
+    try {
+      const response = await adminAPI.deleteUser(userId);
+      if (response.success) {
+        setUsers(prev => prev.filter(user => user._id !== userId));
+        addSuccess('Utilisateur supprimé avec succès');
+      } else {
+        throw new Error(response.error || 'Erreur lors de la suppression');
+      }
+    } catch (error) {
+      console.error('AdminPage: Erreur lors de la suppression:', error);
+      addError(`Erreur de suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+    }
+  };
 
   const handleToggleFeatured = async (type: string, id: string, featured: boolean) => {
     try {
+      console.log(`AdminPage: Mise à jour featured ${type} ${id} -> ${featured}`);
+      
       let response;
       switch (type) {
         case 'user':
@@ -70,6 +223,9 @@ const AdminPage: React.FC = () => {
             setUsers(prev => prev.map(user => 
               user._id === id ? { ...user, featured } : user
             ));
+            addSuccess('Utilisateur mis à jour avec succès');
+          } else {
+            throw new Error(response.error || 'Erreur lors de la mise à jour');
           }
           break;
         case 'session':
@@ -78,6 +234,9 @@ const AdminPage: React.FC = () => {
             setSessions(prev => prev.map(session => 
               session._id === id ? { ...session, featured } : session
             ));
+            addSuccess('Session mise à jour avec succès');
+          } else {
+            throw new Error(response.error || 'Erreur lors de la mise à jour');
           }
           break;
         case 'campaign':
@@ -86,6 +245,9 @@ const AdminPage: React.FC = () => {
             setCampaigns(prev => prev.map(campaign => 
               campaign._id === id ? { ...campaign, featured } : campaign
             ));
+            addSuccess('Campagne mise à jour avec succès');
+          } else {
+            throw new Error(response.error || 'Erreur lors de la mise à jour');
           }
           break;
         case 'game':
@@ -94,11 +256,15 @@ const AdminPage: React.FC = () => {
             setGames(prev => prev.map(game => 
               game._id === id ? { ...game, featured } : game
             ));
+            addSuccess('Jeu mis à jour avec succès');
+          } else {
+            throw new Error(response.error || 'Erreur lors de la mise à jour');
           }
           break;
       }
     } catch (error) {
-      console.error('Erreur lors de la mise à jour:', error);
+      console.error('AdminPage: Erreur lors de la mise à jour:', error);
+      addError(`Erreur de mise à jour: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
 
@@ -111,21 +277,38 @@ const AdminPage: React.FC = () => {
       role: user.role,
       isDM: user.isDM,
       featured: user.featured,
-      createdAt: user.createdAt
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
     }));
 
     const csvContent = [
-      ['ID', 'Prénom', 'Nom', 'Email', 'Rôle', 'MJ', 'Mis en avant', 'Date création'],
-      ...exportData.map(user => [
-        user.id,
-        user.firstName,
-        user.lastName,
-        user.email,
-        user.role,
-        user.isDM ? 'Oui' : 'Non',
-        user.featured ? 'Oui' : 'Non',
-        user.createdAt
-      ])
+      ['ID', 'Prénom', 'Nom', 'Email', 'Rôle', 'MJ', 'Mis en avant', 'Date création', 'Dernière connexion'],
+      ...exportData.map(user => {
+        const createdDate = new Date(user.createdAt);
+        const updatedDate = new Date(user.updatedAt);
+        const formattedCreatedDate = createdDate.toLocaleDateString('fr-FR', { 
+          day: '2-digit', 
+          month: '2-digit', 
+          year: 'numeric' 
+        });
+        const formattedUpdatedDate = updatedDate.toLocaleDateString('fr-FR', { 
+          day: '2-digit', 
+          month: '2-digit', 
+          year: 'numeric' 
+        });
+        
+        return [
+          user.id,
+          user.firstName,
+          user.lastName,
+          user.email,
+          user.role,
+          user.isDM ? 'Oui' : 'Non',
+          user.featured ? 'Oui' : 'Non',
+          formattedCreatedDate,
+          formattedUpdatedDate
+        ];
+      })
     ].map(row => row.join(',')).join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -135,6 +318,8 @@ const AdminPage: React.FC = () => {
     a.download = `users_export_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
+    
+    addSuccess('Export des utilisateurs réussi');
   };
 
   const renderUsersTable = () => (
@@ -142,13 +327,9 @@ const AdminPage: React.FC = () => {
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-cinzel font-semibold text-white">Gestion des utilisateurs</h3>
         <div className="flex space-x-2">
-          <Button onClick={handleExportUsers} variant="outline">
+          <Button onClick={handleExportUsers} variant="primary">
             <Download className="w-4 h-4 mr-2" />
             Exporter
-          </Button>
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            Ajouter
           </Button>
         </div>
       </div>
@@ -181,15 +362,37 @@ const AdminPage: React.FC = () => {
             render: (value: boolean, row: any) => (
               <FeaturedToggle
                 isFeatured={value}
-                onToggle={(featured) => handleToggleFeatured('user', row.id, featured)}
+                onToggle={(featured) => handleToggleFeatured('user', row._id, featured)}
               />
             )
           },
-          { key: 'createdAt', label: 'Date création' },
+          { 
+            key: 'createdAt', 
+            label: 'Date création',
+            render: (value: string) => {
+              const date = new Date(value);
+              return date.toLocaleDateString('fr-FR', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+              });
+            }
+          },
+          { 
+            key: 'updatedAt', 
+            label: 'Dernière connexion',
+            render: (value: string) => {
+              const date = new Date(value);
+              return date.toLocaleDateString('fr-FR', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+              });
+            }
+          },
         ]}
         data={users}
-        onEdit={(user) => console.log('Edit user:', user)}
-        onDelete={(user) => console.log('Delete user:', user._id)}
+        onDelete={(user) => handleDeleteUser(user._id)}
       />
     </div>
   );
@@ -198,16 +401,11 @@ const AdminPage: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-cinzel font-semibold text-white">Gestion des sessions</h3>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          Ajouter
-        </Button>
       </div>
       <DataTable
         columns={[
           { key: 'title', label: 'Titre' },
-          { key: 'game', label: 'Jeu' },
-          { key: 'dm', label: 'MJ' },
+          { key: 'description', label: 'Description' },
           { 
             key: 'status', 
             label: 'Statut',
@@ -218,25 +416,31 @@ const AdminPage: React.FC = () => {
             )
           },
           { 
-            key: 'players', 
-            label: 'Joueurs',
-            render: (value: number, row: any) => `${value}/${row.maxPlayers}`
+            key: 'date', 
+            label: 'Date de session',
+            render: (value: string) => {
+              const date = new Date(value);
+              return date.toLocaleDateString('fr-FR', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+              });
+            }
           },
           { 
-            key: 'featured', 
-            label: 'Mis en avant',
-            render: (value: boolean, row: any) => (
-              <FeaturedToggle
-                isFeatured={value}
-                onToggle={(featured) => handleToggleFeatured('session', row.id, featured)}
-              />
-            )
+            key: 'createdAt', 
+            label: 'Date création',
+            render: (value: string) => {
+              const date = new Date(value);
+              return date.toLocaleDateString('fr-FR', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+              });
+            }
           },
-          { key: 'date', label: 'Date' },
         ]}
         data={sessions}
-        onEdit={(session) => console.log('Edit session:', session)}
-        onDelete={(session) => console.log('Delete session:', session._id)}
       />
     </div>
   );
@@ -245,10 +449,6 @@ const AdminPage: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-cinzel font-semibold text-white">Gestion des campagnes</h3>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          Ajouter
-        </Button>
       </div>
       <DataTable
         columns={[
@@ -275,15 +475,24 @@ const AdminPage: React.FC = () => {
             render: (value: boolean, row: any) => (
               <FeaturedToggle
                 isFeatured={value}
-                onToggle={(featured) => handleToggleFeatured('campaign', row.id, featured)}
+                onToggle={(featured) => handleToggleFeatured('campaign', row._id, featured)}
               />
             )
           },
-          { key: 'createdAt', label: 'Date création' },
+          { 
+            key: 'createdAt', 
+            label: 'Date création',
+            render: (value: string) => {
+              const date = new Date(value);
+              return date.toLocaleDateString('fr-FR', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+              });
+            }
+          },
         ]}
         data={campaigns}
-        onEdit={(campaign) => console.log('Edit campaign:', campaign)}
-        onDelete={(campaign) => console.log('Delete campaign:', campaign._id)}
       />
     </div>
   );
@@ -292,10 +501,6 @@ const AdminPage: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-cinzel font-semibold text-white">Gestion des jeux</h3>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          Ajouter
-        </Button>
       </div>
       <DataTable
         columns={[
@@ -314,28 +519,60 @@ const AdminPage: React.FC = () => {
             render: (value: boolean, row: any) => (
               <FeaturedToggle
                 isFeatured={value}
-                onToggle={(featured) => handleToggleFeatured('game', row.id, featured)}
+                onToggle={(featured) => handleToggleFeatured('game', row._id, featured)}
               />
             )
           },
-          { key: 'createdAt', label: 'Date création' },
+          { 
+            key: 'createdAt', 
+            label: 'Date création',
+            render: (value: string) => {
+              const date = new Date(value);
+              return date.toLocaleDateString('fr-FR', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+              });
+            }
+          },
         ]}
         data={games}
-        onEdit={(game) => console.log('Edit game:', game)}
-        onDelete={(game) => console.log('Delete game:', game._id)}
       />
     </div>
   );
 
+  const tabs = [
+    { id: 'users', label: 'Utilisateurs', icon: Users },
+    { id: 'sessions', label: 'Sessions', icon: Calendar },
+    { id: 'campaigns', label: 'Campagnes', icon: BookOpen },
+    { id: 'games', label: 'Jeux', icon: Gamepad2 },
+  ];
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-cinzel font-bold text-white mb-2">
-          Administration
-        </h1>
-        <p className="text-slate-400">
-          Gérez les utilisateurs, sessions, campagnes et jeux
-        </p>
+      {/* Notifications */}
+      <NotificationContainer
+        notifications={notifications}
+        onRemove={removeNotification}
+        maxNotifications={5}
+        position="top-right"
+      />
+
+
+
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-cinzel font-bold text-white mb-2">
+            Administration
+          </h1>
+          <p className="text-slate-400">
+            Gérez les utilisateurs, sessions, campagnes et jeux
+          </p>
+        </div>
+        <Button onClick={loadData} variant="outline" disabled={loading}>
+          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+          Actualiser
+        </Button>
       </div>
 
       {/* Onglets */}
@@ -370,7 +607,10 @@ const AdminPage: React.FC = () => {
         <CardContent className="p-6">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="text-slate-400">Chargement des données...</div>
+              <div className="flex items-center space-x-3 text-slate-400">
+                <RefreshCw className="w-6 h-6 animate-spin" />
+                <span>Chargement des données...</span>
+              </div>
             </div>
           ) : (
             <>

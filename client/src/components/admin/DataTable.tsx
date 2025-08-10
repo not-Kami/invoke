@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, CardContent } from '../ui/Card';
+import { Trash2 } from 'lucide-react';
 
 interface Column {
   key: string;
@@ -45,14 +46,14 @@ const DataTable: React.FC<DataTableProps> = ({
                 ))}
                 {(onEdit || onDelete) && (
                   <th className="px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">
-                    Actions
+                    
                   </th>
                 )}
               </tr>
             </thead>
             <tbody className="bg-slate-900/50 divide-y divide-slate-700/50">
-              {data.map((row, index) => (
-                <tr key={index} className="hover:bg-slate-800/30 transition-colors">
+              {data.map((row) => (
+                <tr key={row._id || row.id || `row-${Math.random()}`} className="hover:bg-slate-800/30 transition-colors">
                   {columns.map((column) => (
                     <td key={column.key} className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
                       {column.render 
@@ -75,9 +76,10 @@ const DataTable: React.FC<DataTableProps> = ({
                         {onDelete && (
                           <button
                             onClick={() => onDelete(row)}
-                            className="text-red-400 hover:text-red-300 transition-colors"
+                            className="text-red-400 hover:text-red-300 transition-colors p-2 rounded-lg hover:bg-red-500/10"
+                            title="Supprimer"
                           >
-                            Supprimer
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         )}
                       </div>

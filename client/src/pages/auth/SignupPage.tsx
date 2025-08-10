@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
 import { Card, CardContent } from '../../components/ui/Card';
+import ImageUpload from '../../components/ui/ImageUpload';
 import { useAuth } from '../../contexts/AuthContext';
 import { Sword, Eye, EyeOff, UserPlus, Check } from 'lucide-react';
 
@@ -19,6 +20,7 @@ export default function SignupPage() {
     password: '',
     confirmPassword: '',
     isDM: false,
+    avatar: null as string | null,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -60,6 +62,13 @@ export default function SignupPage() {
     setFormData({
       ...formData,
       [name]: type === 'checkbox' ? checked : value,
+    });
+  };
+
+  const handleImageChange = (imageData: string | null) => {
+    setFormData({
+      ...formData,
+      avatar: imageData,
     });
   };
 
@@ -136,6 +145,12 @@ export default function SignupPage() {
                   placeholder="your@email.com"
                 />
               </div>
+
+              {/* Upload d'image de profil */}
+              <ImageUpload
+                onImageChange={handleImageChange}
+                currentImage={formData.avatar}
+              />
 
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">

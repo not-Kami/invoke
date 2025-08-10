@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Sword, Github, Twitter, MessageCircle, Mail } from 'lucide-react';
+import { Github, Twitter, MessageCircle, Mail } from 'lucide-react';
+import InvokeLogo from '../../assets/invoke-logo.svg';
 
 export default function Footer() {
   const navigation = {
@@ -43,7 +44,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="space-y-8 xl:col-span-1">
             <Link to="/" className="flex items-center space-x-2">
-              <Sword className="h-8 w-8 text-purple-400" />
+              <img src={InvokeLogo} alt="Invoke" className="h-12 w-12" />
               <span className="font-display text-xl font-bold text-white">Invoke</span>
             </Link>
             <p className="text-gray-400 text-sm max-w-md">

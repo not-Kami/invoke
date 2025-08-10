@@ -12,6 +12,8 @@ const env = {
     MONGODB_URI: process.env.MONGO_URI || process.env.MONGODB_URI,
     JWT_SECRET: process.env.JWT_SECRET || "default-secret-key-change-in-production",
     JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "7d",
+    NODE_ENV: process.env.NODE_ENV || "development",
+    DISABLE_RATE_LIMIT: process.env.DISABLE_RATE_LIMIT === "true",
 }
 
 console.log('ENV DEBUG - Final JWT_SECRET:', env.JWT_SECRET ? 'Present' : 'Missing');

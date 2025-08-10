@@ -7,7 +7,7 @@ import logger from '../../config/logger.config.js';
 // @access  Public
 export const signup = async (req, res) => {
     try {
-        const { email, password, firstName, lastName, role = 'user' } = req.body;
+        const { email, password, firstName, lastName, role = 'user', isDM = false, avatar } = req.body;
 
         // Vérifier si l'utilisateur existe déjà
         const existingUser = await User.findOne({ email });
@@ -27,7 +27,9 @@ export const signup = async (req, res) => {
             password: hashedPassword,
             firstName,
             lastName,
-            role
+            role,
+            isDM,
+            avatar: avatar || null
         });
 
         // Générer le token
@@ -42,6 +44,7 @@ export const signup = async (req, res) => {
             role: user.role,
             isDM: user.isDM,
             featured: user.featured,
+            avatar: user.avatar,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt
         };

@@ -2,7 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import env from "./dotenv.config.js";
 import corsMiddleware from "../middlewares/cors.middleware.js";
-import { globalLimiter, sensitiveOperationLimiter } from "../middlewares/rateLimiter.middleware.js";
+import { globalLimiter, sensitiveOperationLimiter, getRateLimitStatus } from "./rateLimit.config.js";
 import logger from "./logger.config.js";
 import userRouter from "../resources/user/user.route.js";
 import sessionRouter from "../resources/session/session.route.js";
@@ -21,10 +21,10 @@ app.use(cookieParser()); // Parser les cookies
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Rate limiting global
+// Rate limiting global - Configuré selon l'environnement
 app.use('/api/v1', globalLimiter);
 
-// Routes avec rate limiting pour opérations sensibles
+// Routes avec rate limiting pour opérations sensibles - Configuré selon l'environnement
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', sensitiveOperationLimiter, userRouter);
 app.use('/api/v1/sessions', sensitiveOperationLimiter, sessionRouter);

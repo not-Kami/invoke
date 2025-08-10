@@ -11,7 +11,6 @@ const corsOptions = {
     if (!origin) return callback(null, true);
     // On retire le slash final de l'origin pour la comparaison
     const normalizedOrigin = origin.replace(/\/$/, '');
-    console.log('CORS DEBUG:', { origin, normalizedOrigin, allowedOrigins });
     if (allowedOrigins.includes(normalizedOrigin)) {
       callback(null, true);
     } else {

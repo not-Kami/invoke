@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { usePermissions } from '../../hooks/usePermissions';
 import { 
   LayoutDashboard, 
   Users, 
@@ -12,14 +13,15 @@ import {
 
 const AdminSidebar: React.FC = () => {
   const location = useLocation();
+  const { canManageUsers, canManageSessions, canManageCampaigns } = usePermissions();
 
   const menuItems = [
-    { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/admin/users', icon: Users, label: 'Utilisateurs' },
-    { path: '/admin/sessions', icon: Calendar, label: 'Sessions' },
-    { path: '/admin/games', icon: Gamepad2, label: 'Jeux' },
-    { path: '/admin/campaigns', icon: BookOpen, label: 'Campagnes' },
-    { path: '/admin/settings', icon: Settings, label: 'Paramètres' },
+    { path: '/admin', icon: LayoutDashboard, label: 'Dashboard', required: 'admin' },
+    { path: '/admin/users', icon: Users, label: 'Utilisateurs', required: 'admin' },
+    { path: '/admin/sessions', icon: Calendar, label: 'Sessions', required: 'admin' },
+    { path: '/admin/games', icon: Gamepad2, label: 'Jeux', required: 'admin' },
+    { path: '/admin/campaigns', icon: BookOpen, label: 'Campagnes', required: 'admin' },
+    { path: '/admin/settings', icon: Settings, label: 'Paramètres', required: 'admin' },
   ];
 
   return (
@@ -34,6 +36,11 @@ const AdminSidebar: React.FC = () => {
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
+            
+            // Vérifier les permissions pour chaque élément du menu
+            if (item.required === 'admin' && !canManageUsers) {
+              return null; // Masquer l'élément si pas admin
+            }
             
             return (
               <Link

@@ -33,16 +33,64 @@ const campaignController = {
         }
     },
     getCampaign: async (req, res) => {
-        const campaign = await Campaign.findById(req.params.id);
-        res.status(200).json(campaign);
+        try {
+            const campaign = await Campaign.findById(req.params.id);
+            if (!campaign) {
+                return res.status(404).json({
+                    success: false,
+                    error: 'Campaign not found'
+                });
+            }
+            res.status(200).json({
+                success: true,
+                data: campaign
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
     },
     updateCampaign: async (req, res) => {
-        const campaign = await Campaign.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.status(200).json(campaign);
+        try {
+            const campaign = await Campaign.findByIdAndUpdate(req.params.id, req.body, { new: true });
+            if (!campaign) {
+                return res.status(404).json({
+                    success: false,
+                    error: 'Campaign not found'
+                });
+            }
+            res.status(200).json({
+                success: true,
+                data: campaign
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
     },
     deleteCampaign: async (req, res) => {
-        const campaign = await Campaign.findByIdAndDelete(req.params.id);
-        res.status(200).json(campaign);
+        try {
+            const campaign = await Campaign.findByIdAndDelete(req.params.id);
+            if (!campaign) {
+                return res.status(404).json({
+                    success: false,
+                    error: 'Campaign not found'
+                });
+            }
+            res.status(200).json({
+                success: true,
+                data: campaign
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
     }
 }
 

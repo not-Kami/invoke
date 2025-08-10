@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Campaign } from '../../types';
-import { campaignsApi } from '../../lib/api';
+import { Campaign, adminAPI } from '../../lib/api';
 import Button from '../../components/ui/Button';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Avatar from '../../components/ui/Avatar';
 import Input from '../../components/ui/Input';
-import { formatDate } from '../../lib/utils';
 import { Calendar, Users, Plus, Search, Gamepad2 } from 'lucide-react';
 
 export default function CampaignsPage() {
@@ -20,13 +18,21 @@ export default function CampaignsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
+    // Simuler un chargement API avec des données mockées
     const fetchCampaigns = async () => {
       try {
-        const response = await campaignsApi.getCampaigns();
-        setCampaigns(response.data);
-        setFilteredCampaigns(response.data);
+        // Simuler un délai de chargement
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Pour l'instant, on utilise un tableau vide en attendant l'API
+        const mockCampaigns: Campaign[] = [];
+        
+        setCampaigns(mockCampaigns);
+        setFilteredCampaigns(mockCampaigns);
       } catch (error) {
         console.error('Error fetching campaigns:', error);
+        setCampaigns([]);
+        setFilteredCampaigns([]);
       } finally {
         setLoading(false);
       }
@@ -41,16 +47,14 @@ export default function CampaignsPage() {
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(campaign =>
-        campaign.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        campaign.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        campaign.game.name.toLowerCase().includes(searchTerm.toLowerCase())
+        campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        campaign.game.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     // Status filter
     if (statusFilter !== 'all') {
-      const isActive = statusFilter === 'active';
-      filtered = filtered.filter(campaign => campaign.active === isActive);
+      filtered = filtered.filter(campaign => campaign.status === statusFilter);
     }
 
     setFilteredCampaigns(filtered);
@@ -65,29 +69,30 @@ export default function CampaignsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Campaigns</h1>
-          <p className="mt-2 text-gray-600">
-            Join ongoing campaigns and embark on epic adventures
-          </p>
-        </div>
-        {user && (
-          <div className="mt-4 sm:mt-0">
-            <Link to="/campaigns/create">
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Campaign
-              </Button>
-            </Link>
+    <div className="min-h-screen py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white">Campaigns</h1>
+            <p className="mt-2 text-gray-300">
+              Join ongoing campaigns and embark on epic adventures
+            </p>
           </div>
-        )}
-      </div>
+          {user && (
+            <div className="mt-4 sm:mt-0">
+              <Link to="/campaigns/create">
+                <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Campaign
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
 
-      {/* Filters */}
-      <Card>
+        {/* Filters */}
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
@@ -110,36 +115,37 @@ export default function CampaignsPage() {
               >
                 <option value="all">All Campaigns</option>
                 <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="paused">Paused</option>
+                <option value="completed">Completed</option>
               </select>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Campaigns Grid */}
-      {filteredCampaigns.length === 0 ? (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <Gamepad2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No campaigns found
-            </h3>
-            <p className="text-gray-600 mb-4">
-              {searchTerm || statusFilter !== 'all'
-                ? 'Try adjusting your filters to see more campaigns.'
-                : 'Be the first to create a campaign!'}
-            </p>
-            {user && (
-              <Link to="/campaigns/create">
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Campaign
-                </Button>
-              </Link>
-            )}
-          </CardContent>
-        </Card>
+        {/* Campaigns Grid */}
+        {filteredCampaigns.length === 0 ? (
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <CardContent className="p-12 text-center">
+              <Gamepad2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-white mb-2">
+                No campaigns found
+              </h3>
+              <p className="text-gray-300 mb-4">
+                {searchTerm || statusFilter !== 'all'
+                  ? 'Try adjusting your filters to see more campaigns.'
+                  : 'Be the first to create a campaign!'}
+              </p>
+              {user && (
+                <Link to="/campaigns/create">
+                  <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Campaign
+                  </Button>
+                </Link>
+              )}
+            </CardContent>
+          </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredCampaigns.map((campaign) => (
@@ -232,7 +238,8 @@ export default function CampaignsPage() {
             </Card>
           ))}
         </div>
-      )}
+              )}
+      </div>
     </div>
   );
 }

@@ -18,6 +18,7 @@ interface User {
   role: 'user' | 'admin';
   isDM: boolean;
   featured: boolean;
+  avatar?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -81,7 +82,25 @@ async function apiCall<T>(
       throw new Error(data.message || 'Erreur API');
     }
 
-    return data; // Retourner directement la réponse du serveur
+    // Normalisation des réponses : si l'API retourne directement un tableau ou un objet
+    // on le transforme en format standard { success: true, data: ... }
+    if (Array.isArray(data)) {
+      return {
+        success: true,
+        data: data
+      };
+    }
+    
+    // Si c'est déjà au bon format, on le retourne tel quel
+    if (data && typeof data === 'object' && 'success' in data) {
+      return data;
+    }
+    
+    // Sinon, on normalise
+    return {
+      success: true,
+      data: data
+    };
   } catch (error) {
     return { 
       success: false, 
@@ -163,6 +182,7 @@ interface SignupData {
   email: string;
   password: string;
   isDM?: boolean;
+  avatar?: string;
 }
 
 interface AuthResponse {
