@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import DataTable from '../../components/admin/DataTable';
+import ExpandableDataTable from '../../components/admin/ExpandableDataTable';
+import SessionExpandedContent from '../../components/admin/SessionExpandedContent';
 import FeaturedToggle from '../../components/admin/FeaturedToggle';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
@@ -101,17 +103,17 @@ const AdminPage: React.FC = () => {
       });
 
       // Traitement des utilisateurs
-      if (usersRes.success && usersRes.data) {
+      if (usersRes && usersRes.success && usersRes.data) {
         setUsers(usersRes.data);
         console.log('AdminPage: Utilisateurs chargés:', usersRes.data.length);
-      } else if (Array.isArray(usersRes)) {
+      } else if (usersRes && Array.isArray(usersRes)) {
         // Fallback : si l'API retourne directement un tableau
         setUsers(usersRes);
         console.log('AdminPage: Utilisateurs chargés (format direct):', usersRes.length);
-      } else {
+      } else if (usersRes && usersRes.error) {
         console.error('AdminPage: Erreur lors du chargement des utilisateurs:', usersRes.error);
         // Ne pas afficher d'erreur si c'est juste une absence de données
-        if (usersRes.error && !usersRes.error.includes('Données invalides')) {
+        if (!usersRes.error.includes('Données invalides')) {
           addError(`Erreur utilisateurs: ${usersRes.error}`);
         }
       }
@@ -402,10 +404,11 @@ const AdminPage: React.FC = () => {
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-cinzel font-semibold text-white">Gestion des sessions</h3>
       </div>
-      <DataTable
+      <ExpandableDataTable
         columns={[
           { key: 'title', label: 'Titre' },
-          { key: 'description', label: 'Description' },
+          { key: 'game', label: 'Jeu' },
+          { key: 'dm', label: 'MJ' },
           { 
             key: 'status', 
             label: 'Statut',
@@ -414,6 +417,11 @@ const AdminPage: React.FC = () => {
                 {value === 'open' ? 'Ouvert' : 'Complet'}
               </Badge>
             )
+          },
+          { 
+            key: 'players', 
+            label: 'Joueurs',
+            render: (value: number, row: any) => `${value || 0}/${row.maxPlayers || '?'}`
           },
           { 
             key: 'date', 
@@ -428,19 +436,18 @@ const AdminPage: React.FC = () => {
             }
           },
           { 
-            key: 'createdAt', 
-            label: 'Date création',
-            render: (value: string) => {
-              const date = new Date(value);
-              return date.toLocaleDateString('fr-FR', { 
-                day: '2-digit', 
-                month: '2-digit', 
-                year: 'numeric' 
-              });
-            }
+            key: 'featured', 
+            label: 'Mis en avant',
+            render: (value: boolean, row: any) => (
+              <FeaturedToggle
+                isFeatured={value}
+                onToggle={(featured) => handleToggleFeatured('session', row._id, featured)}
+              />
+            )
           },
         ]}
         data={sessions}
+        expandableContent={(session) => <SessionExpandedContent session={session} />}
       />
     </div>
   );
