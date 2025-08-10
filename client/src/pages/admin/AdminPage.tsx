@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import DataTable from '../../components/admin/DataTable';
 import ExpandableDataTable from '../../components/admin/ExpandableDataTable';
 import SessionExpandedContent from '../../components/admin/SessionExpandedContent';
+import GameExpandedContent from '../../components/admin/GameExpandedContent';
+import GameModal from '../../components/admin/GameModal';
 import FeaturedToggle from '../../components/admin/FeaturedToggle';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
@@ -40,6 +42,8 @@ const AdminPage: React.FC = () => {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [isLoadingData, setIsLoadingData] = useState(false); // Protection contre les appels multiples
+  const [gameModalOpen, setGameModalOpen] = useState(false);
+  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
 
   // Vérification de sécurité - double protection
   useEffect(() => {
@@ -163,6 +167,7 @@ const AdminPage: React.FC = () => {
         }
       }
 
+      // Une seule notification de succès au lieu de multiples
       addSuccess('Données chargées avec succès');
     } catch (error) {
       console.error('AdminPage: Erreur lors du chargement des données:', error);
@@ -267,6 +272,58 @@ const AdminPage: React.FC = () => {
     } catch (error) {
       console.error('AdminPage: Erreur lors de la mise à jour:', error);
       addError(`Erreur de mise à jour: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+    }
+  };
+
+  const handleSaveGame = async (gameData: Partial<Game>) => {
+    try {
+      let response: any;
+      if (gameData._id) {
+        // Modification
+        response = await adminAPI.updateGame(gameData._id, gameData);
+        if (response.success && response.data) {
+          setGames(prev => prev.map(game => 
+            game._id === gameData._id ? response.data : game
+          ));
+          addSuccess('Jeu modifié avec succès');
+        } else {
+          throw new Error(response.error || 'Erreur lors de la modification');
+        }
+      } else {
+        // Création
+        response = await adminAPI.createGame(gameData);
+        if (response.success && response.data) {
+          setGames(prev => [...prev, response.data]);
+          addSuccess('Jeu créé avec succès');
+        } else {
+          throw new Error(response.error || 'Erreur lors de la création');
+        }
+      }
+      
+      setGameModalOpen(false);
+      setSelectedGame(null);
+    } catch (error) {
+      console.error('AdminPage: Erreur lors de la sauvegarde du jeu:', error);
+      addError(`Erreur de sauvegarde: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+    }
+  };
+
+  const handleDeleteGame = async (gameId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce jeu ?')) {
+      return;
+    }
+    
+    try {
+      const response = await adminAPI.deleteGame(gameId);
+      if (response.success) {
+        setGames(prev => prev.filter(game => game._id !== gameId));
+        addSuccess('Jeu supprimé avec succès');
+      } else {
+        throw new Error(response.error || 'Erreur lors de la suppression');
+      }
+    } catch (error) {
+      console.error('AdminPage: Erreur lors de la suppression du jeu:', error);
+      addError(`Erreur de suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
 
@@ -508,8 +565,16 @@ const AdminPage: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-cinzel font-semibold text-white">Gestion des jeux</h3>
+        <Button 
+          onClick={() => setGameModalOpen(true)} 
+          variant="primary"
+          className="flex items-center space-x-2"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Ajouter un jeu</span>
+        </Button>
       </div>
-      <DataTable
+      <ExpandableDataTable
         columns={[
           { key: 'name', label: 'Nom' },
           { key: 'system', label: 'Système' },
@@ -517,7 +582,7 @@ const AdminPage: React.FC = () => {
             key: 'sessionsCount', 
             label: 'Sessions',
             render: (value: number) => (
-              <Badge variant="info">{value}</Badge>
+              <Badge variant="info">{value || 0}</Badge>
             )
           },
           { 
@@ -544,6 +609,12 @@ const AdminPage: React.FC = () => {
           },
         ]}
         data={games}
+        onEdit={(game) => {
+          setSelectedGame(game);
+          setGameModalOpen(true);
+        }}
+        onDelete={(game) => handleDeleteGame(game._id)}
+        expandableContent={(game) => <GameExpandedContent game={game} />}
       />
     </div>
   );
@@ -629,6 +700,19 @@ const AdminPage: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Modal des jeux */}
+      {gameModalOpen && (
+        <GameModal
+          isOpen={gameModalOpen}
+          onClose={() => {
+            setGameModalOpen(false);
+            setSelectedGame(null);
+          }}
+          onSave={handleSaveGame}
+          game={selectedGame}
+        />
+      )}
     </div>
   );
 };
