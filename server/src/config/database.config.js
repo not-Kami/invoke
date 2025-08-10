@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 import env from "./dotenv.config.js";
 
-const databaseConnection = mongoose.connect(env.MONGODB_URI);
+const connectDatabase = () => {
+    console.log('🔗 Attempting database connection with URI:', env.MONGODB_URI ? 'Present' : 'Missing');
+    return mongoose.connect(env.MONGODB_URI);
+};
 
-export default databaseConnection;
+export default connectDatabase;

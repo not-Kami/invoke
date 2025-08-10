@@ -51,10 +51,14 @@ interface Campaign {
 interface Game {
   _id: string;
   name: string;
+  description: string;
+  genre: string;
   system: string;
+  image?: string; // Nom du fichier ou URL
   featured: boolean;
-  sessionsCount: number;
+  sessionsCount?: number;
   createdAt: string;
+  updatedAt?: string;
 }
 
 // Fonction utilitaire pour les appels API
@@ -87,7 +91,7 @@ async function apiCall<T>(
     if (Array.isArray(data)) {
       return {
         success: true,
-        data: data
+        data: data as T
       };
     }
     
