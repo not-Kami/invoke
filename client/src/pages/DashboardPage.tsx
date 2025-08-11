@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useDashboardData } from '../hooks/useDashboardData';
 import { Card, CardContent, CardHeader } from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
@@ -32,6 +33,7 @@ import {
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { loading, sessions, campaigns, isAdmin, isDM } = useDashboardData();
   const [viewMode, setViewMode] = useState<'player' | 'dm'>('player');
 
   if (!user) {
@@ -45,29 +47,14 @@ export default function DashboardPage() {
     );
   }
 
-  // Données mockées pour le dashboard
-  const upcomingGames = [
-    {
-      id: 1,
-      title: "Les Ombres de Valoria",
-      game: "D&D 5e",
-      date: "2024-01-28",
-      time: "19:00",
-      dm: "Alex Lenop",
-      type: "campaign",
-      status: "confirmed"
-    },
-    {
-      id: 2,
-      title: "Cyberpunk One-Shot",
-      game: "Cyberpunk Red",
-      date: "2024-02-02",
-      time: "14:00",
-      dm: "Sarah Chen",
-      type: "session",
-      status: "pending"
-    }
-  ];
+  // Données réelles du dashboard
+  const upcomingSessions = sessions.filter(session => 
+    new Date(session.date) > new Date()
+  ).slice(0, 3);
+
+  const upcomingCampaigns = campaigns.filter(campaign => 
+    campaign.active
+  ).slice(0, 3);
 
   const myCharacters = [
     {
@@ -251,37 +238,54 @@ export default function DashboardPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {upcomingGames.map((game) => (
-                    <div key={game.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
-                          <Gamepad2 className="h-6 w-6 text-white" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-white">{game.title}</h3>
-                          <p className="text-sm text-gray-300">{game.game} • DM: {game.dm}</p>
-                          <div className="flex items-center space-x-4 mt-1">
-                            <div className="flex items-center space-x-1 text-xs text-gray-400">
-                              <Calendar className="h-3 w-3" />
-                              <span>{game.date}</span>
-                            </div>
-                            <div className="flex items-center space-x-1 text-xs text-gray-400">
-                              <Clock className="h-3 w-3" />
-                              <span>{game.time}</span>
+                  {upcomingSessions.length > 0 ? (
+                    upcomingSessions.map((session) => (
+                      <div key={session._id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+                            <Gamepad2 className="h-6 w-6 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-white">{session.title}</h3>
+                            <p className="text-sm text-gray-300">{session.game.name} • MJ: {session.dm.firstName} {session.dm.lastName}</p>
+                            <div className="flex items-center space-x-4 mt-1">
+                              <div className="flex items-center space-x-1 text-xs text-gray-400">
+                                <Calendar className="h-3 w-3" />
+                                <span>{new Date(session.date).toLocaleDateString('fr-FR')}</span>
+                              </div>
+                              <div className="flex items-center space-x-1 text-xs text-gray-400">
+                                <Users className="h-3 w-3" />
+                                <span>{session.players.length} joueurs</span>
+                              </div>
                             </div>
                           </div>
                         </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant={session.status === 'open' ? 'success' : 'warning'}>
+                            {session.status === 'open' ? 'Ouverte' : session.status}
+                          </Badge>
+                          <Badge variant="info" size="sm">
+                            Session
+                          </Badge>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant={game.status === 'confirmed' ? 'success' : 'warning'}>
-                          {game.status}
-                        </Badge>
-                        <Badge variant="info" size="sm">
-                          {game.type}
-                        </Badge>
-                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-400">Aucune session à venir</p>
+                      {(isAdmin || isDM) && (
+                        <Button 
+                          size="sm" 
+                          className="mt-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0"
+                          onClick={() => window.location.href = '/sessions/create'}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Créer une Session
+                        </Button>
+                      )}
                     </div>
-                  ))}
+                  )}
                 </CardContent>
               </Card>
 
@@ -503,151 +507,175 @@ export default function DashboardPage() {
         ) : (
           /* DM Dashboard */
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* My Announcements */}
-            <div className="lg:col-span-2">
-              <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Megaphone className="h-5 w-5 text-purple-400" />
-                      <h2 className="text-xl font-semibold text-white">My Announcements</h2>
-                    </div>
-                    <Button size="sm" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0">
-                      <Plus className="h-4 w-4 mr-2" />
-                      New Announcement
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {myAnnouncements.map((announcement) => (
-                    <div key={announcement.id} className="p-4 bg-white/5 rounded-lg border border-white/10">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <h3 className="font-semibold text-white">{announcement.title}</h3>
-                            <Badge variant="info" size="sm">{announcement.type}</Badge>
-                            <Badge variant={announcement.status === 'active' ? 'success' : 'default'} size="sm">
-                              {announcement.status}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-gray-300 mb-2">{announcement.game}</p>
-                          
-                          <div className="grid grid-cols-2 gap-4 text-xs text-gray-400">
-                            <div className="flex items-center space-x-1">
-                              <MapPin className="h-3 w-3" />
-                              <span>{announcement.location}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <DollarSign className="h-3 w-3" />
-                              <span>{announcement.price}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Users className="h-3 w-3" />
-                              <span>{announcement.players}/{announcement.maxPlayers} players</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Calendar className="h-3 w-3" />
-                              <span>Posted {announcement.createdAt}</span>
-                            </div>
-                          </div>
-                        </div>
-                        
+            {isAdmin || isDM ? (
+              <>
+                {/* My Announcements */}
+                <div className="lg:col-span-2">
+                  <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
-                            <Edit className="h-3 w-3 mr-1" />
-                            Edit
-                          </Button>
-                          <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
-                            <Eye className="h-3 w-3 mr-1" />
-                            View
-                          </Button>
+                          <Megaphone className="h-5 w-5 text-purple-400" />
+                          <h2 className="text-xl font-semibold text-white">Mes Annonces</h2>
                         </div>
-                      </div>
-                      
-                      <div className="flex justify-between items-center pt-2 border-t border-white/10">
-                        <span className="text-xs text-gray-400">
-                          {announcement.players} interested players
-                        </span>
-                        <Button variant="ghost" size="sm" className="text-purple-400 hover:text-white">
-                          <Users className="h-3 w-3 mr-1" />
-                          Manage Players
+                        <Button size="sm" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Nouvelle Annonce
                         </Button>
                       </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-
-              {/* My Sessions & Campaigns */}
-              <Card className="bg-white/10 backdrop-blur-sm border-white/20 mt-6">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Crown className="h-5 w-5 text-purple-400" />
-                      <h2 className="text-xl font-semibold text-white">Running Sessions</h2>
-                    </div>
-                    <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white hover:text-gray-900">
-                      View All
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {mySessions.map((session) => (
-                    <div key={session.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
-                          <Crown className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-white">{session.title}</h3>
-                          <div className="flex items-center space-x-3 mt-1">
-                            <span className="text-xs text-gray-400">{session.game}</span>
-                            <span className="text-xs text-gray-400">
-                              {session.players}/{session.maxPlayers} players
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <Badge variant={session.status === 'active' ? 'success' : 'warning'} size="sm">
-                        {session.status}
-                      </Badge>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-
-              {/* Upcoming Events */}
-              <Card className="bg-white/10 backdrop-blur-sm border-white/20 mt-6">
-                <CardHeader>
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="h-5 w-5 text-purple-400" />
-                    <h2 className="text-xl font-semibold text-white">Upcoming Events</h2>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {upcomingGames.map((event) => (
-                      <div key={event.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
-                        <div>
-                          <h3 className="font-medium text-white">{event.title}</h3>
-                          <div className="flex items-center space-x-4 mt-1">
-                            <div className="flex items-center space-x-1 text-xs text-gray-400">
-                              <Calendar className="h-3 w-3" />
-                              <span>{event.date}</span>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {myAnnouncements.length > 0 ? (
+                        myAnnouncements.map((announcement) => (
+                          <div key={announcement.id} className="p-4 bg-white/5 rounded-lg border border-white/10">
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-2 mb-2">
+                                  <h3 className="font-semibold text-white">{announcement.title}</h3>
+                                  <Badge variant="info" size="sm">{announcement.type}</Badge>
+                                  <Badge variant={announcement.status === 'active' ? 'success' : 'default'} size="sm">
+                                    {announcement.status}
+                                  </Badge>
+                                </div>
+                                <p className="text-sm text-gray-300 mb-2">{announcement.game}</p>
+                                
+                                <div className="grid grid-cols-2 gap-4 text-xs text-gray-400">
+                                  <div className="flex items-center space-x-1">
+                                    <MapPin className="h-3 w-3" />
+                                    <span>{announcement.location}</span>
+                                  </div>
+                                  <div className="flex items-center space-x-1">
+                                    <DollarSign className="h-3 w-3" />
+                                    <span>{announcement.price}</span>
+                                  </div>
+                                  <div className="flex items-center space-x-1">
+                                    <Users className="h-3 w-3" />
+                                    <span>{announcement.players}/{announcement.maxPlayers} joueurs</span>
+                                  </div>
+                                  <div className="flex items-center space-x-1">
+                                    <Calendar className="h-3 w-3" />
+                                    <span>Posté le {announcement.createdAt}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center space-x-2">
+                                <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
+                                  <Edit className="h-3 w-3 mr-1" />
+                                  Modifier
+                                </Button>
+                                <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
+                                  <Eye className="h-3 w-3 mr-1" />
+                                  Voir
+                                </Button>
+                              </div>
                             </div>
-                            <div className="flex items-center space-x-1 text-xs text-gray-400">
-                              <Clock className="h-3 w-3" />
-                              <span>{event.time}</span>
+                            
+                            <div className="flex justify-between items-center pt-2 border-t border-white/10">
+                              <span className="text-xs text-gray-400">
+                                {announcement.players} joueurs intéressés
+                              </span>
+                              <Button variant="ghost" size="sm" className="text-purple-400 hover:text-white">
+                                <Users className="h-3 w-3 mr-1" />
+                                Gérer les Joueurs
+                              </Button>
                             </div>
                           </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-8">
+                          <Megaphone className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                          <p className="text-gray-400">Aucune annonce active</p>
+                          <Button 
+                            size="sm" 
+                            className="mt-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0"
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Créer une Annonce
+                          </Button>
                         </div>
-                        <Badge variant="info" size="sm">{event.type}</Badge>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* My Sessions & Campaigns */}
+                  <Card className="bg-white/10 backdrop-blur-sm border-white/20 mt-6">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Crown className="h-5 w-5 text-purple-400" />
+                          <h2 className="text-xl font-semibold text-white">Sessions en Cours</h2>
+                        </div>
+                        <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white hover:text-gray-900">
+                          Voir Tout
+                        </Button>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {mySessions.length > 0 ? (
+                        mySessions.map((session) => (
+                          <div key={session.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+                                <Crown className="h-5 w-5 text-white" />
+                              </div>
+                              <div>
+                                <h3 className="font-medium text-white">{session.title}</h3>
+                                <div className="flex items-center space-x-3 mt-1">
+                                  <span className="text-xs text-gray-400">{session.game}</span>
+                                  <span className="text-xs text-gray-400">
+                                    {session.players}/{session.maxPlayers} joueurs
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <Badge variant={session.status === 'active' ? 'success' : 'warning'} size="sm">
+                              {session.status}
+                            </Badge>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-4">
+                          <Crown className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                          <p className="text-gray-400">Aucune session en cours</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
+            ) : (
+              /* Message pour les utilisateurs non-MJ */
+              <div className="lg:col-span-3">
+                <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+                  <CardContent className="p-12 text-center">
+                    <Crown className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                    <h2 className="text-2xl font-semibold text-white mb-2">
+                      Mode Maître de Donjon
+                    </h2>
+                    <p className="text-gray-400 mb-6 max-w-md mx-auto">
+                      Ce mode est réservé aux maîtres de donjon et administrateurs. 
+                      Ici, vous pourrez gérer vos campagnes, créer des sessions et 
+                      organiser vos parties de jeu de rôle.
+                    </p>
+                    <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
+                      <div className="flex items-center">
+                        <Gamepad2 className="h-4 w-4 mr-2" />
+                        <span>Gérer les campagnes</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        <span>Créer des sessions</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Users className="h-4 w-4 mr-2" />
+                        <span>Gérer les joueurs</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
             {/* DM Sidebar */}
             <div className="space-y-6">

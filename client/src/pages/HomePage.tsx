@@ -205,7 +205,7 @@ export default function HomePage() {
                 <Link to="/sessions/create">
                   <Button variant="glass" size="lg">
                     <Plus className="h-5 w-5 mr-2" />
-                    Find an Adventure
+                    Onto your next an Adventure
                   </Button>
                 </Link>
                 <Button 
@@ -215,7 +215,7 @@ export default function HomePage() {
                   title="Fonctionnalité à venir"
                 >
                   <Users className="h-5 w-5 mr-2" />
-                  Onto your next adventure
+                  Hire a Dungeon Master
                   <span className="ml-2 text-sm text-gray-300">(À venir)</span>
                 </Button>
               </div>

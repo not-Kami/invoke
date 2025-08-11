@@ -79,7 +79,7 @@ export default function CampaignsPage() {
               Join ongoing campaigns and embark on epic adventures
             </p>
           </div>
-          {user && (
+          {user && (user.role === 'admin' || user.isDM) && (
             <div className="mt-4 sm:mt-0">
               <Link to="/campaigns/create">
                 <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0">

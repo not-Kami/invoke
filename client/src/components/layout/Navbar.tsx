@@ -10,7 +10,8 @@ import {
   UserPlus,
   Bell,
   Settings,
-  LayoutDashboard
+  LayoutDashboard,
+  Search
 } from 'lucide-react';
 import InvokeLogo from '../../assets/invoke-logo.svg';
 
@@ -27,15 +28,15 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-gradient-to-r from-black/60 via-black/40 to-black/60 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
+        <div className="flex items-center h-16">
+          {/* Logo - Fixé à gauche */}
+          <Link to="/" className="flex items-center space-x-2 flex-shrink-0">
             <img src={InvokeLogo} alt="Invoke" className="h-12 w-12" />
             <span className="font-display text-xl font-bold text-white">Invoke</span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          {/* Navigation + Search + Actions - Centrés */}
+          <div className="hidden md:flex items-center flex-1 justify-center space-x-8 ml-8">
             {user && (
               <Link
                 to="/dashboard"
@@ -54,10 +55,22 @@ export default function Navbar() {
                 {item.name}
               </Link>
             ))}
+            
+            {/* Search Bar - Intégré dans la navigation */}
+            <div className="flex items-center max-w-md mx-4">
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Rechercher des sessions, campagnes, joueurs..."
+                  className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+            </div>
           </div>
 
-          {/* Desktop Actions */}
-          <div className="hidden md:flex items-center space-x-4">
+          {/* Desktop Actions - Fixés à droite */}
+          <div className="hidden md:flex items-center space-x-4 flex-shrink-0">
             {user ? (
               <>
                 <button className="text-gray-300 hover:text-white transition-colors relative">
@@ -117,7 +130,19 @@ export default function Navbar() {
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 rounded-lg mt-2">
+            {/* Mobile Search */}
+            <div className="px-2 pt-2 pb-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Rechercher..."
+                  className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+            
+            <div className="px-2 pt-2 pb-3 space-y-1 rounded-lg">
               {user && (
                 <Link
                   to="/dashboard"
