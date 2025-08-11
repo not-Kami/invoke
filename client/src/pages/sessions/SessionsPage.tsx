@@ -95,7 +95,7 @@ export default function SessionsPage() {
               Find and join gaming sessions in your area or online
             </p>
           </div>
-          {user && (
+          {user && (user.role === 'admin' || user.isDM) && (
             <div className="mt-4 sm:mt-0">
               <Link to="/sessions/create">
                 <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0">
@@ -165,9 +165,9 @@ export default function SessionsPage() {
                   ? 'Try adjusting your filters to see more sessions.'
                   : 'Be the first to create a session!'}
               </p>
-              {user && (
+              {user && (user.role === 'admin' || user.isDM) && (
                 <Link to="/sessions/create">
-                  <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0">
+                  <Button className="text-gray-400 hover:text-white transition-colors">
                     <Plus className="h-4 w-4 mr-2" />
                     Create Session
                   </Button>
