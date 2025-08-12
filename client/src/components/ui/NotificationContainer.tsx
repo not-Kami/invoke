@@ -1,55 +1,23 @@
-import React, { useState, useCallback } from 'react';
-import Notification, { NotificationProps } from './Notification';
+import React from 'react';
+import Notification from './Notification';
+import { useNotification } from '../../hooks/useNotification';
 
-export interface NotificationItem {
-  id: string;
-  type: 'success' | 'error' | 'info';
-  message: string;
-  autoRemove?: boolean;
-  duration?: number;
-}
-
-interface NotificationContainerProps {
-  notifications: NotificationItem[];
-  onRemove: (id: string) => void;
-  maxNotifications?: number;
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
-}
-
-const NotificationContainer: React.FC<NotificationContainerProps> = ({
-  notifications,
-  onRemove,
-  maxNotifications = 5,
-  position = 'top-right'
-}) => {
-  const getPositionClasses = () => {
-    switch (position) {
-      case 'top-right':
-        return 'top-4 right-4';
-      case 'top-left':
-        return 'top-4 left-4';
-      case 'bottom-right':
-        return 'bottom-4 right-4';
-      case 'bottom-left':
-        return 'bottom-4 left-4';
-      default:
-        return 'top-4 right-4';
-    }
-  };
-
-  // Limiter le nombre de notifications affichées
-  const visibleNotifications = notifications.slice(0, maxNotifications);
+const NotificationContainer: React.FC = () => {
+  const { notifications, removeNotification } = useNotification();
 
   return (
-    <div className={`fixed z-50 space-y-2 ${getPositionClasses()}`}>
-      {visibleNotifications.map((notification) => (
+    <>
+      {notifications.map((notification) => (
         <Notification
           key={notification.id}
-          {...notification}
-          onRemove={onRemove}
+          type={notification.type}
+          title={notification.title}
+          message={notification.message}
+          duration={notification.duration}
+          onClose={() => removeNotification(notification.id)}
         />
       ))}
-    </div>
+    </>
   );
 };
 

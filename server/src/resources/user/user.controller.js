@@ -81,15 +81,82 @@ const userController = {
     },
     uploadAvatar: async (req, res) => {
         try {
-            // req.file contient les infos du fichier uploadé
-            // req.params.id = id du user
-            // Tu peux mettre à jour le champ avatar du user ici
-            res.json({
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Aucun fichier fourni'
+                });
+            }
+
+            const userId = req.params.id;
+            if (!userId) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'ID utilisateur requis'
+                });
+            }
+
+            // Vérifier que l'utilisateur existe
+            const user = await User.findById(userId);
+            if (!user) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Utilisateur non trouvé'
+                });
+            }
+
+            // Vérifier que l'utilisateur connecté peut modifier cet avatar
+            if (req.user._id.toString() !== userId && req.user.role !== 'admin') {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Vous n\'êtes pas autorisé à modifier cet avatar'
+                });
+            }
+
+            // Construire l'URL de l'avatar
+            // Le middleware uploadImage sauvegarde dans uploads/user/:userId/
+            // Utiliser l'URL du serveur depuis les variables d'environnement
+            const serverUrl = process.env.SERVER_URL || (req.protocol + '://' + req.get('host'));
+            const avatarUrl = `${serverUrl}/uploads/user/${userId}/${req.file.filename}`;
+            
+
+
+            // Mettre à jour l'utilisateur avec le nouvel avatar
+            const updatedUser = await User.findByIdAndUpdate(
+                userId,
+                { 
+                    avatar: avatarUrl,
+                    updatedAt: new Date()
+                },
+                { new: true }
+            );
+
+            res.status(200).json({
                 success: true,
-                file: req.file
+                message: 'Avatar uploadé avec succès',
+                data: {
+                    user: {
+                        id: updatedUser._id,
+                        firstName: updatedUser.firstName,
+                        lastName: updatedUser.lastName,
+                        avatar: updatedUser.avatar
+                    },
+                    file: {
+                        filename: req.file.filename,
+                        path: req.file.path,
+                        size: req.file.size,
+                        mimetype: req.file.mimetype,
+                        url: avatarUrl
+                    }
+                }
             });
         } catch (error) {
-            res.status(500).json({ success: false, message: "Upload failed", error: error.message });
+            console.error('Erreur upload avatar:', error);
+            res.status(500).json({ 
+                success: false, 
+                message: "Échec de l'upload", 
+                error: error.message 
+            });
         }
     },
     getFeaturedDMs: async (req, res) => {

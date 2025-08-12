@@ -13,7 +13,7 @@ import GamesPage from './pages/games/GamesPage';
 import CampaignsPage from './pages/campaigns/CampaignsPage';
 import CreateCampaignPage from './pages/campaigns/CreateCampaignPage';
 import DashboardPage from './pages/DashboardPage';
-import ProfilePage from './pages/ProfilePage';
+import ProfilePage from './pages/profile/ProfilePage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import SecureRoute from './components/auth/SecureRoute';
 import AdminLayout from './components/admin/AdminLayout';
