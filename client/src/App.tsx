@@ -7,6 +7,8 @@ import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
 import SessionsPage from './pages/sessions/SessionsPage';
 import CreateSessionPage from './pages/sessions/CreateSessionPage';
+import SessionDetailPage from './pages/sessions/SessionDetailPage';
+import EditSessionPage from './pages/sessions/EditSessionPage';
 import GamesPage from './pages/games/GamesPage';
 import CampaignsPage from './pages/campaigns/CampaignsPage';
 import CreateCampaignPage from './pages/campaigns/CreateCampaignPage';
@@ -24,10 +26,18 @@ function App() {
         <Routes>
           <Route path="/" element={<Layout><HomePage /></Layout>} />
           <Route path="/sessions" element={<Layout><SessionsPage /></Layout>} />
+          <Route path="/sessions/:id" element={<Layout><SessionDetailPage /></Layout>} />
           <Route path="/sessions/create" element={
             <ProtectedRoute>
               <Layout>
                 <CreateSessionPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/sessions/:id/edit" element={
+            <ProtectedRoute>
+              <Layout>
+                <EditSessionPage />
               </Layout>
             </ProtectedRoute>
           } />
