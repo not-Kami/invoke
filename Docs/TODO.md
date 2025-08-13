@@ -4,92 +4,137 @@ Ce fichier liste toutes les tâches à accomplir, organisées par priorité, ses
 
 ---
 
+## 🚀 **PROCHAINE PRIORITÉ IMMÉDIATE**
 
-
-```markdown
-<code_block_to_apply_changes_from>
-```
-
----
-
-
-
-Veux-tu que je te propose un diff précis à appliquer à ton `TODO.md` pour refléter l’état actuel du backend, ou tu préfères le faire à la main ?
-
-## Prochaine Session
-
-### Backend API
-
-* [x] Corriger le **campaign** seeder (blocage actuel)
-* [x] Réactiver et tester le middleware **Joi validation**
-* [x] Sécuriser toutes les routes (GET/PUT/DELETE by id avec validateParams, POST/PUT avec validate)
-* [x] Implémenter le modèle **Character** (multi-personnages par utilisateur)
-* [x] Upload d'avatar pour chaque personnage (uploads/characters/)
-* [x] Adapter les routes pour lecture publique/écriture protégée (campagnes, jeux, feedbacks, sessions)
-* [ ] Écrire et exécuter les **tests d’intégration** pour tous les endpoints CRUD (users, campaigns, feedback, sessions, games, characters)
-* [ ] Mettre à jour **README.md** (instructions, variables d’env, scripts de seed)
-* [x] Ajouter et configurer un **rate limiter** 
-* [x] Intégrer un système centralisé de **logs d’erreur** (Winston,)
-* [ ] Documentation API (Swagger/OpenAPI)
-* [ ] Configurer **Multer** pour les uploads d’images
-* [ ] Activer les middlewares de **sécurité** (Helmet, CORS)
-
-* [ ] Implémenter les **filtres, pagination, tri et projection** sur les endpoints de liste :
-  * /api/v1/users
-  * /api/v1/games
-  * /api/v1/sessions
-  * /api/v1/campaigns
-
-* [ ] Implémenter les filtres sur /api/v1/users :
-    * Recherche texte (q) sur firstName, lastName, nickname, bio
-    * Filtre par rôle (role)
-    * Filtre par isDM
-    * Pagination (page, limit)
-    * Tri (sort)
-
-
-### Tâches Backend Générales
-
-* [x] Mettre à jour `.env.example` et documenter toutes les variables
-* [x] Optimiser les **indexes** Mongoose (unicité, TTL, performance)
-* [x] Middleware parsing des **query params** (filtrer, paginer, trier)
-* [ ] Store distribué du rate limiter avec **Redis**
-* [ ] Pipeline **CI/CD** pour seeders & tests
-* [ ] Documentation API (Swagger/OpenAPI)
-
-## Frontend Client (Mobile First)
-
-* [ ] Structure React + TypeScript (features/resource folders)
-* [ ] Layout mobile-first (navigation, header, footer)
-* [ ] UX empathique & non intrusif (toasts, notifications)
-* [ ] Pages CRUD (Users, Campaigns, Sessions, Games, Feedback)
-* [ ] Validation forms (react-hook-form + Joi)
-* [ ] Connexion API (Axios)
-* [ ] Backoffice Desktop (admin)
-* [ ] Gestion des uploads d’images (preview & Multer)
-
-## Documentation & Livrables TFE
-
-* [ ] Mettre à jour le **Cahier des charges** avec retours
-* [ ] Décrire l’**architecture front-end**
-* [ ] Décrire l’**architecture back-end**
-* [ ] Rédiger le rapport :
-
-  * Contexte & besoins
-  * Choix techniques & justifications
-  * Workflow clés (auth, CRUD, uploads, tests)
-  * Bilan & perspectives
+### Onboarding & Création de Compte
+* [ ] **Implémenter l'onboarding pour la création de compte**
+  * [ ] Formulaire de création avec validation (react-hook-form + Joi)
+  * [ ] Choix du rôle (Joueur/DM) avec explications
+  * [ ] Sélection des jeux préférés via l'API `/favorites`
+  * [ ] Personnalisation du profil (avatar, bio, nickname)
+  * [ ] Première connexion au dashboard avec tutoriel
+  * [ ] Validation côté client et serveur
+  * [ ] Gestion des erreurs et feedback utilisateur
 
 ---
 
-## Long-term & Future Features
+## ✅ **SESSION ACTUELLE TERMINÉE (13/08/25)**
 
-* [ ] RBAC avancé (permissions granulaires)
-* [ ] Stratégie de stockage fichiers (local vs cloud – AWS S3)
-* [ ] Redis pour rate limiter multi-instance
-* [ ] Endpoints d’analytics & métriques
-* [ ] Intégration complète Auth en frontend (guards, stores)
-* [ ] Audit sécurité (pentests, code review)
-* [ ] Documentation utilisateur (guides API, tutoriels)
+### Dashboard & Architecture Backend
+* [x] **Refactor complet du dashboard** avec séparation des responsabilités
+* [x] **Architecture RESTful** avec routes spécialisées
+* [x] **Middlewares spécialisés** par type d'opération
+* [x] **API jeux favoris** : GET, POST, DELETE avec persistance
+* [x] **API jeux maîtrisés** : Gestion pour les DMs
+* [x] **Gestion des rôles** : Devenir DM, arrêter d'être DM
+* [x] **Sécurité renforcée** : Permissions granulaires et validation des champs
+* [x] **Interface utilisateur** : Dashboard responsive avec gestion des rôles
+* [x] **Persistance des données** : Jeux favoris sauvegardés en base
+
+### Architecture & Sécurité
+* [x] **Séparation des responsabilités** : Profil, favoris, maîtrisés, rôles
+* [x] **Routes RESTful claires** : `/profile`, `/favorites`, `/mastered`, `/role`
+* [x] **Middlewares spécialisés** : `canUpdateProfile`, `canManageFavoriteGames`, `canManageMasteredGames`
+* [x] **Validation des champs** : Seuls les champs autorisés peuvent être modifiés
+* [x] **Gestion d'erreurs** : catchAsync et AppError pour une gestion propre
+* [x] **Permissions granulaires** : Utilisateur peut modifier son profil, admins peuvent tout
+
+---
+
+## 🔄 **EN COURS / PROCHAINES SESSIONS**
+
+### Backend API - Fonctionnalités Avancées
+* [ ] **Tests d'intégration** pour tous les endpoints CRUD
+  * [ ] Tests pour les nouvelles routes RESTful
+  * [ ] Tests de permissions et middlewares
+  * [ ] Tests de validation et gestion d'erreurs
+* [ ] **Filtres, pagination et tri** sur les endpoints de liste
+  * [ ] `/api/v1/users` avec recherche et filtres
+  * [ ] `/api/v1/games` avec pagination
+  * [ ] `/api/v1/sessions` avec filtres par statut
+  * [ ] `/api/v1/campaigns` avec tri par date
+* [ ] **Documentation API** (Swagger/OpenAPI)
+* [ ] **Rate limiting avancé** avec Redis
+* [ ] **Pipeline CI/CD** pour tests et déploiement
+
+### Frontend Client - Améliorations UX
+* [ ] **Gestion des uploads d'images** (avatars, preview)
+* [ ] **Validation des formulaires** (react-hook-form + Joi)
+* [ ] **Gestion des erreurs** (toasts, notifications)
+* [ ] **Tests unitaires** pour les composants
+* [ ] **Responsive design** mobile-first
+* [ ] **Accessibilité** (ARIA, navigation clavier)
+
+---
+
+## 📋 **TÂCHES BACKEND GÉNÉRALES**
+
+* [x] **Modèles et schémas** : User, Game, Session, Campaign
+* [x] **Routes CRUD** : Users, Games, Sessions, Campaigns
+* [x] **Middleware d'authentification** : JWT, protect, restrictTo
+* [x] **Validation des données** : Joi schemas
+* [x] **Gestion des erreurs** : AppError, catchAsync
+* [x] **Upload d'images** : Multer configuré
+* [x] **Sécurité** : Helmet, CORS, rate limiting
+* [x] **Logs** : Winston pour le logging
+* [x] **Indexes MongoDB** : Performance et unicité
+* [ ] **Tests** : Unitaires et d'intégration
+* [ ] **Documentation** : API et déploiement
+
+---
+
+## 🎨 **FRONTEND CLIENT (Mobile First)**
+
+* [x] **Structure React + TypeScript** : Composants organisés
+* [x] **Dashboard principal** : Interface utilisateur complète
+* [x] **Gestion des rôles** : Vue joueur et vue DM
+* [x] **Jeux favoris** : Interface d'ajout/suppression
+* [x] **Navigation** : Header, sidebar, routing
+* [x] **État global** : Context API pour l'authentification
+* [x] **API integration** : Hooks personnalisés
+* [ ] **Onboarding** : Création de compte et première connexion
+* [ ] **Formulaires** : Validation et gestion des erreurs
+* [ ] **Upload d'images** : Preview et gestion des fichiers
+* [ ] **Tests** : Unitaires et d'intégration
+* [ ] **Responsive design** : Mobile-first approach
+
+---
+
+## 📚 **DOCUMENTATION & LIVRABLES TFE**
+
+* [x] **Journal de développement** : Suivi quotidien des sessions
+* [x] **Architecture backend** : Routes, middlewares, sécurité
+* [x] **Architecture frontend** : Composants, hooks, état
+* [ ] **Cahier des charges** : Mise à jour avec retours
+* [ ] **Documentation technique** : API, déploiement, maintenance
+* [ ] **Rapport TFE** :
+  * [ ] Contexte & besoins
+  * [ ] Choix techniques & justifications
+  * [ ] Workflow clés (auth, CRUD, uploads, tests)
+  * [ ] Bilan & perspectives
+  * [ ] Démonstration des fonctionnalités
+
+---
+
+## 🔮 **LONG-TERM & FUTURE FEATURES**
+
+* [ ] **RBAC avancé** : Permissions granulaires par ressource
+* [ ] **Stratégie de stockage** : Local vs cloud (AWS S3)
+* [ ] **Redis avancé** : Cache, sessions, rate limiting
+* [ ] **Analytics** : Métriques d'utilisation et performance
+* [ ] **Notifications** : Push, email, in-app
+* [ ] **Collaboration** : Chat, partage de ressources
+* [ ] **Mobile app** : React Native ou PWA
+* [ ] **Audit sécurité** : Pentests, code review automatisé
+
+---
+
+## 📊 **PROGRESSION GÉNÉRALE**
+
+- **Backend** : 85% ✅
+- **Frontend** : 70% ✅
+- **Documentation** : 60% ✅
+- **Tests** : 20% ⚠️
+- **Onboarding** : 0% ❌
 
 *Basé sur le Cahier des charges, Contraintes techniques et fonctionnelles, Checklist TFE et Entrées journalières.*

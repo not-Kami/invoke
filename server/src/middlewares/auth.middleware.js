@@ -84,6 +84,131 @@ export const restrictTo = (...roles) => {
     };
 };
 
+// Middleware pour vérifier que l'utilisateur peut modifier son propre profil
+export const canModifyUser = (req, res, next) => {
+    if (!req.user) {
+        return res.status(401).json({
+            success: false,
+            message: 'Not authorized to access this route'
+        });
+    }
+
+    const userId = req.params.id;
+    
+    // L'utilisateur peut modifier son propre profil
+    if (req.user._id.toString() === userId) {
+        return next();
+    }
+    
+    // Les admins peuvent modifier n'importe quel profil
+    if (req.user.role === 'admin') {
+        return next();
+    }
+    
+    // Sinon, accès refusé
+    return res.status(403).json({
+        success: false,
+        message: 'You can only modify your own profile'
+    });
+};
+
+// Middleware pour vérifier que l'utilisateur peut gérer ses jeux favoris
+export const canManageFavoriteGames = (req, res, next) => {
+    if (!req.user) {
+        return res.status(401).json({
+            success: false,
+            message: 'Not authorized to access this route'
+        });
+    }
+
+    const userId = req.params.id;
+    
+    // L'utilisateur peut gérer ses propres jeux favoris
+    if (req.user._id.toString() === userId) {
+        return next();
+    }
+    
+    // Les admins peuvent gérer les jeux favoris de n'importe qui
+    if (req.user.role === 'admin') {
+        return next();
+    }
+    
+    // Sinon, accès refusé
+    return res.status(403).json({
+        success: false,
+        message: 'You can only manage your own favorite games'
+    });
+};
+
+// Middleware pour vérifier que l'utilisateur peut gérer ses jeux maîtrisés
+export const canManageMasteredGames = (req, res, next) => {
+    if (!req.user) {
+        return res.status(401).json({
+            success: false,
+            message: 'Not authorized to access this route'
+        });
+    }
+
+    const userId = req.params.id;
+    
+    // L'utilisateur doit être un DM pour gérer ses jeux maîtrisés
+    if (req.user._id.toString() === userId && req.user.isDM) {
+        return next();
+    }
+    
+    // Les admins peuvent gérer les jeux maîtrisés de n'importe qui
+    if (req.user.role === 'admin') {
+        return next();
+    }
+    
+    // Sinon, accès refusé
+    return res.status(403).json({
+        success: false,
+        message: 'Only DMs can manage mastered games'
+    });
+};
+
+// Middleware pour vérifier que l'utilisateur peut modifier son profil de base
+export const canUpdateProfile = (req, res, next) => {
+    if (!req.user) {
+        return res.status(401).json({
+            success: false,
+            message: 'Not authorized to access this route'
+        });
+    }
+
+    const userId = req.params.id;
+    
+    // L'utilisateur peut modifier son propre profil de base
+    if (req.user._id.toString() === userId) {
+        // Vérifier que les champs modifiés sont autorisés
+        const allowedFields = ['firstName', 'lastName', 'nickname', 'bio', 'avatar'];
+        const modifiedFields = Object.keys(req.body);
+        
+        const hasUnauthorizedFields = modifiedFields.some(field => !allowedFields.includes(field));
+        
+        if (hasUnauthorizedFields) {
+            return res.status(400).json({
+                success: false,
+                message: 'You can only update basic profile fields. Use specific endpoints for games and other data.'
+            });
+        }
+        
+        return next();
+    }
+    
+    // Les admins peuvent modifier n'importe quel profil
+    if (req.user.role === 'admin') {
+        return next();
+    }
+    
+    // Sinon, accès refusé
+    return res.status(403).json({
+        success: false,
+        message: 'You can only modify your own profile'
+    });
+};
+
 // Middleware optionnel (ne bloque pas si pas de token)
 export const optionalAuth = async (req, res, next) => {
     try {

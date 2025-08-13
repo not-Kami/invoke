@@ -8,6 +8,7 @@ export interface User {
   avatar?: string;
   bio?: string;
   nickname?: string;
+  favorite_games?: string[]; // IDs des jeux favoris
   createdAt: string;
   updatedAt: string;
 }

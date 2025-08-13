@@ -26,14 +26,20 @@ interface User {
 interface Session {
   _id: string;
   title: string;
-  game: string;
-  dm: string;
-  status: 'open' | 'full' | 'closed';
-  players: number;
-  maxPlayers: number;
-  featured: boolean;
+  description: string;
   date: string;
+  timezone: string;
+  sessionType: 'online' | 'offline';
+  isOneShot: boolean;
+  game: string; // ID du jeu
+  dm: string; // ID du DM
+  players: string[]; // IDs des joueurs
+  maxPlayers: number;
+  status: 'open' | 'full' | 'finished' | 'cancelled';
+  featured: boolean;
+  image?: string; // URL de l'image
   createdAt: string;
+  updatedAt: string;
 }
 
 interface Campaign {
@@ -135,12 +141,59 @@ export const adminAPI = {
     apiCall(`/users/${id}`, { method: 'DELETE' }),
 
   // Sessions
-  getSessions: () => apiCall<Session[]>('/sessions'),
+  getSessions: (filters?: {
+    search?: string;
+    sessionType?: 'online' | 'offline';
+    status?: 'open' | 'full' | 'finished' | 'cancelled';
+    game?: string;
+    dm?: string;
+    page?: number;
+    limit?: number;
+  }) => {
+    const params = new URLSearchParams();
+    if (filters?.search) params.append('search', filters.search);
+    if (filters?.sessionType) params.append('sessionType', filters.sessionType);
+    if (filters?.status) params.append('status', filters.status);
+    if (filters?.game) params.append('game', filters.game);
+    if (filters?.dm) params.append('dm', filters.dm);
+    if (filters?.page) params.append('page', filters.page.toString());
+    if (filters?.limit) params.append('limit', filters.limit.toString());
+    
+    const queryString = params.toString();
+    const endpoint = queryString ? `/sessions?${queryString}` : '/sessions';
+    return apiCall<{ data: Session[]; page: number; limit: number; total: number }>(endpoint);
+  },
+  getSession: (id: string) => apiCall<Session>(`/sessions/${id}`),
+  createSession: (data: Partial<Session>) => 
+    apiCall<Session>('/sessions', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  invitePlayer: (sessionId: string, playerId: string) => 
+    apiCall<Session>(`/sessions/${sessionId}/invite`, {
+      method: 'POST',
+      body: JSON.stringify({ playerId }),
+    }),
+  removePlayer: (sessionId: string, playerId: string) => 
+    apiCall<Session>(`/sessions/${sessionId}/remove-player`, {
+      method: 'DELETE',
+      body: JSON.stringify({ playerId }),
+    }),
+  joinSession: (sessionId: string) => 
+    apiCall<Session>(`/sessions/${sessionId}/join`, {
+      method: 'POST',
+    }),
   getFeaturedSessions: () => apiCall<Session[]>('/sessions/featured'),
   updateSession: (id: string, data: Partial<Session>) => 
     apiCall<Session>(`/sessions/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
+    }),
+  // Fonction admin pour mettre à jour le statut featured
+  adminUpdateSessionFeatured: (id: string, featured: boolean) => 
+    apiCall<Session>(`/sessions/${id}/featured`, {
+      method: 'PATCH',
+      body: JSON.stringify({ featured }),
     }),
   deleteSession: (id: string) => 
     apiCall(`/sessions/${id}`, { method: 'DELETE' }),
@@ -173,6 +226,41 @@ export const adminAPI = {
     apiCall(`/campaigns/${id}`, { method: 'DELETE' }),
 };
 
+// ===== USERS API =====
+export const usersApi = {
+  // Profil de base
+  updateProfile: (userId: string, data: Partial<User>) => 
+    apiCall<User>(`/users/${userId}/profile`, { method: 'PUT', body: JSON.stringify(data) }),
+  
+  // Rôle utilisateur
+  updateRole: (userId: string, role: string) => 
+    apiCall<User>(`/users/${userId}/role`, { method: 'PUT', body: JSON.stringify({ role }) }),
+  
+  // Jeux favoris
+  getFavorites: (userId: string) => 
+    apiCall<Game[]>(`/users/${userId}/favorites`),
+  addFavorite: (userId: string, gameId: string) => 
+    apiCall<Game[]>(`/users/${userId}/favorites`, { method: 'POST', body: JSON.stringify({ gameId }) }),
+  removeFavorite: (userId: string, gameId: string) => 
+    apiCall<Game[]>(`/users/${userId}/favorites/${gameId}`, { method: 'DELETE' }),
+  
+  // Jeux maîtrisés
+  getMastered: (userId: string) => 
+    apiCall<Game[]>(`/users/${userId}/mastered`),
+  addMastered: (userId: string, gameId: string) => 
+    apiCall<Game[]>(`/users/${userId}/mastered`, { method: 'POST', body: JSON.stringify({ gameId }) }),
+  removeMastered: (userId: string, gameId: string) => 
+    apiCall<Game[]>(`/users/${userId}/mastered/${gameId}`, { method: 'DELETE' }),
+  
+  // Avatar
+  uploadAvatar: (userId: string, formData: FormData) => 
+    apiCall<User>(`/users/${userId}/avatar`, { method: 'POST', body: formData }),
+  
+  // Suppression
+  deleteUser: (userId: string) => 
+    apiCall<{ success: boolean }>(`/users/${userId}`, { method: 'DELETE' })
+};
+
 // ===== ENDPOINTS AUTH =====
 
 interface LoginData {
@@ -190,9 +278,12 @@ interface SignupData {
 }
 
 interface AuthResponse {
+  success: boolean;
   data: {
     user: User;
+    token: string;
   };
+  error?: string;
 }
 
 export const authAPI = {
@@ -217,7 +308,9 @@ export const authAPI = {
 
 export const publicAPI = {
   getFeaturedSessions: () => apiCall<Session[]>('/sessions/featured'),
+  getSession: (id: string) => apiCall<Session>(`/sessions/${id}`),
   getFeaturedGames: () => apiCall<Game[]>('/games/featured'),
+  getGames: () => apiCall<Game[]>('/games'), // API publique pour tous les jeux
   getFeaturedDMs: () => apiCall<User[]>('/users/featured-dms'),
 };
 

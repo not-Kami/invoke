@@ -6,10 +6,14 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
 import SessionsPage from './pages/sessions/SessionsPage';
+import CreateSessionPage from './pages/sessions/CreateSessionPage';
+import SessionDetailPage from './pages/sessions/SessionDetailPage';
+import EditSessionPage from './pages/sessions/EditSessionPage';
 import GamesPage from './pages/games/GamesPage';
 import CampaignsPage from './pages/campaigns/CampaignsPage';
+import CreateCampaignPage from './pages/campaigns/CreateCampaignPage';
 import DashboardPage from './pages/DashboardPage';
-import ProfilePage from './pages/ProfilePage';
+import ProfilePage from './pages/profile/ProfilePage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import SecureRoute from './components/auth/SecureRoute';
 import AdminLayout from './components/admin/AdminLayout';
@@ -22,8 +26,30 @@ function App() {
         <Routes>
           <Route path="/" element={<Layout><HomePage /></Layout>} />
           <Route path="/sessions" element={<Layout><SessionsPage /></Layout>} />
+          <Route path="/sessions/:id" element={<Layout><SessionDetailPage /></Layout>} />
+          <Route path="/sessions/create" element={
+            <ProtectedRoute>
+              <Layout>
+                <CreateSessionPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/sessions/:id/edit" element={
+            <ProtectedRoute>
+              <Layout>
+                <EditSessionPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
           <Route path="/games" element={<Layout><GamesPage /></Layout>} />
           <Route path="/campaigns" element={<Layout><CampaignsPage /></Layout>} />
+          <Route path="/campaigns/create" element={
+            <ProtectedRoute>
+              <Layout>
+                <CreateCampaignPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           
@@ -41,6 +67,15 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <ProfilePage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          {/* Route Profile Edit - Redirige vers profile avec état d'édition */}
+          <Route path="/profile/edit" element={
+            <ProtectedRoute>
+              <Layout>
+                <ProfilePage defaultEditMode={true} />
               </Layout>
             </ProtectedRoute>
           } />

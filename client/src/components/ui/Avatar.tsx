@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { cn } from '../../lib/utils';
 import { getInitials } from '../../lib/utils';
 
@@ -19,6 +19,9 @@ export default function Avatar({
   size = 'md', 
   className 
 }: AvatarProps) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  
   const sizes = {
     sm: 'h-8 w-8 text-sm',
     md: 'h-10 w-10 text-base',
@@ -27,6 +30,8 @@ export default function Avatar({
   };
 
   const initials = getInitials(firstName, lastName);
+  
+
 
   return (
     <div
@@ -36,11 +41,19 @@ export default function Avatar({
         className
       )}
     >
-      {src ? (
+      {src && !imageError ? (
         <img
           src={src}
           alt={alt || `${firstName} ${lastName}`}
           className="h-full w-full rounded-full object-cover"
+          onLoad={() => {
+            setImageLoaded(true);
+            setImageError(false);
+          }}
+          onError={() => {
+            setImageError(true);
+            setImageLoaded(false);
+          }}
         />
       ) : (
         <span>{initials}</span>

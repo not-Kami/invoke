@@ -81,7 +81,7 @@ const SessionExpandedContent: React.FC<SessionExpandedContentProps> = ({ session
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-slate-400">Système:</span>
-              <span className="text-white">{session.game || 'Non spécifié'}</span>
+              <span className="text-white">{session.game?.name || 'Non spécifié'}</span>
             </div>
             
             <div className="flex justify-between">
@@ -130,7 +130,9 @@ const SessionExpandedContent: React.FC<SessionExpandedContentProps> = ({ session
             )}
             
             <div>
-              <p className="text-white font-medium">{session.dmName || 'Nom non spécifié'}</p>
+              <p className="text-white font-medium">
+                {session.dm ? `${session.dm.firstName} ${session.dm.lastName}` : 'Nom non spécifié'}
+              </p>
               <p className="text-slate-400 text-sm">
                 {session.dmExperience ? `${session.dmExperience} ans d'expérience` : 'Expérience non spécifiée'}
               </p>
@@ -159,7 +161,7 @@ const SessionExpandedContent: React.FC<SessionExpandedContentProps> = ({ session
                 {player.avatar ? (
                   <img 
                     src={player.avatar} 
-                    alt={player.name || `Joueur ${index + 1}`}
+                    alt={player.firstName && player.lastName ? `${player.firstName} ${player.lastName}` : `Joueur ${index + 1}`}
                     className="w-10 h-10 rounded-full object-cover border border-slate-600"
                   />
                 ) : (
@@ -170,7 +172,7 @@ const SessionExpandedContent: React.FC<SessionExpandedContentProps> = ({ session
                 
                 <div className="flex-1 min-w-0">
                   <p className="text-white font-medium truncate">
-                    {player.name || `Joueur ${index + 1}`}
+                    {player.firstName && player.lastName ? `${player.firstName} ${player.lastName}` : `Joueur ${index + 1}`}
                   </p>
                   {player.character && (
                     <p className="text-slate-400 text-sm truncate">
