@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useDashboardData } from '../hooks/useDashboardData';
 import { useFavoriteGames } from '../hooks/useFavoriteGames';
+import { useMasteredGames } from '../hooks/useMasteredGames';
 import { Card, CardContent, CardHeader } from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import Avatar from '../components/ui/Avatar';
 import DMConfirmationModal from '../components/ui/DMConfirmationModal';
 import StopDMConfirmationModal from '../components/ui/StopDMConfirmationModal';
+
 import { Game } from '../types';
 import { publicAPI } from '../lib/api';
 import { 
@@ -46,6 +48,7 @@ export default function DashboardPage() {
   const { user, updateUser } = useAuth();
   const { loading, sessions, campaigns, isAdmin, isDM } = useDashboardData();
   const { favoriteGames, loading: gamesLoading, error: gamesError, removeFavoriteGame, addFavoriteGame } = useFavoriteGames();
+  const { masteredGames } = useMasteredGames();
   const [viewMode, setViewMode] = useState<'player' | 'dm'>('player');
   
   // États pour les modals DM
@@ -59,6 +62,8 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [availableGames, setAvailableGames] = useState<any[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
+
+
 
   if (!user) {
     return (
@@ -624,21 +629,36 @@ export default function DashboardPage() {
                   <h2 className="text-lg font-semibold text-white">Quick Actions</h2>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button variant="glass" className="w-full justify-start">
+                  <Button 
+                    variant="glass" 
+                    className="w-full justify-start"
+                    onClick={() => window.location.href = '/profile/edit'}
+                  >
                     <Settings className="h-4 w-4 mr-2" />
                     Edit Profile
                   </Button>
-                  <Button variant="glass" className="w-full justify-start">
-                    <Globe className="h-4 w-4 mr-2" />
-                    Browse Adventure
-                  </Button>
-                  <Button variant="glass" className="w-full justify-start">
+
+                  <Button 
+                    variant="glass" 
+                    className="w-full justify-start opacity-50 bg-white/5 border-white/10 cursor-not-allowed" 
+                    disabled
+                  >
                     <Users className="h-4 w-4 mr-2" />
                     Find Groups
+                    <Badge variant="default" size="sm" className="ml-auto bg-gray-600 text-gray-300">
+                      Coming Soon
+                    </Badge>
                   </Button>
-                  <Button variant="glass" className="w-full justify-start">
+                  <Button 
+                    variant="glass" 
+                    className="w-full justify-start opacity-50 bg-white/5 border-white/10 cursor-not-allowed" 
+                    disabled
+                  >
                     <Calendar className="h-4 w-4 mr-2" />
                     My Schedule
+                    <Badge variant="default" size="sm" className="ml-auto bg-gray-600 text-gray-300">
+                      Coming Soon
+                    </Badge>
                   </Button>
                   {!isDM && (
                     <Button 
@@ -1205,6 +1225,8 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+
+      
     </div>
   );
 }
