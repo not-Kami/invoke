@@ -12,6 +12,7 @@ import campaignRouter from "../resources/campaign/campaign.route.js";
 import authRouter from "../resources/auth/auth.route.js";
 import characterRouter from "../resources/character/character.route.js";
 import tableRouter from "../resources/table/table.route.js";
+import uploadRouter from "../resources/upload/upload.route.js";
 
 const app = express();
 
@@ -20,6 +21,9 @@ app.use(corsMiddleware);
 app.use(cookieParser()); // Parser les cookies
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Servir les fichiers statiques (images uploadées)
+app.use('/uploads', express.static('uploads'));
 
 // Rate limiting global - Configuré selon l'environnement
 app.use('/api/v1', globalLimiter);
@@ -33,6 +37,7 @@ app.use('/api/v1/games', sensitiveOperationLimiter, gameRouter);
 app.use('/api/v1/campaigns', sensitiveOperationLimiter, campaignRouter);
 app.use('/api/v1/characters', characterRouter);
 app.use('/api/v1/tables', sensitiveOperationLimiter, tableRouter);
+app.use('/api/v1/upload', uploadRouter);
 
 // Health check endpoint
 app.get('/api/v1/health', (req, res) => {

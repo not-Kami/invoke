@@ -153,14 +153,9 @@ export const login = async (req, res) => {
 // @access  Private
 export const getMe = async (req, res) => {
     try {
-        console.log('GetMe Debug - req.user:', req.user);
-        console.log('GetMe Debug - req.user._id:', req.user._id);
-        
         const user = await User.findById(req.user._id);
-        console.log('GetMe Debug - Found user:', user);
         
         if (!user) {
-            console.log('GetMe Debug - User not found');
             return res.status(404).json({
                 success: false,
                 message: 'User not found'
@@ -175,11 +170,12 @@ export const getMe = async (req, res) => {
             role: user.role,
             isDM: user.isDM,
             featured: user.featured,
+            avatar: user.avatar,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt
         };
         
-        console.log('GetMe Debug - User response:', userResponse);
+
         
         res.status(200).json({
             success: true,

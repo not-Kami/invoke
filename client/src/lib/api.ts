@@ -189,6 +189,12 @@ export const adminAPI = {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
+  // Fonction admin pour mettre à jour le statut featured
+  adminUpdateSessionFeatured: (id: string, featured: boolean) => 
+    apiCall<Session>(`/sessions/${id}/featured`, {
+      method: 'PATCH',
+      body: JSON.stringify({ featured }),
+    }),
   deleteSession: (id: string) => 
     apiCall(`/sessions/${id}`, { method: 'DELETE' }),
 
@@ -218,6 +224,35 @@ export const adminAPI = {
     }),
   deleteCampaign: (id: string) => 
     apiCall(`/campaigns/${id}`, { method: 'DELETE' }),
+};
+
+// ===== ENDPOINTS USERS =====
+
+export const usersApi = {
+  // Mettre à jour un utilisateur
+  updateUser: (id: string, data: Partial<User>) => 
+    apiCall<User>(`/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  
+  // Upload d'avatar utilisateur
+  uploadAvatar: (id: string, file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    return fetch(`${API_BASE_URL}/users/${id}/avatar`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+      },
+      body: formData,
+      credentials: 'include',
+    }).then(response => response.json());
+  },
+  
+  // Récupérer les MJ mis en avant
+  getFeaturedDMs: () => apiCall<User[]>('/users/featured-dms'),
 };
 
 // ===== ENDPOINTS AUTH =====

@@ -236,7 +236,7 @@ const AdminPage: React.FC = () => {
           }
           break;
         case 'session':
-          response = await adminAPI.updateSession(id, { featured });
+          response = await adminAPI.adminUpdateSessionFeatured(id, featured);
           if (response.success && response.data) {
             setSessions(prev => prev.map(session => 
               session._id === id ? { ...session, featured } : session
@@ -464,8 +464,16 @@ const AdminPage: React.FC = () => {
       <ExpandableDataTable
         columns={[
           { key: 'title', label: 'Titre' },
-          { key: 'game', label: 'Jeu' },
-          { key: 'dm', label: 'MJ' },
+          { 
+            key: 'game', 
+            label: 'Jeu',
+            render: (value: any) => value?.name || 'N/A'
+          },
+          { 
+            key: 'dm', 
+            label: 'MJ',
+            render: (value: any) => value ? `${value.firstName} ${value.lastName}` : 'N/A'
+          },
           { 
             key: 'status', 
             label: 'Statut',
@@ -478,7 +486,11 @@ const AdminPage: React.FC = () => {
           { 
             key: 'players', 
             label: 'Joueurs',
-            render: (value: number, row: any) => `${value || 0}/${row.maxPlayers || '?'}`
+            render: (value: any, row: any) => {
+              const playerCount = Array.isArray(value) ? value.length : (typeof value === 'number' ? value : 0);
+              const maxPlayers = row.maxPlayers || '?';
+              return `${playerCount}/${maxPlayers}`;
+            }
           },
           { 
             key: 'date', 
@@ -517,8 +529,16 @@ const AdminPage: React.FC = () => {
       <DataTable
         columns={[
           { key: 'title', label: 'Titre' },
-          { key: 'game', label: 'Jeu' },
-          { key: 'dm', label: 'MJ' },
+          { 
+            key: 'game', 
+            label: 'Jeu',
+            render: (value: any) => value?.name || 'N/A'
+          },
+          { 
+            key: 'dm', 
+            label: 'MJ',
+            render: (value: any) => value ? `${value.firstName} ${value.lastName}` : 'N/A'
+          },
           { 
             key: 'status', 
             label: 'Statut',

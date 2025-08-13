@@ -239,6 +239,47 @@ const sessionController = {
         }
     },
 
+    // Fonction admin pour mettre à jour le statut featured
+    adminUpdateSession: async (req, res) => {
+        try {
+            const sessionId = req.params.id;
+            const { featured } = req.body;
+
+            console.log(`Admin updating session ${sessionId} featured status to ${featured}`);
+
+            // Vérifier que la session existe
+            const existingSession = await Session.findById(sessionId);
+            if (!existingSession) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Session not found'
+                });
+            }
+
+            // Mettre à jour uniquement le champ featured
+            const session = await Session.findByIdAndUpdate(
+                sessionId, 
+                { featured }, 
+                { new: true }
+            );
+            
+            console.log(`Session ${sessionId} featured status updated to ${featured}`);
+            
+            res.status(200).json({
+                success: true,
+                message: 'Session featured status updated successfully',
+                data: session
+            });
+        } catch (error) {
+            console.error('Error updating session featured status:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Failed to update session featured status',
+                error: error.message
+            });
+        }
+    },
+
     // Inviter un joueur à une session
     invitePlayer: async (req, res) => {
         try {
