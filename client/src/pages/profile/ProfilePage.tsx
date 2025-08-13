@@ -30,10 +30,14 @@ import {
   EyeOff
 } from 'lucide-react';
 
-export default function ProfilePage() {
+interface ProfilePageProps {
+  defaultEditMode?: boolean;
+}
+
+export default function ProfilePage({ defaultEditMode = false }: ProfilePageProps) {
   const { user } = useAuth();
   const { success, error, warning } = useNotification();
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(defaultEditMode);
   const [activeTab, setActiveTab] = useState<'personal' | 'preferences' | 'dm-settings' | 'privacy'>('personal');
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);

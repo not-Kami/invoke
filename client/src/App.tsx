@@ -71,6 +71,15 @@ function App() {
             </ProtectedRoute>
           } />
           
+          {/* Route Profile Edit - Redirige vers profile avec état d'édition */}
+          <Route path="/profile/edit" element={
+            <ProtectedRoute>
+              <Layout>
+                <ProfilePage defaultEditMode={true} />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
           {/* Routes Admin - Protégées */}
           <Route path="/admin" element={
             <SecureRoute requiredRole="admin" showSecurityInfo={true}>
