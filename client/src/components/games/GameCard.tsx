@@ -24,21 +24,31 @@ const GameCard: React.FC<GameCardProps> = ({ game, onClick }) => {
       className="hover:shadow-lg transition-all duration-200 hover:scale-[1.02] cursor-pointer bg-white/10 backdrop-blur-sm border-white/20 hover:border-primary-500/50"
       onClick={onClick}
     >
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between mb-3">
-          {/* Icône du jeu */}
-          <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center shadow-lg">
-            <Gamepad2 className="h-8 w-8 text-white" />
-          </div>
-          
-          {/* Badge featured */}
-          {game.feature && (
-            <div className="flex items-center space-x-1">
-              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-              <span className="text-xs text-yellow-400 font-medium">Vedette</span>
+              <CardHeader className="pb-3">
+          <div className="flex items-start justify-between mb-3">
+            {/* Logo du jeu ou icône par défaut */}
+            <div className="w-16 h-16 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
+              {game.images?.logo ? (
+                <img 
+                  src={game.images.logo} 
+                  alt={`Logo ${game.name}`}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center">
+                  <Gamepad2 className="h-8 w-8 text-white" />
+                </div>
+              )}
             </div>
-          )}
-        </div>
+            
+            {/* Badge featured */}
+            {game.feature && (
+              <div className="flex items-center space-x-1">
+                <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                <span className="text-xs text-yellow-400 font-medium">Vedette</span>
+              </div>
+            )}
+          </div>
 
         {/* Titre et badges */}
         <div className="space-y-3">

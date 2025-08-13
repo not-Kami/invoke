@@ -32,6 +32,7 @@ router.post('/campaign/banner', campaignBannerUpload, uploadCampaignBanner);
 
 // Routes pour les images de jeu
 router.post('/game/:gameName/:imageType', gameImageUpload, uploadGameImage);
+router.post('/game/id/:gameId/:imageType', gameImageUpload, uploadGameImage);
 router.post('/game/image', gameImageUpload, uploadGameImage);
 
 // Routes pour la gestion des images

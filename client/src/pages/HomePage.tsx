@@ -19,6 +19,7 @@ import Button from '../components/ui/Button';
 import { Card, CardContent } from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import HeroImage from '../assets/hero_section.webp';
+import { Game } from '../types';
 
 export default function HomePage() {
   const [currentGameIndex, setCurrentGameIndex] = useState(0);
@@ -51,39 +52,45 @@ export default function HomePage() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Données mockées pour le moment
-  const trendingGames = [
-    {
-      id: 1,
-      name: "Dungeons & Dragons 5e",
-      genre: "Fantasy",
-      system: "D&D 5e",
-      feature: true
-    },
-    {
-      id: 2,
-      name: "Call of Cthulhu",
-      genre: "Horreur",
-      system: "CoC 7e",
-      feature: true
-    },
-    {
-      id: 3,
-      name: "Pathfinder 2e",
-      genre: "Fantasy",
-      system: "PF2e",
-      feature: false
-    },
-    {
-      id: 4,
-      name: "Vampire: The Masquerade",
-      genre: "Horreur",
-      system: "V5",
-      feature: false
-    }
-  ];
+  // État pour les jeux mis en avant
+  const [featuredGames, setFeaturedGames] = useState<Game[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const allGames = [...trendingGames];
+  // Récupérer les jeux mis en avant depuis l'API
+  useEffect(() => {
+    const fetchFeaturedGames = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/v1/games');
+        if (response.ok) {
+          const data = await response.json();
+          console.log('📡 Données reçues de l\'API:', data);
+          // Filtrer seulement les jeux mis en avant
+          const featured = data.data.filter((game: Game) => game.featured);
+          console.log('⭐ Jeux mis en avant:', featured);
+          
+          // Debug des images
+          featured.forEach((game: Game) => {
+            console.log(`🖼️ ${game.name}:`, {
+              images: game.images,
+              hasPortrait: !!game.images?.portrait,
+              portraitUrl: game.images?.portrait
+            });
+          });
+          
+          setFeaturedGames(featured);
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des jeux:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeaturedGames();
+  }, []);
+
+  const allGames = featuredGames;
 
   // Fonction pour aller au jeu suivant
   const nextGame = () => {
@@ -240,73 +247,103 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Section Jeux en Tendance */}
+      {/* Section Jeux Mis en Avant */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <div className="flex items-center justify-center space-x-2 mb-4">
-              <TrendingUp className="h-6 w-6 text-purple-400" />
-              <h2 className="font-display text-3xl font-bold text-white">Tous les Jeux</h2>
+              <Sparkles className="h-6 w-6 text-purple-400" />
+              <h2 className="font-display text-3xl font-bold text-white">Jeux Mis en Avant</h2>
             </div>
-            <p className="text-gray-300 text-lg">Découvrez notre collection complète de jeux de rôle</p>
+            <p className="text-gray-300 text-lg">Découvrez notre sélection de jeux recommandés</p>
           </div>
         </div>
         
-        {/* Slider en pleine largeur */}
+        {/* Slider des jeux mis en avant */}
         <div className="relative group w-full">
-          {/* Boutons de navigation */}
-          <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <button
-              onClick={prevGame}
-              className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-200 shadow-lg hover:scale-110"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-          </div>
-          
-          <div className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <button
-              onClick={nextGame}
-              className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-200 shadow-lg hover:scale-110"
-            >
-              <ChevronRight className="h-6 w-6" />
-            </button>
-          </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="flex items-center space-x-3 text-slate-400">
+                <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                <span>Chargement des jeux...</span>
+              </div>
+            </div>
+          ) : featuredGames.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Gamepad2 className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">Aucun jeu mis en avant</h3>
+              <p className="text-slate-400">Les administrateurs peuvent mettre en avant des jeux depuis le panneau d'administration.</p>
+            </div>
+          ) : (
+            <>
+              {/* Boutons de navigation */}
+              <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <button
+                  onClick={prevGame}
+                  className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-200 shadow-lg hover:scale-110"
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </button>
+              </div>
+              
+              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <button
+                  onClick={nextGame}
+                  className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-200 shadow-lg hover:scale-110"
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </button>
+              </div>
 
-          {/* Container des cartes avec scroll horizontal */}
-          <div 
-            ref={containerRef}
-            className={`relative overflow-hidden w-full px-4 sm:px-8 py-4 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
-            <div 
-              ref={sliderRef}
-              className="flex space-x-2 sm:space-x-4 transition-transform duration-500 ease-in-out"
-              style={{ 
-                transform: `translateX(${getSliderTransform()}px)`,
-                width: `${allGames.length * (isMobile ? 256 : 280) + (allGames.length - 1) * (isMobile ? 8 : 16)}px`
-              }}
-            >
-              {allGames.map((game, index) => (
+              {/* Container des cartes avec scroll horizontal */}
+              <div 
+                ref={containerRef}
+                className={`relative overflow-hidden w-full px-4 sm:px-8 py-4 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+              >
                 <div 
-                  key={`${game.id}-${index}`}
+                  ref={sliderRef}
+                  className="flex space-x-2 sm:space-x-4 transition-transform duration-500 ease-in-out"
+                  style={{ 
+                    transform: `translateX(${getSliderTransform()}px)`,
+                    width: `${featuredGames.length * (isMobile ? 256 : 280) + (featuredGames.length - 1) * (isMobile ? 8 : 16)}px`
+                  }}
+                >
+                  {featuredGames.map((game, index) => (
+                <div 
+                  key={`${game._id}-${index}`}
                   className={`flex-shrink-0 w-60 sm:w-64 transition-all duration-300 transform card-hover ${
                     index === currentGameIndex ? 'scale-105' : 'scale-100'
                   }`}
                 >
                   <Card className="relative bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 transition-all duration-300 overflow-hidden group h-72 sm:h-80">
-                    {/* Image de fond avec gradient overlay */}
+                    {/* Image de fond - Portrait en priorité pour les cartes */}
                     <div className="absolute inset-0 w-full h-full">
+                      {/* Fallback vers le gradient si pas d'images */}
                       <div className="w-full h-full bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center">
                         <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-xl">
                           <Gamepad2 className="h-8 w-8 text-white" />
                         </div>
                       </div>
+                      
+                      {/* Image portrait si disponible */}
+                      {game.images?.portrait ? (
+                        <img 
+                          src={game.images.portrait} 
+                          alt={`Portrait ${game.name}`}
+                          className="absolute inset-0 w-full h-full object-cover"
+                          onLoad={() => console.log('✅ Image portrait chargée pour', game.name, ':', game.images.portrait)}
+                          onError={(e) => console.error('❌ Erreur chargement image pour', game.name, ':', e)}
+                        />
+                      ) : null}
+                      
                       {/* Gradient overlay transparent -> opaque de haut en bas */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
                     </div>
@@ -318,10 +355,10 @@ export default function HomePage() {
                       </button>
                     </div>
 
-                    {/* Badge Tendance uniquement pour les jeux en tendance */}
-                    {game.feature && (
+                    {/* Badge Mis en avant pour les jeux featured */}
+                    {game.featured && (
                       <div className="absolute top-3 left-3 z-10">
-                        <Badge variant="success" size="sm">Tendance</Badge>
+                        <Badge variant="success" size="sm">Mis en avant</Badge>
                       </div>
                     )}
 
@@ -344,8 +381,8 @@ export default function HomePage() {
               ))}
             </div>
           </div>
-
-          {/* Indicateurs de navigation supprimés pour un design plus épuré */}
+            </>
+          )}
         </div>
       </section>
 

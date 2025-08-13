@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Gamepad2, Save, Plus, Star } from 'lucide-react';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
+import { normalizeGameName } from '../../utils/gameUtils';
 
 interface Game {
   _id?: string;
@@ -9,7 +10,11 @@ interface Game {
   description: string;
   genre: string;
   system: string;
-  image?: string | File; // Peut être une URL existante ou un nouveau fichier
+  images: {
+    logo?: string | File;
+    portrait?: string | File;
+    banner?: string | File;
+  };
   featured: boolean;
   sessionsCount?: number;
   createdAt?: string;
@@ -36,12 +41,24 @@ const GameModal: React.FC<GameModalProps> = ({
     description: '',
     genre: '',
     system: '',
-    image: '',
+    images: {
+      logo: '',
+      portrait: '',
+      banner: ''
+    },
     featured: false
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [selectedFiles, setSelectedFiles] = useState<{
+    logo?: File;
+    portrait?: File;
+    banner?: File;
+  }>({});
+  const [previewUrls, setPreviewUrls] = useState<{
+    logo?: string;
+    portrait?: string;
+    banner?: string;
+  }>({});
 
   const isEditing = !!game?._id;
   const title = isEditing ? 'Modifier le jeu' : 'Ajouter un nouveau jeu';
@@ -53,12 +70,26 @@ const GameModal: React.FC<GameModalProps> = ({
         description: game.description || '',
         genre: game.genre || '',
         system: game.system || '',
-        image: game.image || '',
+        images: {
+          logo: game.images?.logo || '',
+          portrait: game.images?.portrait || '',
+          banner: game.images?.banner || ''
+        },
         featured: game.featured || false
       });
-      // Si c'est un jeu existant avec une image, on l'affiche
-      if (typeof game.image === 'string' && game.image) {
-        setPreviewUrl(game.image);
+      // Si c'est un jeu existant avec des images, on les affiche
+      if (game.images) {
+        const urls: any = {};
+        if (typeof game.images.logo === 'string' && game.images.logo) {
+          urls.logo = game.images.logo;
+        }
+        if (typeof game.images.portrait === 'string' && game.images.portrait) {
+          urls.portrait = game.images.portrait;
+        }
+        if (typeof game.images.banner === 'string' && game.images.banner) {
+          urls.banner = game.images.banner;
+        }
+        setPreviewUrls(urls);
       }
     } else {
       setFormData({
@@ -66,23 +97,29 @@ const GameModal: React.FC<GameModalProps> = ({
         description: '',
         genre: '',
         system: '',
-        image: '',
+        images: {
+          logo: '',
+          portrait: '',
+          banner: ''
+        },
         featured: false
       });
     }
-    setSelectedFile(null);
-    setPreviewUrl('');
+    setSelectedFiles({});
+    setPreviewUrls({});
     setErrors({});
   }, [game, isOpen]);
 
   // Nettoyer les URLs temporaires à la fermeture
   useEffect(() => {
     return () => {
-      if (previewUrl && selectedFile) {
-        URL.revokeObjectURL(previewUrl);
-      }
+      Object.values(previewUrls).forEach(url => {
+        if (url) {
+          URL.revokeObjectURL(url);
+        }
+      });
     };
-  }, [previewUrl, selectedFile]);
+  }, [previewUrls]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -103,13 +140,19 @@ const GameModal: React.FC<GameModalProps> = ({
       newErrors.system = 'Le système de jeu est requis';
     }
 
-    if (!formData.image && !selectedFile) {
-      newErrors.image = 'Une image est requise';
-    }
+    // Les images sont optionnelles maintenant
+    // if (!formData.images.logo && !formData.images.portrait && !formData.images.banner && 
+    //     !selectedFiles.logo && !selectedFiles.portrait && !selectedFiles.banner) {
+    //   newErrors.images = 'Au moins une image est requise (logo, portrait ou bannière)';
+    // }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,11 +161,87 @@ const GameModal: React.FC<GameModalProps> = ({
       return;
     }
 
+    // Protection contre les soumissions multiples
+    if (isSubmitting) {
+      console.log('🚫 Soumission déjà en cours...');
+      return;
+    }
+    
+    setIsSubmitting(true);
+
     try {
-      await onSave(formData);
-      onClose();
+      // Préparer les données pour l'envoi (sans les fichiers)
+      const gameDataToSend = { ...formData };
+      
+      // Nettoyer les objets File des données envoyées
+      if (gameDataToSend.images) {
+        Object.keys(gameDataToSend.images).forEach(key => {
+          if (gameDataToSend.images[key] instanceof File) {
+            delete gameDataToSend.images[key];
+          }
+        });
+      }
+      
+      try {
+        // Détecter si c'est une création ou une modification
+        const isEditing = !!game?._id;
+        
+        // Nettoyer complètement le champ images avant l'envoi
+        const cleanGameData = { ...gameDataToSend };
+        if (cleanGameData.images) {
+          // Supprimer toutes les images (même les chaînes vides)
+          delete cleanGameData.images;
+        }
+        
+        // Si c'est une modification, s'assurer que l'ID est présent
+        if (isEditing && game?._id) {
+          cleanGameData._id = game._id;
+        }
+        
+        const savedGame = await onSave(cleanGameData);
+        
+        // Si on a des fichiers sélectionnés, les uploader après création
+        if (Object.keys(selectedFiles).length > 0) {
+          // Utiliser l'ID du jeu créé (plus sûr que le nom normalisé)
+          let gameIdentifier;
+          if (savedGame && savedGame._id) {
+            gameIdentifier = savedGame._id;
+          } else {
+            // Fallback sur le nom normalisé si pas d'ID
+            gameIdentifier = normalizeGameName(gameDataToSend.name || '');
+          }
+          
+          for (const [imageType, file] of Object.entries(selectedFiles)) {
+            if (file) {
+              try {
+                const formData = new FormData();
+                formData.append('image', file);
+                formData.append('imageType', imageType);
+                
+                const response = await fetch(`/api/v1/upload/game/id/${gameIdentifier}/${imageType}`, {
+                  method: 'POST',
+                  body: formData,
+                });
+                
+                if (!response.ok) {
+                  console.error(`❌ Erreur upload ${imageType}:`, await response.text());
+                }
+              } catch (error) {
+                console.error(`❌ Erreur upload ${imageType}:`, error);
+              }
+            }
+          }
+        }
+        
+        onClose();
+      } catch (error) {
+        console.error('❌ Erreur lors de la création du jeu:', error);
+        throw error; // Re-lancer l'erreur pour que handleSaveGame puisse la gérer
+      }
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -135,26 +254,42 @@ const GameModal: React.FC<GameModalProps> = ({
     }
   };
 
-  const handleFileSelect = (file: File) => {
-    setSelectedFile(file);
+  const handleFileSelect = (file: File, imageType: 'logo' | 'portrait' | 'banner') => {
+    setSelectedFiles(prev => ({ ...prev, [imageType]: file }));
     
     // Créer une URL temporaire pour la prévisualisation
     const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
+    setPreviewUrls(prev => ({ ...prev, [imageType]: url }));
     
     // Mettre à jour le formulaire avec le fichier
-    setFormData(prev => ({ ...prev, image: file }));
+    setFormData(prev => ({ 
+      ...prev, 
+      images: { ...prev.images, [imageType]: file }
+    }));
     
-    // Effacer l'erreur d'image
-    if (errors.image) {
-      setErrors(prev => ({ ...prev, image: '' }));
+    // Effacer l'erreur d'images
+    if (errors.images) {
+      setErrors(prev => ({ ...prev, images: '' }));
     }
   };
 
-  const handleRemoveImage = () => {
-    setSelectedFile(null);
-    setPreviewUrl('');
-    setFormData(prev => ({ ...prev, image: '' }));
+  const handleRemoveImage = (imageType: 'logo' | 'portrait' | 'banner') => {
+    setSelectedFiles(prev => {
+      const newFiles = { ...prev };
+      delete newFiles[imageType];
+      return newFiles;
+    });
+    
+    setPreviewUrls(prev => {
+      const newUrls = { ...prev };
+      delete newUrls[imageType];
+      return newUrls;
+    });
+    
+    setFormData(prev => ({ 
+      ...prev, 
+      images: { ...prev.images, [imageType]: '' }
+    }));
   };
 
   if (!isOpen) return null;
@@ -265,85 +400,178 @@ const GameModal: React.FC<GameModalProps> = ({
             )}
           </div>
 
-          {/* Image du jeu */}
+          {/* Images du jeu */}
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              Image du jeu *
+              Images du jeu (optionnelles)
             </label>
             
-            {/* Zone d'upload */}
-            <div className="space-y-3">
-              {/* Input file caché */}
-              <input
-                type="file"
-                id="image-upload"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    handleFileSelect(file);
-                  }
-                }}
-                className="hidden"
-                disabled={loading}
-              />
-              
-              {/* Bouton d'upload */}
-              {!previewUrl && (
-                <label
-                  htmlFor="image-upload"
-                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer bg-slate-800/30 hover:bg-slate-800/50 hover:border-slate-500 transition-colors"
-                >
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Gamepad2 className="w-8 h-8 mb-2 text-slate-400" />
-                    <p className="mb-2 text-sm text-slate-400">
-                      <span className="font-semibold">Cliquez pour uploader</span> ou glissez-déposez
-                    </p>
-                    <p className="text-xs text-slate-500">PNG, JPG, GIF jusqu'à 10MB</p>
-                  </div>
+            <div className="space-y-4">
+              {/* Logo du jeu */}
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-2">
+                  Logo du jeu
                 </label>
-              )}
-              
-              {/* Prévisualisation de l'image */}
-              {previewUrl && (
-                <div className="relative">
-                  <div className="relative w-full h-48 rounded-lg overflow-hidden border border-slate-600">
-                    <img
-                      src={previewUrl}
-                      alt="Prévisualisation"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <input
+                    type="file"
+                    id="logo-upload"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleFileSelect(file, 'logo');
+                      }
+                    }}
+                    className="hidden"
+                    disabled={loading}
+                  />
                   
-                  {/* Boutons d'action sur l'image */}
-                  <div className="absolute top-2 right-2 flex space-x-2">
-                    <button
-                      type="button"
-                      onClick={handleRemoveImage}
-                      className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
-                      title="Supprimer l'image"
+                  {!previewUrls.logo && (
+                    <label
+                      htmlFor="logo-upload"
+                      className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer bg-slate-800/30 hover:bg-slate-800/50 hover:border-slate-500 transition-colors"
                     >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
+                      <div className="flex flex-col items-center justify-center">
+                        <Gamepad2 className="w-6 h-6 mb-1 text-slate-400" />
+                        <p className="text-xs text-slate-400">Logo du jeu</p>
+                      </div>
+                    </label>
+                  )}
                   
-                  {/* Informations du fichier */}
-                  {selectedFile && (
-                    <div className="mt-2 p-2 bg-slate-800/50 rounded-lg">
-                      <p className="text-sm text-slate-300">
-                        <span className="font-medium">Fichier sélectionné:</span> {selectedFile.name}
-                      </p>
-                      <p className="text-xs text-slate-400">
-                        Taille: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                      </p>
+                  {previewUrls.logo && (
+                    <div className="relative">
+                      <div className="relative w-full h-24 rounded-lg overflow-hidden border border-slate-600">
+                        <img
+                          src={previewUrls.logo}
+                          alt="Logo du jeu"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage('logo')}
+                        className="absolute top-1 right-1 p-1 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                        title="Supprimer le logo"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
                     </div>
                   )}
                 </div>
-              )}
+              </div>
+
+              {/* Portrait du jeu */}
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-2">
+                  Portrait du jeu
+                </label>
+                <div className="space-y-2">
+                  <input
+                    type="file"
+                    id="portrait-upload"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleFileSelect(file, 'portrait');
+                      }
+                    }}
+                    className="hidden"
+                    disabled={loading}
+                  />
+                  
+                  {!previewUrls.portrait && (
+                    <label
+                      htmlFor="portrait-upload"
+                      className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer bg-slate-800/30 hover:bg-slate-800/50 hover:border-slate-500 transition-colors"
+                    >
+                      <div className="flex flex-col items-center justify-center">
+                        <Gamepad2 className="w-6 h-6 mb-1 text-slate-400" />
+                        <p className="text-xs text-slate-400">Portrait du jeu</p>
+                      </div>
+                    </label>
+                  )}
+                  
+                  {previewUrls.portrait && (
+                    <div className="relative">
+                      <div className="relative w-full h-24 rounded-lg overflow-hidden border border-slate-600">
+                        <img
+                          src={previewUrls.portrait}
+                          alt="Portrait du jeu"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage('portrait')}
+                        className="absolute top-1 right-1 p-1 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                        title="Supprimer le portrait"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Bannière du jeu */}
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-2">
+                  Bannière du jeu
+                </label>
+                <div className="space-y-2">
+                  <input
+                    type="file"
+                    id="banner-upload"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleFileSelect(file, 'banner');
+                      }
+                    }}
+                    className="hidden"
+                    disabled={loading}
+                  />
+                  
+                  {!previewUrls.banner && (
+                    <label
+                      htmlFor="banner-upload"
+                      className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer bg-slate-800/30 hover:bg-slate-800/50 hover:border-slate-500 transition-colors"
+                    >
+                      <div className="flex flex-col items-center justify-center">
+                        <Gamepad2 className="w-6 h-6 mb-1 text-slate-400" />
+                        <p className="text-xs text-slate-400">Bannière du jeu</p>
+                      </div>
+                    </label>
+                  )}
+                  
+                  {previewUrls.banner && (
+                    <div className="relative">
+                      <div className="relative w-full h-24 rounded-lg overflow-hidden border border-slate-600">
+                        <img
+                          src={previewUrls.banner}
+                          alt="Bannière du jeu"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage('banner')}
+                        className="absolute top-1 right-1 p-1 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                        title="Supprimer la bannière"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
             
-            {errors.image && (
-              <p className="mt-1 text-sm text-red-400">{errors.image}</p>
+            {errors.images && (
+              <p className="mt-1 text-sm text-red-400">{errors.images}</p>
             )}
           </div>
 

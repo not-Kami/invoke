@@ -594,6 +594,9 @@ const AdminPage: React.FC = () => {
           <span>Ajouter un jeu</span>
         </Button>
       </div>
+      
+
+      
       <ExpandableDataTable
         columns={[
           { key: 'name', label: 'Nom' },
