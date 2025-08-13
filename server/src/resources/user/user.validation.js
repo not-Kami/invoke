@@ -11,6 +11,7 @@ export const createUserSchema = Joi.object({
     avatar: Joi.string().optional(),
     bio: Joi.string().optional(),
     favorite_games: Joi.array().items(Joi.string()).optional(),
+    mastered_games: Joi.array().items(Joi.string()).optional(),
     evaluations: Joi.array().items(Joi.string()).optional(),
     sessionsCreated: Joi.array().items(Joi.string()).optional(),
     sessionsJoined: Joi.array().items(Joi.string()).optional(),
@@ -29,6 +30,8 @@ export const updateUserSchema = Joi.object({
     isDM: Joi.boolean().optional(),
     avatar: Joi.string().optional(),
     bio: Joi.string().optional(),
+    favorite_games: Joi.array().items(Joi.string()).optional(),
+    mastered_games: Joi.array().items(Joi.string()).optional(),
 });
 
 export const getUserSchema = Joi.object({

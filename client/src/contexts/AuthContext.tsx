@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, authAPI } from '../lib/api';
+import { User, authAPI, usersApi } from '../lib/api';
 
 interface AuthContextType {
   user: User | null;
@@ -14,6 +14,7 @@ interface AuthContextType {
     avatar?: string;
   }) => Promise<void>;
   logout: () => void;
+  updateUser: (updates: Partial<User>) => Promise<void>;
   loading: boolean;
 }
 
@@ -96,6 +97,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateUser = async (updates: Partial<User>) => {
+    if (!user) {
+      throw new Error('No user logged in');
+    }
+
+    try {
+      // Appeler l'API pour mettre à jour l'utilisateur
+      const response = await usersApi.updateUser(user._id, updates);
+      
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to update user');
+      }
+      
+      // Mettre à jour l'utilisateur localement
+      setUser(response.data);
+      console.log('User updated successfully:', response.data);
+    } catch (error: any) {
+      console.error('Error updating user:', error);
+      throw new Error(error.message || 'Failed to update user');
+    }
+  };
+
   const logout = async () => {
     try {
       // Appeler l'API de logout pour supprimer le cookie
@@ -109,7 +132,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, signup, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, signup, logout, updateUser, loading }}>
       {children}
     </AuthContext.Provider>
   );

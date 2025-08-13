@@ -226,33 +226,39 @@ export const adminAPI = {
     apiCall(`/campaigns/${id}`, { method: 'DELETE' }),
 };
 
-// ===== ENDPOINTS USERS =====
-
+// ===== USERS API =====
 export const usersApi = {
-  // Mettre à jour un utilisateur
-  updateUser: (id: string, data: Partial<User>) => 
-    apiCall<User>(`/users/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    }),
+  // Profil de base
+  updateProfile: (userId: string, data: Partial<User>) => 
+    apiCall<User>(`/users/${userId}/profile`, { method: 'PUT', body: JSON.stringify(data) }),
   
-  // Upload d'avatar utilisateur
-  uploadAvatar: (id: string, file: File) => {
-    const formData = new FormData();
-    formData.append('image', file);
-    
-    return fetch(`${API_BASE_URL}/users/${id}/avatar`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
-      },
-      body: formData,
-      credentials: 'include',
-    }).then(response => response.json());
-  },
+  // Rôle utilisateur
+  updateRole: (userId: string, role: string) => 
+    apiCall<User>(`/users/${userId}/role`, { method: 'PUT', body: JSON.stringify({ role }) }),
   
-  // Récupérer les MJ mis en avant
-  getFeaturedDMs: () => apiCall<User[]>('/users/featured-dms'),
+  // Jeux favoris
+  getFavorites: (userId: string) => 
+    apiCall<Game[]>(`/users/${userId}/favorites`),
+  addFavorite: (userId: string, gameId: string) => 
+    apiCall<Game[]>(`/users/${userId}/favorites`, { method: 'POST', body: JSON.stringify({ gameId }) }),
+  removeFavorite: (userId: string, gameId: string) => 
+    apiCall<Game[]>(`/users/${userId}/favorites/${gameId}`, { method: 'DELETE' }),
+  
+  // Jeux maîtrisés
+  getMastered: (userId: string) => 
+    apiCall<Game[]>(`/users/${userId}/mastered`),
+  addMastered: (userId: string, gameId: string) => 
+    apiCall<Game[]>(`/users/${userId}/mastered`, { method: 'POST', body: JSON.stringify({ gameId }) }),
+  removeMastered: (userId: string, gameId: string) => 
+    apiCall<Game[]>(`/users/${userId}/mastered/${gameId}`, { method: 'DELETE' }),
+  
+  // Avatar
+  uploadAvatar: (userId: string, formData: FormData) => 
+    apiCall<User>(`/users/${userId}/avatar`, { method: 'POST', body: formData }),
+  
+  // Suppression
+  deleteUser: (userId: string) => 
+    apiCall<{ success: boolean }>(`/users/${userId}`, { method: 'DELETE' })
 };
 
 // ===== ENDPOINTS AUTH =====
@@ -272,9 +278,12 @@ interface SignupData {
 }
 
 interface AuthResponse {
+  success: boolean;
   data: {
     user: User;
+    token: string;
   };
+  error?: string;
 }
 
 export const authAPI = {
@@ -301,6 +310,7 @@ export const publicAPI = {
   getFeaturedSessions: () => apiCall<Session[]>('/sessions/featured'),
   getSession: (id: string) => apiCall<Session>(`/sessions/${id}`),
   getFeaturedGames: () => apiCall<Game[]>('/games/featured'),
+  getGames: () => apiCall<Game[]>('/games'), // API publique pour tous les jeux
   getFeaturedDMs: () => apiCall<User[]>('/users/featured-dms'),
 };
 
