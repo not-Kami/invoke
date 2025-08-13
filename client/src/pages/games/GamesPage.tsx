@@ -1,33 +1,115 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Game, adminAPI } from '../../lib/api';
-import { Card, CardContent, CardHeader } from '../../components/ui/Card';
-import Badge from '../../components/ui/Badge';
-import Input from '../../components/ui/Input';
-import { Search, Gamepad2 } from 'lucide-react';
+import { Card, CardContent } from '../../components/ui/Card';
+import GameFilters, { GameFiltersState } from '../../components/games/GameFilters';
+import GameCard from '../../components/games/GameCard';
+import Pagination from '../../components/ui/Pagination';
+import { Gamepad2, Loader2 } from 'lucide-react';
 
 export default function GamesPage() {
   const [games, setGames] = useState<Game[]>([]);
-  const [filteredGames, setFilteredGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [genreFilter, setGenreFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
+  
+  // État des filtres
+  const [filters, setFilters] = useState<GameFiltersState>({
+    searchTerm: '',
+    genre: 'all',
+    system: 'all',
+    featured: false,
+    sortBy: 'createdAt',
+    sortOrder: 'desc'
+  });
+
+  // Données mockées pour le développement
+  const mockGames: Game[] = [
+    {
+      _id: '1',
+      name: 'Dungeons & Dragons 5e',
+      description: 'Le système de jeu de rôle fantastique le plus populaire au monde. Créez des héros épiques et partez à l\'aventure dans des mondes magiques remplis de dragons, de donjons et de trésors légendaires.',
+      genre: 'Fantasy',
+      system: 'D&D 5e',
+      image: '/images/dnd5e.jpg',
+      feature: true,
+      createdAt: '2024-01-15T10:00:00Z',
+      updatedAt: '2024-01-15T10:00:00Z'
+    },
+    {
+      _id: '2',
+      name: 'Call of Cthulhu',
+      description: 'Un jeu d\'horreur cosmique basé sur les œuvres de H.P. Lovecraft. Les joueurs incarnent des investigateurs confrontés à des forces anciennes et maléfiques qui menacent l\'humanité.',
+      genre: 'Horreur',
+      system: 'BRP',
+      image: '/images/cthulhu.jpg',
+      feature: false,
+      createdAt: '2024-02-20T14:30:00Z',
+      updatedAt: '2024-02-20T14:30:00Z'
+    },
+    {
+      _id: '3',
+      name: 'Cyberpunk Red',
+      description: 'Plongez dans un futur dystopique où la technologie et la cybernétique règnent en maître. Incarnez des mercenaires, des hackers et des street samouraïs dans Night City.',
+      genre: 'Science-Fiction',
+      system: 'Cyberpunk Red',
+      image: '/images/cyberpunk.jpg',
+      feature: true,
+      createdAt: '2024-03-10T09:15:00Z',
+      updatedAt: '2024-03-10T09:15:00Z'
+    },
+    {
+      _id: '4',
+      name: 'Vampire: The Masquerade',
+      description: 'Un jeu de rôle gothique où les joueurs incarnent des vampires dans un monde moderne. Gagnez en puissance tout en maintenant le secret de votre nature vampirique.',
+      genre: 'Horreur',
+      system: 'Storyteller',
+      image: '/images/vampire.jpg',
+      feature: false,
+      createdAt: '2024-04-05T20:45:00Z',
+      updatedAt: '2024-04-05T16:45:00Z'
+    },
+    {
+      _id: '5',
+      name: 'Pathfinder 2e',
+      description: 'Un système de jeu de rôle fantastique offrant une grande liberté de création de personnages et des règles tactiques sophistiquées pour des combats épiques.',
+      genre: 'Fantasy',
+      system: 'Pathfinder 2e',
+      image: '/images/pathfinder.jpg',
+      feature: false,
+      createdAt: '2024-05-12T11:20:00Z',
+      updatedAt: '2024-05-12T11:20:00Z'
+    },
+    {
+      _id: '6',
+      name: 'Star Wars: Edge of the Empire',
+      description: 'Explorez la galaxie Star Wars en incarnant des contrebandiers, des chasseurs de primes et des explorateurs dans les territoires de la Bordure Extérieure.',
+      genre: 'Science-Fiction',
+      system: 'Genesys',
+      image: '/images/starwars.jpg',
+      feature: true,
+      createdAt: '2024-06-18T13:10:00Z',
+      updatedAt: '2024-06-18T13:10:00Z'
+    }
+  ];
 
   useEffect(() => {
     // Simuler un chargement API avec des données mockées
     const fetchGames = async () => {
       try {
+        setLoading(true);
         // Simuler un délai de chargement
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Pour l'instant, on utilise un tableau vide en attendant l'API
-        const mockGames: Game[] = [];
-        
+        // Utiliser les données mockées pour le développement
         setGames(mockGames);
-        setFilteredGames(mockGames);
+        setTotalResults(mockGames.length);
+        setTotalPages(Math.ceil(mockGames.length / 6)); // 6 jeux par page
       } catch (error) {
         console.error('Error fetching games:', error);
         setGames([]);
-        setFilteredGames([]);
+        setTotalResults(0);
+        setTotalPages(1);
       } finally {
         setLoading(false);
       }
@@ -36,32 +118,119 @@ export default function GamesPage() {
     fetchGames();
   }, []);
 
-  useEffect(() => {
-    let filtered = games;
+  // Filtrer et trier les jeux
+  const filteredAndSortedGames = useMemo(() => {
+    let filtered = [...games];
 
-    // Search filter
-    if (searchTerm) {
+    // Filtre par recherche
+    if (filters.searchTerm) {
       filtered = filtered.filter(game =>
-        game.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        game.system.toLowerCase().includes(searchTerm.toLowerCase())
+        game.name.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+        game.description.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+        game.system.toLowerCase().includes(filters.searchTerm.toLowerCase())
       );
     }
 
-    // Genre filter (désactivé pour le moment car pas dans l'API actuelle)
-    // if (genreFilter !== 'all') {
-    //   filtered = filtered.filter(game => game.genre === genreFilter);
-    // }
+    // Filtre par genre
+    if (filters.genre !== 'all') {
+      filtered = filtered.filter(game => game.genre === filters.genre);
+    }
 
-    setFilteredGames(filtered);
-  }, [games, searchTerm, genreFilter]);
+    // Filtre par système
+    if (filters.system !== 'all') {
+      filtered = filtered.filter(game => game.system === filters.system);
+    }
 
-  // Get unique genres for filter
-  const genres = Array.from(new Set(games.map(game => game.genre)));
+    // Filtre par featured
+    if (filters.featured) {
+      filtered = filtered.filter(game => game.feature);
+    }
+
+    // Tri
+    filtered.sort((a, b) => {
+      let aValue: any, bValue: any;
+      
+      switch (filters.sortBy) {
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'genre':
+          aValue = a.genre.toLowerCase();
+          bValue = b.genre.toLowerCase();
+          break;
+        case 'system':
+          aValue = a.system.toLowerCase();
+          bValue = b.system.toLowerCase();
+          break;
+        case 'createdAt':
+        default:
+          aValue = new Date(a.createdAt);
+          bValue = new Date(b.createdAt);
+          break;
+      }
+
+      if (filters.sortOrder === 'asc') {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+
+    return filtered;
+  }, [games, filters]);
+
+  // Pagination
+  const paginatedGames = useMemo(() => {
+    const gamesPerPage = 6;
+    const startIndex = (currentPage - 1) * gamesPerPage;
+    return filteredAndSortedGames.slice(startIndex, startIndex + gamesPerPage);
+  }, [filteredAndSortedGames, currentPage]);
+
+  // Mettre à jour la pagination quand les filtres changent
+  useEffect(() => {
+    setCurrentPage(1);
+    setTotalPages(Math.ceil(filteredAndSortedGames.length / 6));
+  }, [filteredAndSortedGames]);
+
+  // Obtenir les genres et systèmes uniques pour les filtres
+  const availableGenres = useMemo(() => 
+    Array.from(new Set(games.map(game => game.genre))).sort(),
+    [games]
+  );
+
+  const availableSystems = useMemo(() => 
+    Array.from(new Set(games.map(game => game.system))).sort(),
+    [games]
+  );
+
+  const handleFiltersChange = (newFilters: GameFiltersState) => {
+    setFilters(newFilters);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      searchTerm: '',
+      genre: 'all',
+      system: 'all',
+      featured: false,
+      sortBy: 'createdAt',
+      sortOrder: 'desc'
+    });
+  };
+
+  const handleGameClick = (game: Game) => {
+    // TODO: Navigation vers la page de détail du jeu
+    console.log('Game clicked:', game);
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 text-primary-500 animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Chargement des jeux...</p>
+        </div>
       </div>
     );
   }
@@ -71,96 +240,65 @@ export default function GamesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-white">Game Systems</h1>
+          <h1 className="text-3xl font-bold text-white">Systèmes de Jeu</h1>
           <p className="mt-2 text-gray-300">
-            Explore different tabletop RPG systems and find your next adventure
+            Explorez différents systèmes de jeux de rôle sur table et trouvez votre prochaine aventure
           </p>
         </div>
 
-        {/* Filters */}
+        {/* Filtres */}
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search games..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            
-            <div>
-              <select
-                value={genreFilter}
-                onChange={(e) => setGenreFilter(e.target.value)}
-                className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-              >
-                <option value="all">All Genres</option>
-                {genres.map(genre => (
-                  <option key={genre} value={genre}>{genre}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          <CardContent className="p-6">
+            <GameFilters
+              filters={filters}
+              onFiltersChange={handleFiltersChange}
+              onClearFilters={handleClearFilters}
+              availableGenres={availableGenres}
+              availableSystems={availableSystems}
+              totalResults={filteredAndSortedGames.length}
+            />
+          </CardContent>
+        </Card>
 
-        {/* Games Grid */}
-        {filteredGames.length === 0 ? (
+        {/* Grille des jeux */}
+        {paginatedGames.length === 0 ? (
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardContent className="p-12 text-center">
               <Gamepad2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-white mb-2">
-                No games found
+                Aucun jeu trouvé
               </h3>
               <p className="text-gray-300">
-                {searchTerm ? 'Try adjusting your search criteria.' : 'Game systems will appear here when available.'}
+                {filters.searchTerm || filters.genre !== 'all' || filters.system !== 'all' || filters.featured
+                  ? 'Essayez d\'ajuster vos critères de recherche.'
+                  : 'Les systèmes de jeu apparaîtront ici quand ils seront disponibles.'}
               </p>
             </CardContent>
           </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredGames.map((game) => (
-            <Card key={game._id} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-lg mb-4 flex items-center justify-center">
-                      <Gamepad2 className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      {game.name}
-                    </h3>
-                    <div className="flex items-center space-x-2 mb-3">
-                      <Badge variant="info">
-                        {game.genre}
-                      </Badge>
-                      <Badge variant="default">
-                        {game.system}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  {game.description}
-                </p>
-                
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="text-xs text-gray-500">
-                    Added {new Date(game.createdAt).toLocaleDateString()}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-              )}
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {paginatedGames.map((game) => (
+                <GameCard
+                  key={game._id}
+                  game={game}
+                  onClick={() => handleGameClick(game)}
+                />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="pt-8">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

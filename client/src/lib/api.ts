@@ -189,6 +189,12 @@ export const adminAPI = {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
+  // Fonction admin pour mettre à jour le statut featured
+  adminUpdateSessionFeatured: (id: string, featured: boolean) => 
+    apiCall<Session>(`/sessions/${id}/featured`, {
+      method: 'PATCH',
+      body: JSON.stringify({ featured }),
+    }),
   deleteSession: (id: string) => 
     apiCall(`/sessions/${id}`, { method: 'DELETE' }),
 
