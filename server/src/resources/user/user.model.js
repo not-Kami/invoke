@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema({
     avatar: { type: String, default: null },
     bio: { type: String, default: null },
     favorite_games: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Game' }],
+    mastered_games: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Game' }], // Jeux maîtrisés pour être MJ
     evaluations: { type: [mongoose.Schema.Types.ObjectId], ref: "Evaluation", default: [] },
     sessionsCreated: { type: [mongoose.Schema.Types.ObjectId], ref: "Session", default: [] },
     sessionsJoined: { type: [mongoose.Schema.Types.ObjectId], ref: "Session", default: [] },
