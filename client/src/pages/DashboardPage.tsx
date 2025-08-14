@@ -10,7 +10,6 @@ import Avatar from '../components/ui/Avatar';
 import DMConfirmationModal from '../components/ui/DMConfirmationModal';
 import StopDMConfirmationModal from '../components/ui/StopDMConfirmationModal';
 
-import { Game } from '../types';
 import { publicAPI } from '../lib/api';
 import { 
   Calendar, 
@@ -21,34 +20,27 @@ import {
   Crown,
   User,
   Gamepad2,
-  Clock,
   MapPin,
   Edit,
   Eye,
-  ChevronRight,
-  UserPlus,
-  Mail,
   CheckCircle,
   XCircle,
-  Globe,
   Monitor,
   DollarSign,
-  Star,
   Megaphone,
   Heart,
   Lock,
-  Info,
   AlertTriangle,
   X,
-  Search
+  Search,
+  BarChart3
 } from 'lucide-react';
-import { usersApi } from '../lib/api';
 
 export default function DashboardPage() {
   const { user, updateUser } = useAuth();
-  const { loading, sessions, campaigns, isAdmin, isDM } = useDashboardData();
+  const { loading, sessions, isAdmin, isDM } = useDashboardData();
   const { favoriteGames, loading: gamesLoading, error: gamesError, removeFavoriteGame, addFavoriteGame } = useFavoriteGames();
-  const { masteredGames } = useMasteredGames();
+  const { masteredGames, removeMasteredGame, addMasteredGame } = useMasteredGames();
   const [viewMode, setViewMode] = useState<'player' | 'dm'>('player');
   
   // États pour les modals DM
@@ -62,6 +54,12 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [availableGames, setAvailableGames] = useState<any[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
+
+  // États pour le popup des jeux maîtrisés
+  const [showAddMasteredGamePopup, setShowAddMasteredGamePopup] = useState(false);
+  const [masteredSearchTerm, setMasteredSearchTerm] = useState('');
+  const [availableMasteredGames, setAvailableMasteredGames] = useState<any[]>([]);
+  const [masteredSearchLoading, setMasteredSearchLoading] = useState(false);
 
 
 
@@ -86,10 +84,6 @@ export default function DashboardPage() {
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .slice(0, 5);
 
-  const upcomingCampaigns = campaigns.filter(campaign => 
-    campaign.active
-  ).slice(0, 3);
-
   const myCharacters = [
     {
       id: 1,
@@ -109,34 +103,12 @@ export default function DashboardPage() {
     }
   ];
 
-  const myTables = [
-    {
-      id: 1,
-      name: "Équipe Dragon Rouge",
-      members: [
-        { id: 1, name: "Alice Martin", status: "confirmed", avatar: null },
-        { id: 2, name: "Bob Dupont", status: "confirmed", avatar: null },
-        { id: 3, name: "Charlie Durand", status: "pending", avatar: null }
-      ],
-      invitations: 1,
-      createdAt: "2024-01-15"
-    },
-    {
-      id: 2,
-      name: "Les Aventuriers du Dimanche",
-      members: [
-        { id: 4, name: "Diana Lopez", status: "confirmed", avatar: null },
-        { id: 5, name: "Eve Chen", status: "confirmed", avatar: null }
-      ],
-      invitations: 0,
-      createdAt: "2024-01-20"
-    }
-  ];
+
 
   const mySessions = [
     {
       id: 1,
-      title: "Les Mystères d'Arkham",
+      title: "The Mysteries of Arkham",
       game: "Call of Cthulhu",
       players: 4,
       maxPlayers: 6,
@@ -145,7 +117,7 @@ export default function DashboardPage() {
     },
     {
       id: 2,
-      title: "Campagne Épique Fantasy",
+      title: "Epic Fantasy Campaign",
       game: "D&D 5e",
       players: 6,
       maxPlayers: 6,
@@ -157,10 +129,10 @@ export default function DashboardPage() {
   const myAnnouncements = [
     {
       id: 1,
-      title: "Nouvelle campagne D&D 5e - Les Terres Oubliées",
+      title: "New D&D 5e Campaign - The Forgotten Realms",
       game: "D&D 5e",
       type: "campaign",
-      location: "IRL - Paris 11ème",
+      location: "IRL - Paris 11th",
       price: "15€/session",
       players: 3,
       maxPlayers: 6,
@@ -172,8 +144,8 @@ export default function DashboardPage() {
       title: "One-shot Cyberpunk Red",
       game: "Cyberpunk Red",
       type: "session",
-      location: "En ligne - Roll20",
-      price: "Gratuit",
+      location: "Online - Roll20",
+      price: "Free",
       players: 2,
       maxPlayers: 4,
       status: "active",
@@ -272,6 +244,45 @@ export default function DashboardPage() {
     }
   };
 
+  // Fonction pour ouvrir le popup des jeux maîtrisés
+  const handleOpenAddMasteredGamePopup = async () => {
+    console.log('🚀 Opening mastered games popup');
+    setShowAddMasteredGamePopup(true);
+    setMasteredSearchTerm('');
+    setAvailableMasteredGames([]);
+    
+    // Charger les jeux populaires par défaut
+    try {
+      setMasteredSearchLoading(true);
+      console.log('📡 Loading popular games...');
+      
+      const response = await publicAPI.getGames();
+      console.log('📡 Popular games API response:', response);
+      
+      if (response.success && response.data) {
+        const games = response.data;
+        console.log('🎮 Total games available:', games.length);
+        
+        // Filtrer les jeux qui ne sont pas déjà maîtrisés et prendre les premiers (populaires)
+        const currentMasteredIds = masteredGames.map((g: any) => g._id);
+        console.log('🎯 Current mastered IDs:', currentMasteredIds);
+        
+        const popularGames = games
+          .filter(game => !currentMasteredIds.includes(game._id))
+          .slice(0, 8); // Limiter à 8 jeux populaires
+        
+        console.log('✅ Popular games to display:', popularGames.length);
+        setAvailableMasteredGames(popularGames);
+      } else {
+        console.error('❌ Failed to load popular games:', response);
+      }
+    } catch (error) {
+      console.error('❌ Error loading popular mastered games:', error);
+    } finally {
+      setMasteredSearchLoading(false);
+    }
+  };
+
   // Fonction pour rechercher des jeux disponibles
   const handleSearchGames = async () => {
     if (!searchTerm.trim()) {
@@ -313,6 +324,76 @@ export default function DashboardPage() {
     });
     setSearchTerm('');
     setAvailableGames([]);
+  };
+
+  // Fonction pour rechercher des jeux pour les jeux maîtrisés
+  const handleSearchMasteredGames = async () => {
+    try {
+      console.log('🔍 Searching mastered games with term:', masteredSearchTerm);
+      setMasteredSearchLoading(true);
+      
+      const response = await publicAPI.getGames();
+      console.log('📡 API response:', response);
+      
+      if (response.success && response.data) {
+        let filteredGames = response.data;
+        console.log('🎮 Total games from API:', filteredGames.length);
+        
+        // Si un terme de recherche est fourni, filtrer les jeux
+        if (masteredSearchTerm.trim()) {
+          filteredGames = response.data.filter((game: any) => 
+            game.name.toLowerCase().includes(masteredSearchTerm.toLowerCase()) ||
+            (game.system && game.system.toLowerCase().includes(masteredSearchTerm.toLowerCase()))
+          );
+          console.log('🔍 Filtered games after search:', filteredGames.length);
+        }
+        
+        // Filtrer les jeux déjà maîtrisés
+        const currentMasteredIds = masteredGames.map((g: any) => g._id);
+        console.log('🎯 Current mastered game IDs:', currentMasteredIds);
+        
+        filteredGames = filteredGames.filter((game: any) => 
+          !currentMasteredIds.includes(game._id)
+        );
+        console.log('🎯 Games after filtering mastered:', filteredGames.length);
+        
+        // Limiter à 8 jeux et mettre à jour l'état
+        const finalGames = filteredGames.slice(0, 8);
+        console.log('✅ Final games to display:', finalGames.length);
+        setAvailableMasteredGames(finalGames);
+      } else {
+        console.error('❌ API response not successful:', response);
+        setAvailableMasteredGames([]);
+      }
+    } catch (error) {
+      console.error('❌ Error searching mastered games:', error);
+      setAvailableMasteredGames([]);
+    } finally {
+      setMasteredSearchLoading(false);
+    }
+  };
+
+  // Fonction pour ajouter un jeu aux jeux maîtrisés
+  const handleAddToMastered = async (game: any) => {
+    try {
+      await addMasteredGame(game);
+      setNotification({
+        type: 'success',
+        message: `${game.name} ajouté aux jeux maîtrisés !`
+      });
+      
+      // Retirer le jeu de la liste des jeux disponibles
+      setAvailableMasteredGames(prev => prev.filter(g => g._id !== game._id));
+      
+      // Vider le terme de recherche
+      setMasteredSearchTerm('');
+      
+    } catch (error) {
+      setNotification({
+        type: 'error',
+        message: `Erreur lors de l'ajout de ${game.name}`
+      });
+    }
   };
 
   // Vérifier si l'utilisateur peut accéder au mode DM
@@ -402,15 +483,15 @@ export default function DashboardPage() {
 
             {/* Bouton pour arrêter d'être DM (seulement visible en mode DM) */}
             {viewMode === 'dm' && isDM && !isAdmin && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-red-500 text-red-400 hover:text-white hover:bg-red-500"
-                onClick={() => setShowStopDMConfirmation(true)}
-              >
-                <X className="h-4 w-4 mr-2" />
-                Arrêter d'être DM
-              </Button>
+                              <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-red-500 text-red-400 hover:text-white hover:bg-red-500"
+                  onClick={() => setShowStopDMConfirmation(true)}
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Stop being DM
+                </Button>
             )}
           </div>
         </div>
@@ -541,84 +622,9 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
 
-              {/* My Tables - Grisé (upcoming feature) */}
-              <Card className="bg-white/5 backdrop-blur-sm border-white/10 mt-6 opacity-50">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Users className="h-5 w-5 text-gray-400" />
-                      <h2 className="text-xl font-semibold text-gray-400">My Tables</h2>
-                      <Badge variant="default" size="sm" className="bg-gray-600 text-gray-300">
-                        Coming Soon
-                      </Badge>
-                    </div>
-                    <Button size="sm" className="bg-gray-600 text-gray-300 border-gray-500 cursor-not-allowed" disabled>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Table
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {myTables.map((table) => (
-                      <div key={table.id} className="p-4 bg-white/5 rounded-lg border border-white/10">
-                        <div className="flex items-center justify-between mb-3">
-                          <h3 className="font-semibold text-gray-400">{table.name}</h3>
-                          <div className="flex items-center space-x-2">
-                            {table.invitations > 0 && (
-                              <Badge variant="warning" size="sm">
-                                {table.invitations} pending
-                              </Badge>
-                            )}
-                            <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-400" disabled>
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2 mb-3">
-                          {table.members.slice(0, 4).map((member) => (
-                            <div key={member.id} className="relative">
-                              <Avatar
-                                firstName={member.name.split(' ')[0]}
-                                lastName={member.name.split(' ')[1]}
-                                size="sm"
-                              />
-                              {member.status === 'pending' && (
-                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-500 rounded-full border border-white"></div>
-                              )}
-                              {member.status === 'confirmed' && (
-                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-white"></div>
-                              )}
-                            </div>
-                          ))}
-                          {table.members.length > 4 && (
-                            <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-xs text-white">
-                              +{table.members.length - 4}
-                            </div>
-                          )}
-                        </div>
 
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-500">
-                            {table.members.length} members
-                          </span>
-                          <div className="flex space-x-2">
-                            <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-400" disabled>
-                              <UserPlus className="h-3 w-3 mr-1" />
-                              Invite
-                            </Button>
-                            <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-400" disabled>
-                              <Calendar className="h-3 w-3 mr-1" />
-                              Book Session
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+
+
             </div>
 
             {/* Sidebar */}
@@ -741,25 +747,24 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
 
-              {/* Recent Activity - Gardé tel quel */}
-              <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              {/* Recent Activity - Coming Soon */}
+              <Card className="bg-white/5 backdrop-blur-sm border-white/10 opacity-50">
                 <CardHeader>
-                  <h2 className="text-lg font-semibold text-white">Recent Activity</h2>
+                  <div className="flex items-center space-x-2">
+                    <BarChart3 className="h-5 w-5 text-gray-400" />
+                    <h2 className="text-lg font-semibold text-gray-400">Recent Activity</h2>
+                    <Badge variant="default" size="sm" className="bg-gray-600 text-gray-300">
+                      Coming Soon
+                    </Badge>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex items-center space-x-2 text-gray-300">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span>Joined "Les Ombres de Valoria"</span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-gray-300">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span>Updated character sheet</span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-gray-300">
-                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                      <span>Completed one-shot session</span>
-                    </div>
+                  <div className="text-center py-6">
+                    <BarChart3 className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-400 text-sm">Activity tracking coming soon</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Track your game sessions, achievements, and progress
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -770,18 +775,19 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {canAccessDMView ? (
               <>
-                {/* My Announcements */}
-                <div className="lg:col-span-2">
+                {/* Colonne principale - Annonces et Sessions */}
+                <div className="lg:col-span-2 space-y-6">
+                  {/* My Announcements */}
                   <Card className="bg-white/10 backdrop-blur-sm border-white/20">
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <Megaphone className="h-5 w-5 text-purple-400" />
-                          <h2 className="text-xl font-semibold text-white">Mes Annonces</h2>
+                          <h2 className="text-xl font-semibold text-white">My Announcements</h2>
                         </div>
                         <Button size="sm" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0">
                           <Plus className="h-4 w-4 mr-2" />
-                          Nouvelle Annonce
+                          New Announcement
                         </Button>
                       </div>
                     </CardHeader>
@@ -823,52 +829,52 @@ export default function DashboardPage() {
                               <div className="flex items-center space-x-2">
                                 <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
                                   <Edit className="h-3 w-3 mr-1" />
-                                  Modifier
+                                  Edit
                                 </Button>
                                 <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
                                   <Eye className="h-3 w-3 mr-1" />
-                                  Voir
+                                  View
                                 </Button>
                               </div>
                             </div>
                             
                             <div className="flex justify-between items-center pt-2 border-t border-white/10">
-                              <span className="text-xs text-gray-400">
-                                {announcement.players} joueurs intéressés
-                              </span>
-                              <Button variant="ghost" size="sm" className="text-purple-400 hover:text-white">
-                                <Users className="h-3 w-3 mr-1" />
-                                Gérer les Joueurs
-                              </Button>
+                                                                <span className="text-xs text-gray-400">
+                                    {announcement.players} interested players
+                                  </span>
+                                  <Button variant="ghost" size="sm" className="text-purple-400 hover:text-white">
+                                    <Users className="h-3 w-3 mr-1" />
+                                    Manage Players
+                                  </Button>
                             </div>
                           </div>
                         ))
                       ) : (
                         <div className="text-center py-8">
                           <Megaphone className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                          <p className="text-gray-400">Aucune annonce active</p>
+                          <p className="text-gray-400">No active announcements</p>
                           <Button 
                             size="sm" 
                             className="mt-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0"
                           >
                             <Plus className="h-4 w-4 mr-2" />
-                            Créer une Annonce
+                            Create Announcement
                           </Button>
                         </div>
                       )}
                     </CardContent>
                   </Card>
 
-                  {/* My Sessions & Campaigns */}
-                  <Card className="bg-white/10 backdrop-blur-sm border-white/20 mt-6">
+                  {/* My Sessions */}
+                  <Card className="bg-white/10 backdrop-blur-sm border-white/20">
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <Crown className="h-5 w-5 text-purple-400" />
-                          <h2 className="text-xl font-semibold text-white">Sessions en Cours</h2>
+                          <h2 className="text-xl font-semibold text-white">My Sessions</h2>
                         </div>
                         <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white hover:text-gray-900">
-                          Voir Tout
+                          View All
                         </Button>
                       </div>
                     </CardHeader>
@@ -885,7 +891,7 @@ export default function DashboardPage() {
                                 <div className="flex items-center space-x-3 mt-1">
                                   <span className="text-xs text-gray-400">{session.game}</span>
                                   <span className="text-xs text-gray-400">
-                                    {session.players}/{session.maxPlayers} joueurs
+                                    {session.players}/{session.maxPlayers} players
                                   </span>
                                 </div>
                               </div>
@@ -898,12 +904,92 @@ export default function DashboardPage() {
                       ) : (
                         <div className="text-center py-4">
                           <Crown className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                          <p className="text-gray-400">Aucune session en cours</p>
+                          <p className="text-gray-400">No active sessions</p>
                         </div>
                       )}
                     </CardContent>
                   </Card>
+
+                  {/* DM Tools, Profile & Stats - Coming Soon - Côte à côte */}
+                  <div className="grid grid-cols-3 gap-4">
+                    {/* DM Tools - Coming Soon */}
+                    <Card className="bg-white/5 backdrop-blur-sm border-white/10 opacity-60">
+                      <CardHeader>
+                        <div className="flex items-center space-x-2">
+                          <Settings className="h-5 w-5 text-gray-400" />
+                          <h2 className="text-lg font-semibold text-gray-400">DM Tools</h2>
+                          <Badge variant="default" className="text-gray-400 border-gray-400">Coming Soon</Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <Button variant="ghost" className="w-full justify-start text-gray-400" disabled>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Create Session
+                          </Button>
+                          <Button variant="ghost" className="w-full justify-start text-gray-400" disabled>
+                            <Users className="h-4 w-4 mr-2" />
+                            Manage Players
+                          </Button>
+                          <Button variant="ghost" className="w-full justify-start text-gray-400" disabled>
+                            <Calendar className="h-4 w-4 mr-2" />
+                            Schedule Events
+                          </Button>
+                          <Button variant="ghost" className="w-full justify-start text-gray-400" disabled>
+                            <Settings className="h-4 w-4 mr-2" />
+                            Campaign Settings
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* DM Profile - Coming Soon */}
+                    <Card className="bg-white/5 backdrop-blur-sm border-white/10 opacity-60">
+                      <CardHeader>
+                        <div className="flex items-center space-x-2">
+                          <User className="h-5 w-5 text-gray-400" />
+                          <h2 className="text-lg font-semibold text-gray-400">DM Profile</h2>
+                          <Badge variant="default" className="text-gray-400 border-gray-400">Coming Soon</Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-6">
+                          <User className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                          <p className="text-gray-400 text-sm">Profile management coming soon</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Your Stats - Coming Soon */}
+                    <Card className="bg-white/5 backdrop-blur-sm border-white/10 opacity-60">
+                      <CardHeader>
+                        <div className="flex items-center space-x-2">
+                          <BarChart3 className="h-5 w-5 text-gray-400" />
+                          <h2 className="text-lg font-semibold text-gray-400">Your Stats</h2>
+                          <Badge variant="default" className="text-gray-400 border-gray-400">Coming Soon</Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div className="text-center">
+                            <div className="text-xl font-bold text-gray-400">--</div>
+                            <div className="text-xs text-gray-400">Active Players</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xl font-bold text-gray-400">--</div>
+                            <div className="text-xs text-gray-400">Running Campaigns</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xl font-bold text-gray-400">--</div>
+                            <div className="text-xs text-gray-400">Sessions Completed</div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </div>
+
+
               </>
             ) : (
               /* Message pour les utilisateurs non-MJ avec encouragement à devenir DM */
@@ -956,122 +1042,54 @@ export default function DashboardPage() {
               </div>
             )}
 
+
+
             {/* DM Sidebar - Seulement si accès autorisé */}
             {canAccessDMView && (
               <div className="space-y-6">
-                {/* DM Tools */}
-                <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-                  <CardHeader>
-                    <h2 className="text-lg font-semibold text-white">DM Tools</h2>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <Button variant="glass" className="w-full justify-start">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Session
-                    </Button>
-                    <Button variant="glass" className="w-full justify-start">
-                      <Users className="h-4 w-4 mr-2" />
-                      Manage Players
-                    </Button>
-                    <Button variant="glass" className="w-full justify-start">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Schedule Events
-                    </Button>
-                    <Button variant="glass" className="w-full justify-start">
-                      <Settings className="h-4 w-4 mr-2" />
-                      Campaign Settings
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* DM Profile Settings */}
+                {/* Mastered Games */}
                 <Card className="bg-white/10 backdrop-blur-sm border-white/20">
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        <Settings className="h-4 w-4 text-purple-400" />
-                        <h2 className="text-lg font-semibold text-white">DM Profile</h2>
+                        <Gamepad2 className="h-5 w-5 text-blue-400" />
+                        <h2 className="text-lg font-semibold text-white">Mastered Games</h2>
                       </div>
-                      <Button variant="ghost" size="sm" className="text-purple-400 hover:text-white">
-                        <Edit className="h-3 w-3" />
+                      <Button 
+                        size="sm" 
+                        variant="glass"
+                        onClick={handleOpenAddMasteredGamePopup}
+                        disabled={!isDM}
+                      >
+                        <Plus className="h-4 w-4" />
                       </Button>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Location */}
-                    <div>
-                      <h3 className="text-sm font-medium text-white mb-2">Where I Play</h3>
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2">
-                          <MapPin className="h-3 w-3 text-gray-400" />
-                          <span className="text-xs text-gray-300">IRL: {dmSettings.location.irlLocation}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Monitor className="h-3 w-3 text-gray-400" />
-                          <span className="text-xs text-gray-300">Online: {dmSettings.location.vtt.join(', ')}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Pricing */}
-                    <div>
-                      <h3 className="text-sm font-medium text-white mb-2">Pricing</h3>
-                      <div className="flex items-center space-x-2">
-                        <DollarSign className="h-3 w-3 text-gray-400" />
-                        <span className="text-xs text-gray-300">
-                          {dmSettings.pricing.hourlyRate}{dmSettings.pricing.currency}/hour
-                        </span>
-                        {dmSettings.pricing.freeGames && (
-                          <Badge variant="success" size="sm">Free games available</Badge>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Mastered Games */}
-                    <div>
-                      <h3 className="text-sm font-medium text-white mb-2">Games I Master</h3>
-                      <div className="space-y-2">
-                        {dmSettings.masteredGames.map((game, index) => (
-                          <div key={index} className="flex items-center justify-between">
-                            <div>
-                              <p className="text-xs font-medium text-white">{game.name}</p>
-                              <p className="text-xs text-gray-400">{game.years} years experience</p>
-                            </div>
-                            <Badge 
-                              variant={
-                                game.experience === 'Expert' ? 'success' :
-                                game.experience === 'Advanced' ? 'warning' : 'default'
-                              } 
-                              size="sm"
-                            >
-                              {game.experience}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Statistics */}
-                <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-                  <CardHeader>
-                    <h2 className="text-lg font-semibold text-white">Your Stats</h2>
-                  </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-white">12</div>
-                        <div className="text-sm text-gray-300">Active Players</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-white">3</div>
-                        <div className="text-sm text-gray-300">Running Campaigns</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-white">24</div>
-                        <div className="text-sm text-gray-300">Sessions Completed</div>
-                      </div>
+                    <div className="space-y-3">
+                      {masteredGames.length === 0 ? (
+                        <p className="text-gray-400 text-sm">No mastered games yet</p>
+                      ) : (
+                        masteredGames.map((game) => (
+                          <div key={game._id} className="flex items-center justify-between p-2 bg-white/5 rounded border border-white/10">
+                            <div className="flex items-center space-x-2">
+                              <Gamepad2 className="h-3 w-3 text-blue-400" />
+                              <div>
+                                <p className="text-sm font-medium text-white">{game.name}</p>
+                                <p className="text-xs text-gray-400">{game.system}</p>
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeMasteredGame(game._id)}
+                              className="text-red-400 hover:text-red-300 hover:bg-red-400/10 p-1"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -1226,6 +1244,135 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* Add Mastered Games Modal */}
+      {showAddMasteredGamePopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowAddMasteredGamePopup(false)}
+          />
+          
+          {/* Modal */}
+          <div className="relative bg-gray-900 border border-white/20 rounded-lg p-6 max-w-md w-full mx-4 shadow-2xl">
+            {/* Close button */}
+            <button
+              onClick={() => setShowAddMasteredGamePopup(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            {/* Header */}
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Gamepad2 className="h-6 w-6 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-white mb-2">
+                Add Mastered Games
+              </h2>
+              <p className="text-gray-300">
+                Search and add games you've mastered as a DM
+              </p>
+            </div>
+
+            {/* Search */}
+            <div className="mb-6">
+              <div className="flex space-x-2">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search for games..."
+                    value={masteredSearchTerm}
+                    onChange={(e) => setMasteredSearchTerm(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSearchMasteredGames()}
+                    className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded text-white placeholder-gray-400 focus:outline-none focus:border-blue-400"
+                  />
+                </div>
+                <Button
+                  onClick={handleSearchMasteredGames}
+                  disabled={masteredSearchLoading}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0"
+                >
+                  {masteredSearchLoading ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  ) : (
+                    <Search className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {/* Results */}
+            {masteredSearchLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto mb-2"></div>
+                <p className="text-gray-400">Loading games...</p>
+              </div>
+            ) : availableMasteredGames.length > 0 ? (
+              <div className="max-h-64 overflow-y-auto space-y-2">
+                <h3 className="text-sm font-medium text-white mb-3">
+                  {masteredSearchTerm ? `Search Results for "${masteredSearchTerm}"` : 'Popular Games'}
+                </h3>
+                {availableMasteredGames.map((game) => (
+                  <div key={game._id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-white">{game.name}</p>
+                      {game.genre && (
+                        <p className="text-xs text-gray-400">{game.genre}</p>
+                      )}
+                      {game.system && (
+                        <p className="text-xs text-gray-500">{game.system}</p>
+                      )}
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => handleAddToMastered(game)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white border-0 ml-3"
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      Add
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : masteredSearchTerm ? (
+              <div className="text-center py-4">
+                <p className="text-gray-400">No games found matching "{masteredSearchTerm}"</p>
+                <p className="text-xs text-gray-500 mt-1">Try a different search term</p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="mt-2 border-gray-600 text-gray-300 hover:text-white hover:border-gray-500"
+                  onClick={() => {
+                    setMasteredSearchTerm('');
+                    handleSearchMasteredGames();
+                  }}
+                >
+                  Show Popular Games
+                </Button>
+              </div>
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-gray-400">No popular games available</p>
+                <p className="text-xs text-gray-500 mt-1">Try searching for specific games</p>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex justify-end mt-6">
+              <Button
+                variant="outline"
+                className="border-gray-600 text-gray-300 hover:text-white hover:border-gray-500"
+                onClick={() => setShowAddMasteredGamePopup(false)}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       
     </div>
   );

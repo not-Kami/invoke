@@ -67,7 +67,7 @@ export function useDashboardData() {
     .slice(0, 5);
 
   const isAdmin = user?.role === 'admin';
-  const isDM = user?.role === 'dm';
+  const isDM = user?.isDM;
 
   return {
     loading,

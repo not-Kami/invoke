@@ -120,20 +120,40 @@ export const uploadAvatar = catchAsync(async (req, res, next) => {
 // ===== RÔLE UTILISATEUR =====
 export const updateRole = catchAsync(async (req, res, next) => {
     const { id } = req.params;
-    const { role } = req.body;
+    const { role, isDM } = req.body;
     
     // Vérifier que l'utilisateur peut modifier ce rôle
     if (req.user._id.toString() !== id && req.user.role !== 'admin') {
         return next(new AppError('You can only modify your own role', 403));
     }
     
-    // Rôles autorisés
-    const allowedRoles = ['user', 'dm'];
-    if (!allowedRoles.includes(role)) {
-        return next(new AppError('Invalid role. Must be "user" or "dm"', 400));
+    const updateData = {};
+    
+    // Gérer le rôle si fourni
+    if (role !== undefined) {
+        // Rôles autorisés
+        const allowedRoles = ['user', 'admin'];
+        if (!allowedRoles.includes(role)) {
+            return next(new AppError('Invalid role. Must be "user" or "admin"', 400));
+        }
+        updateData.role = role;
     }
     
-    const user = await User.findByIdAndUpdate(id, { role }, { 
+    // Gérer le statut DM si fourni
+    if (isDM !== undefined) {
+        // Vérifier que isDM est un booléen
+        if (typeof isDM !== 'boolean') {
+            return next(new AppError('isDM must be a boolean value', 400));
+        }
+        updateData.isDM = isDM;
+    }
+    
+    // Vérifier qu'au moins un champ est fourni
+    if (Object.keys(updateData).length === 0) {
+        return next(new AppError('At least one field (role or isDM) must be provided', 400));
+    }
+    
+    const user = await User.findByIdAndUpdate(id, updateData, { 
         new: true, 
         runValidators: true 
     }).select('-password');
@@ -144,7 +164,8 @@ export const updateRole = catchAsync(async (req, res, next) => {
     
     res.json({
         success: true,
-        data: user
+        data: user,
+        message: 'User updated successfully'
     });
 });
 
@@ -152,8 +173,8 @@ export const updateRole = catchAsync(async (req, res, next) => {
 export const getFavorites = catchAsync(async (req, res, next) => {
     const { id } = req.params;
     
-    // Vérifier que l'utilisateur peut voir ces favoris
-    if (req.user._id.toString() !== id && req.user.role !== 'admin') {
+    // Vérifier que l'utilisateur peut voir ses propres favoris
+    if (req.user._id.toString() !== id) {
         return next(new AppError('You can only view your own favorites', 403));
     }
     
@@ -172,8 +193,8 @@ export const addFavorite = catchAsync(async (req, res, next) => {
     const { id } = req.params;
     const { gameId } = req.body;
     
-    // Vérifier que l'utilisateur peut modifier ses favoris
-    if (req.user._id.toString() !== id && req.user.role !== 'admin') {
+    // Vérifier que l'utilisateur peut modifier ses propres favoris
+    if (req.user._id.toString() !== id) {
         return next(new AppError('You can only modify your own favorites', 403));
     }
     
@@ -188,7 +209,11 @@ export const addFavorite = catchAsync(async (req, res, next) => {
     
     // Vérifier que le jeu n'est pas déjà en favori
     if (user.favorite_games.includes(gameId)) {
-        return next(new AppError('Game is already in favorites', 400));
+        return res.status(400).json({
+            success: false,
+            error: 'Game is already in favorites',
+            message: 'This game is already in your favorites list'
+        });
     }
     
     user.favorite_games.push(gameId);
@@ -207,14 +232,23 @@ export const addFavorite = catchAsync(async (req, res, next) => {
 export const removeFavorite = catchAsync(async (req, res, next) => {
     const { id, gameId } = req.params;
     
-    // Vérifier que l'utilisateur peut modifier ses favoris
-    if (req.user._id.toString() !== id && req.user.role !== 'admin') {
+    // Vérifier que l'utilisateur peut modifier ses propres favoris
+    if (req.user._id.toString() !== id) {
         return next(new AppError('You can only modify your own favorites', 403));
     }
     
     const user = await User.findById(id);
     if (!user) {
         return next(new AppError('User not found', 404));
+    }
+    
+    // Vérifier que le jeu est bien dans la liste des favoris
+    if (!user.favorite_games.includes(gameId)) {
+        return res.status(400).json({
+            success: false,
+            error: 'Game not found in favorites',
+            message: 'This game is not in your favorites list'
+        });
     }
     
     // Retirer le jeu des favoris
@@ -235,8 +269,8 @@ export const removeFavorite = catchAsync(async (req, res, next) => {
 export const getMastered = catchAsync(async (req, res, next) => {
     const { id } = req.params;
     
-    // Vérifier que l'utilisateur peut voir ces jeux maîtrisés
-    if (req.user._id.toString() !== id && req.user.role !== 'admin') {
+    // Vérifier que l'utilisateur peut voir ses propres jeux maîtrisés
+    if (req.user._id.toString() !== id) {
         return next(new AppError('You can only view your own mastered games', 403));
     }
     
@@ -255,13 +289,13 @@ export const addMastered = catchAsync(async (req, res, next) => {
     const { id } = req.params;
     const { gameId } = req.body;
     
-    // Vérifier que l'utilisateur peut modifier ses jeux maîtrisés
-    if (req.user._id.toString() !== id && req.user.role !== 'admin') {
+    // Vérifier que l'utilisateur peut modifier ses propres jeux maîtrisés
+    if (req.user._id.toString() !== id) {
         return next(new AppError('You can only modify your own mastered games', 403));
     }
     
     // Vérifier que l'utilisateur est un DM
-    if (req.user.role !== 'dm' && req.user.role !== 'admin') {
+    if (!req.user.isDM) {
         return next(new AppError('Only DMs can manage mastered games', 403));
     }
     
@@ -276,7 +310,11 @@ export const addMastered = catchAsync(async (req, res, next) => {
     
     // Vérifier que le jeu n'est pas déjà maîtrisé
     if (user.mastered_games.includes(gameId)) {
-        return next(new AppError('Game is already mastered', 400));
+        return res.status(400).json({
+            success: false,
+            error: 'Game is already mastered',
+            message: 'This game is already in your mastered games list'
+        });
     }
     
     user.mastered_games.push(gameId);
@@ -295,19 +333,28 @@ export const addMastered = catchAsync(async (req, res, next) => {
 export const removeMastered = catchAsync(async (req, res, next) => {
     const { id, gameId } = req.params;
     
-    // Vérifier que l'utilisateur peut modifier ses jeux maîtrisés
-    if (req.user._id.toString() !== id && req.user.role !== 'admin') {
+    // Vérifier que l'utilisateur peut modifier ses propres jeux maîtrisés
+    if (req.user._id.toString() !== id) {
         return next(new AppError('You can only modify your own mastered games', 403));
     }
     
     // Vérifier que l'utilisateur est un DM
-    if (req.user.role !== 'dm' && req.user.role !== 'admin') {
+    if (!req.user.isDM) {
         return next(new AppError('Only DMs can manage mastered games', 403));
     }
     
     const user = await User.findById(id);
     if (!user) {
         return next(new AppError('User not found', 404));
+    }
+    
+    // Vérifier que le jeu est bien dans la liste des jeux maîtrisés
+    if (!user.mastered_games.includes(gameId)) {
+        return res.status(400).json({
+            success: false,
+            error: 'Game not found in mastered games',
+            message: 'This game is not in your mastered games list'
+        });
     }
     
     // Retirer le jeu des jeux maîtrisés
