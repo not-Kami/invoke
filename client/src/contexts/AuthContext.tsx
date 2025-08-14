@@ -103,8 +103,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      // Appeler l'API pour mettre à jour l'utilisateur
-      const response = await usersApi.updateUser(user._id, updates);
+      // Appeler l'API pour mettre à jour le profil utilisateur
+      const response = await usersApi.updateProfile(user._id, updates);
       
       if (!response.success || !response.data) {
         throw new Error(response.error || 'Failed to update user');

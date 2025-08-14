@@ -19,6 +19,11 @@ interface User {
   isDM: boolean;
   featured: boolean;
   avatar?: string | null;
+  bio?: string;
+  nickname?: string;
+  favorite_games?: any[];
+  mastered_games?: any[];
+  evaluations?: any[];
   createdAt: string;
   updatedAt: string;
 }
@@ -231,6 +236,8 @@ export const adminAPI = {
 // ===== USERS API =====
 export const usersApi = {
   // Profil de base
+  getProfile: (userId: string) => 
+    apiCall<User>(`/users/${userId}`),
   updateProfile: (userId: string, data: Partial<User>) => 
     apiCall<User>(`/users/${userId}/profile`, { method: 'PUT', body: JSON.stringify(data) }),
   
@@ -255,8 +262,15 @@ export const usersApi = {
     apiCall<Game[]>(`/users/${userId}/mastered/${gameId}`, { method: 'DELETE' }),
   
   // Avatar
-  uploadAvatar: (userId: string, formData: FormData) => 
-    apiCall<User>(`/users/${userId}/avatar`, { method: 'POST', body: formData }),
+  uploadAvatar: (userId: string, file: File) => {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return apiCall<User>(`/users/${userId}/avatar`, { 
+      method: 'POST', 
+      body: formData,
+      headers: {} // Pas de Content-Type pour FormData
+    });
+  },
   
   // Suppression
   deleteUser: (userId: string) => 
