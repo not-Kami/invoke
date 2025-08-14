@@ -38,6 +38,7 @@ const AdminPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('users');
   const [users, setUsers] = useState<User[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [originalSessions, setOriginalSessions] = useState<Session[]>([]); // Pour sauvegarder les sessions originales
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
@@ -89,7 +90,7 @@ const AdminPage: React.FC = () => {
           }
           break;
         case 'sessions':
-          sessionsRes = await adminAPI.getSessions();
+          sessionsRes = await adminAPI.getSessions({ limit: 100 }); // Limite élevée = détection admin automatique
           break;
         case 'campaigns':
           campaignsRes = await adminAPI.getCampaigns();
@@ -125,10 +126,12 @@ const AdminPage: React.FC = () => {
       // Traitement des sessions
       if (sessionsRes && sessionsRes.success && sessionsRes.data) {
         setSessions(sessionsRes.data);
+        setOriginalSessions(sessionsRes.data); // Sauvegarder les sessions originales
         console.log('AdminPage: Sessions chargées:', sessionsRes.data.length);
       } else if (sessionsRes && Array.isArray(sessionsRes)) {
         // Fallback : si l'API retourne directement un tableau
         setSessions(sessionsRes);
+        setOriginalSessions(sessionsRes); // Sauvegarder les sessions originales
         console.log('AdminPage: Sessions chargées (format direct):', sessionsRes.length);
       } else if (sessionsRes && sessionsRes.error) {
         console.error('AdminPage: Erreur lors du chargement des sessions:', sessionsRes.error);
@@ -461,6 +464,76 @@ const AdminPage: React.FC = () => {
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-cinzel font-semibold text-white">Gestion des sessions</h3>
       </div>
+      
+      {/* Filtres pour les sessions */}
+      <div className="bg-slate-800/50 rounded-lg p-4 space-y-4">
+        <h4 className="text-sm font-medium text-slate-300">Filtres</h4>
+        <div className="flex flex-wrap gap-4">
+          {/* Filtre par statut */}
+          <div className="flex items-center space-x-2">
+            <label className="text-sm text-slate-400">Statut:</label>
+            <select 
+              className="bg-slate-700 border border-slate-600 rounded px-3 py-1 text-sm text-white"
+                             onChange={(e) => {
+                 const status = e.target.value;
+                 if (status === 'all') {
+                   setSessions(originalSessions); // Restaurer toutes les sessions
+                 } else {
+                   // Filtrer côté client
+                   const filteredSessions = originalSessions.filter(s => s.status === status);
+                   setSessions(filteredSessions);
+                 }
+               }}
+            >
+              <option value="all">Tous les statuts</option>
+              <option value="open">Ouvertes</option>
+              <option value="full">Complètes</option>
+              <option value="finished">Terminées</option>
+              <option value="cancelled">Annulées</option>
+            </select>
+          </div>
+          
+          {/* Filtre par type de session */}
+          <div className="flex items-center space-x-2">
+            <label className="text-sm text-slate-400">Type:</label>
+            <select 
+              className="bg-slate-700 border border-slate-600 rounded px-3 py-1 text-sm text-white"
+                             onChange={(e) => {
+                 const sessionType = e.target.value;
+                 if (sessionType === 'all') {
+                   setSessions(originalSessions); // Restaurer toutes les sessions
+                 } else {
+                   // Filtrer côté client
+                   const filteredSessions = originalSessions.filter(s => s.sessionType === sessionType);
+                   setSessions(filteredSessions);
+                 }
+               }}
+            >
+              <option value="all">Tous les types</option>
+              <option value="online">En ligne</option>
+              <option value="offline">En présentiel</option>
+            </select>
+          </div>
+          
+          {/* Bouton pour réinitialiser les filtres */}
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              setSessions(originalSessions); // Restaurer toutes les sessions
+            }}
+            className="text-slate-400 hover:text-white"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Réinitialiser
+          </Button>
+        </div>
+        
+        {/* Affichage du nombre de sessions filtrées */}
+        <div className="text-sm text-slate-400">
+          Affichage de {sessions.length} session(s)
+        </div>
+      </div>
       <ExpandableDataTable
         columns={[
           { key: 'title', label: 'Titre' },
@@ -477,11 +550,38 @@ const AdminPage: React.FC = () => {
           { 
             key: 'status', 
             label: 'Statut',
-            render: (value: string) => (
-              <Badge variant={value === 'open' ? 'success' : 'warning'}>
-                {value === 'open' ? 'Ouvert' : 'Complet'}
-              </Badge>
-            )
+            render: (value: string) => {
+              let variant: 'success' | 'warning' | 'default' | 'danger' = 'default';
+              let label = value;
+              
+              switch (value) {
+                case 'open':
+                  variant = 'success';
+                  label = 'Ouvert';
+                  break;
+                case 'full':
+                  variant = 'warning';
+                  label = 'Complet';
+                  break;
+                case 'finished':
+                  variant = 'default';
+                  label = 'Terminé';
+                  break;
+                case 'cancelled':
+                  variant = 'danger';
+                  label = 'Annulé';
+                  break;
+                default:
+                  variant = 'default';
+                  label = value;
+              }
+              
+              return (
+                <Badge variant={variant}>
+                  {label}
+                </Badge>
+              );
+            }
           },
           { 
             key: 'players', 
@@ -594,6 +694,9 @@ const AdminPage: React.FC = () => {
           <span>Ajouter un jeu</span>
         </Button>
       </div>
+      
+
+      
       <ExpandableDataTable
         columns={[
           { key: 'name', label: 'Nom' },

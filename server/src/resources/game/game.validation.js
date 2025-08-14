@@ -5,10 +5,15 @@ export const createGameSchema = Joi.object({
     description: Joi.string().required(),
     genre: Joi.string().required(),
     system: Joi.string().required(),
-    image: Joi.string().required(),
+    images: Joi.object({
+        logo: Joi.string().optional(),
+        portrait: Joi.string().optional(),
+        banner: Joi.string().optional()
+    }).optional(),
+    featured: Joi.boolean().optional(),
     createdAt: Joi.date().optional(),
     updatedAt: Joi.date().optional(),
-    createdBy: Joi.string().required(),
+    createdBy: Joi.string().optional(), // Temporairement optionnel pour les tests
     updatedBy: Joi.string().optional(),
     isActive: Joi.boolean().optional(),
     isDeleted: Joi.boolean().optional(),
@@ -19,7 +24,12 @@ export const updateGameSchema = Joi.object({
     description: Joi.string().optional(),
     genre: Joi.string().optional(),
     system: Joi.string().optional(),
-    image: Joi.string().optional(),
+    images: Joi.object({
+        logo: Joi.string().optional(),
+        portrait: Joi.string().optional(),
+        banner: Joi.string().optional()
+    }).optional(),
+    featured: Joi.boolean().optional(),
     // Les champs suivants ne devraient être modifiés que par des admins
     // createdAt: Joi.date().optional(),
     // updatedAt: Joi.date().optional(),

@@ -24,11 +24,22 @@ const gameController = {
                 .sort(sortOption)
                 .skip(skip)
                 .limit(parseInt(limit))
-                .select('name description genre system image isActive createdAt');
+                .select('name description genre system images featured createdAt')
+                .lean(); // Convertir en objets JavaScript simples
+            
+            // Ajouter featured: false par défaut si le champ n'existe pas
+            const gamesWithFeatured = games.map(game => ({
+                ...game,
+                featured: game.featured !== undefined ? game.featured : false
+            }));
+            
+            console.log('🔍 Jeux avant transformation:', games);
+            console.log('✨ Jeux après transformation:', gamesWithFeatured);
+            
             const total = await Game.countDocuments(filter);
             res.status(200).json({
                 success: true,
-                data: games,
+                data: gamesWithFeatured,
                 page: parseInt(page),
                 limit: parseInt(limit),
                 total
