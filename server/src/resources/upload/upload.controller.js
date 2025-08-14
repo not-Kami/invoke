@@ -168,9 +168,33 @@ export const uploadGameImage = async (req, res) => {
             });
         }
 
-        const gameId = req.params.gameId || req.body.gameId;
-        const gameName = req.params.gameName || req.body.gameName;
-        const imageType = req.body.imageType; // logo, banner, portrait
+        // Extraire les paramètres selon la route utilisée
+        let gameId, gameName, imageType;
+        
+        // Route: /game/:gameName/:imageType
+        if (req.params.gameName && req.params.imageType) {
+            gameName = req.params.gameName;
+            imageType = req.params.imageType;
+        }
+        // Route: /game/id/:gameId/:imageType
+        else if (req.params.gameId && req.params.imageType) {
+            gameId = req.params.gameId;
+            imageType = req.params.imageType;
+        }
+        // Route: /game/image (avec body)
+        else if (req.body.gameId || req.body.gameName) {
+            gameId = req.body.gameId;
+            gameName = req.body.gameName;
+            imageType = req.body.imageType;
+        }
+        
+        console.log('🔍 Paramètres extraits:', {
+            params: req.params,
+            body: req.body,
+            gameId,
+            gameName,
+            imageType
+        });
         
         if (!gameId && !gameName) {
             return res.status(400).json({
@@ -240,26 +264,88 @@ export const uploadGameImage = async (req, res) => {
         // Mettre à jour le jeu dans la base de données avec l'URL de l'image
         try {
             const Game = (await import('../../resources/game/game.model.js')).default;
-            const imageUrl = `/uploads/game/${identifier}/${req.file.filename}`;
+            
+            // Construire l'URL de l'image selon le type d'identifiant
+            const isGameId = /^[0-9a-fA-F]{24}$/.test(identifier);
+            const folderName = isGameId ? `id_${identifier}` : identifier;
+            const imageUrl = `/uploads/game/${folderName}/${req.file.filename}`;
+            
+            console.log('🔗 Construction de l\'URL:', {
+                identifier,
+                isGameId,
+                folderName,
+                imageUrl
+            });
+            
+            console.log('🔧 Debug mise à jour:', {
+                gameId,
+                gameName,
+                identifier,
+                imageType,
+                imageUrl
+            });
             
             // Mettre à jour le jeu avec l'URL de l'image
-            const updateResult = await Game.findByIdAndUpdate(
-                gameId,
-                { 
-                    $set: { 
-                        [`images.${imageType}`]: imageUrl 
-                    } 
-                },
-                { new: true }
-            );
+            // Utiliser l'ID si disponible, sinon chercher par nom
+            let updateResult;
+            if (gameId) {
+                console.log('🆔 Mise à jour par ID:', gameId);
+                // Mise à jour par ID
+                updateResult = await Game.findByIdAndUpdate(
+                    gameId,
+                    { 
+                        $set: { 
+                            [`images.${imageType}`]: imageUrl 
+                        } 
+                    },
+                    { new: true }
+                );
+            } else if (gameName) {
+                console.log('📝 Mise à jour par nom:', gameName);
+                
+                // D'abord, chercher le jeu pour vérifier son nom exact
+                const existingGame = await Game.findOne({ name: { $regex: new RegExp(gameName, 'i') } });
+                if (existingGame) {
+                    console.log('🔍 Jeu trouvé:', {
+                        id: existingGame._id,
+                        name: existingGame.name,
+                        exactMatch: existingGame.name === gameName
+                    });
+                } else {
+                    console.log('❌ Aucun jeu trouvé avec le nom:', gameName);
+                    // Lister tous les jeux pour debug
+                    const allGames = await Game.find({}, 'name');
+                    console.log('📋 Tous les jeux en base:', allGames.map(g => g.name));
+                }
+                
+                // Mise à jour par nom (insensible à la casse)
+                updateResult = await Game.findOneAndUpdate(
+                    { name: { $regex: new RegExp(gameName, 'i') } },
+                    { 
+                        $set: { 
+                            [`images.${imageType}`]: imageUrl 
+                        } 
+                    },
+                    { new: true }
+                );
+            } else {
+                console.log('❌ Ni gameId ni gameName disponible');
+            }
             
             if (updateResult) {
                 console.log('✅ Jeu mis à jour avec l\'image:', imageUrl);
+                console.log('📝 Jeu mis à jour:', updateResult.name);
+                console.log('🆔 ID du jeu mis à jour:', updateResult._id);
             } else {
                 console.log('⚠️ Jeu non trouvé pour la mise à jour');
+                console.log('🔍 Recherche avec:', { gameId, gameName, identifier });
             }
         } catch (updateError) {
             console.error('❌ Erreur lors de la mise à jour du jeu:', updateError);
+            console.error('🔍 Détails de l\'erreur:', {
+                message: updateError.message,
+                stack: updateError.stack
+            });
         }
         
         res.status(200).json({

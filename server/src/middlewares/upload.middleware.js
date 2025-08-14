@@ -112,12 +112,22 @@ const gameImageStorage = multer.diskStorage({
             return cb(new Error('Game name or ID is required'), null);
         }
         
+        // Déterminer si c'est un ID (24 caractères hex) ou un nom
+        const isGameId = /^[0-9a-fA-F]{24}$/.test(gameName);
+        const folderName = isGameId ? `id_${gameName}` : gameName;
+        
+        console.log('🔍 Type d\'identifiant:', {
+            gameName,
+            isGameId,
+            folderName
+        });
+        
         // Essayer plusieurs chemins possibles
         const possiblePaths = [
-            path.join(__dirname, '../../uploads/game', gameName),
-            path.join(process.cwd(), 'uploads/game', gameName),
-            path.join(process.cwd(), 'server/uploads/game', gameName),
-            `uploads/game/${gameName}`
+            path.join(__dirname, '../../uploads/game', folderName),
+            path.join(process.cwd(), 'uploads/game', folderName),
+            path.join(process.cwd(), 'server/uploads/game', folderName),
+            `uploads/game/${folderName}`
         ];
         
         console.log('🔍 Chemins possibles:');

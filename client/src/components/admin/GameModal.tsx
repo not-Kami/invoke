@@ -200,16 +200,30 @@ const GameModal: React.FC<GameModalProps> = ({
         
         const savedGame = await onSave(cleanGameData);
         
+        console.log('🔍 Debug onSave:', {
+          savedGame,
+          savedGameId: savedGame?._id,
+          gameDataToSend,
+          gameDataToSendId: gameDataToSend._id,
+          hasSelectedFiles: Object.keys(selectedFiles).length > 0
+        });
+        
         // Si on a des fichiers sélectionnés, les uploader après création
         if (Object.keys(selectedFiles).length > 0) {
-          // Utiliser l'ID du jeu créé (plus sûr que le nom normalisé)
+          // DÉTECTER si c'est un jeu existant ou nouveau
           let gameIdentifier;
-          if (savedGame && savedGame._id) {
-            gameIdentifier = savedGame._id;
+          
+          if (gameDataToSend._id) {
+            // JEU EXISTANT: Utiliser l'ID pour éviter la duplication
+            gameIdentifier = gameDataToSend._id;
+            console.log('🆔 Upload pour jeu EXISTANT avec ID:', gameIdentifier);
           } else {
-            // Fallback sur le nom normalisé si pas d'ID
+            // NOUVEAU JEU: Utiliser le nom formaté
             gameIdentifier = normalizeGameName(gameDataToSend.name || '');
+            console.log('📝 Upload pour NOUVEAU jeu avec nom:', gameIdentifier);
           }
+          
+          console.log('🎯 Identifiant final pour upload:', gameIdentifier);
           
           for (const [imageType, file] of Object.entries(selectedFiles)) {
             if (file) {
@@ -218,13 +232,22 @@ const GameModal: React.FC<GameModalProps> = ({
                 formData.append('image', file);
                 formData.append('imageType', imageType);
                 
-                const response = await fetch(`/api/v1/upload/game/id/${gameIdentifier}/${imageType}`, {
+                              // Utiliser la route appropriée selon le type d'identifiant
+              const uploadUrl = gameDataToSend._id 
+                ? `/api/v1/upload/game/id/${gameIdentifier}/${imageType}`  // Route avec ID
+                : `/api/v1/upload/game/${gameIdentifier}/${imageType}`;    // Route avec nom
+              
+              console.log('📤 Upload URL:', uploadUrl);
+                
+                const response = await fetch(uploadUrl, {
                   method: 'POST',
                   body: formData,
                 });
                 
                 if (!response.ok) {
                   console.error(`❌ Erreur upload ${imageType}:`, await response.text());
+                } else {
+                  console.log(`✅ Upload ${imageType} réussi`);
                 }
               } catch (error) {
                 console.error(`❌ Erreur upload ${imageType}:`, error);
