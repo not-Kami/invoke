@@ -20,6 +20,15 @@ Ce fichier liste toutes les tâches à accomplir, organisées par priorité, ses
 
 ## ✅ **SESSION ACTUELLE TERMINÉE (13/08/25)**
 
+### Upload d'Images & Carousel de Jeux
+* [x] **Upload d'images pour les jeux** : Logo, portrait, bannière
+* [x] **Résolution du problème de suppression** des fichiers nouvellement uploadés
+* [x] **Correction de la duplication** des jeux lors de la modification
+* [x] **Implémentation du carousel** de jeux mis en avant
+* [x] **Gestion des champs manquants** (featured) pour les jeux existants
+* [x] **Architecture robuste** pour la gestion des images
+* [x] **Types alignés** entre client et serveur
+
 ### Dashboard & Architecture Backend
 * [x] **Refactor complet du dashboard** avec séparation des responsabilités
 * [x] **Architecture RESTful** avec routes spécialisées
@@ -42,6 +51,17 @@ Ce fichier liste toutes les tâches à accomplir, organisées par priorité, ses
 ---
 
 ## 🔄 **EN COURS / PROCHAINES SESSIONS**
+
+### 🎯 **PRIORITÉ IMMÉDIATE - Demain (14/08/25)**
+* [ ] **Finaliser l'affichage des images** dans le carousel
+  * [ ] Tester l'upload d'images avec le nouveau contrôleur
+  * [ ] Vérifier que les URLs sont sauvegardées en base de données
+  * [ ] Confirmer l'affichage des images portrait en arrière-plan des cartes
+  * [ ] Nettoyer les logs de debug une fois fonctionnel
+* [ ] **Optimisation du carousel** de jeux mis en avant
+  * [ ] Vérifier les performances avec plusieurs jeux
+  * [ ] Ajouter des transitions fluides
+  * [ ] Gérer les cas d'erreur d'affichage d'images
 
 ### Backend API - Fonctionnalités Avancées
 * [ ] **Tests d'intégration** pour tous les endpoints CRUD

@@ -104,8 +104,11 @@ const sessionController = {
             }
             if (slots_gte) filter.slots = { $gte: parseInt(slots_gte) };
 
-            // Par défaut, ne pas afficher les sessions terminées
-            if (!req.query.showFinished) {
+            // Détecter si c'est une requête admin (pas de limite ou limite élevée)
+            const isAdminRequest = parseInt(limit) > 50 || req.query.admin === 'true';
+            
+            // Par défaut, ne pas afficher les sessions terminées SAUF pour l'admin
+            if (!req.query.showFinished && !isAdminRequest) {
                 filter.status = { $nin: ['finished', 'cancelled'] };
             }
             

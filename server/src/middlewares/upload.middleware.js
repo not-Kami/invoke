@@ -104,16 +104,47 @@ const campaignBannerStorage = multer.diskStorage({
 // Configuration du stockage pour les images de jeu
 const gameImageStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const gameName = req.params.gameName || req.body.gameName;
-        const imageType = req.body.imageType || 'logo'; // logo, banner, portrait
-        const uploadPath = `uploads/game/${gameName}`;
+        // Gérer à la fois gameName et gameId
+        const gameName = req.params.gameName || req.params.gameId || req.body.gameName || req.body.gameId;
+        const imageType = req.params.imageType || req.body.imageType || 'logo'; // logo, banner, portrait
+        
+        if (!gameName) {
+            return cb(new Error('Game name or ID is required'), null);
+        }
+        
+        // Déterminer si c'est un ID (24 caractères hex) ou un nom
+        const isGameId = /^[0-9a-fA-F]{24}$/.test(gameName);
+        const folderName = isGameId ? `id_${gameName}` : gameName;
+        
+        console.log('🔍 Type d\'identifiant:', {
+            gameName,
+            isGameId,
+            folderName
+        });
+        
+        // Essayer plusieurs chemins possibles
+        const possiblePaths = [
+            path.join(__dirname, '../../uploads/game', folderName),
+            path.join(process.cwd(), 'uploads/game', folderName),
+            path.join(process.cwd(), 'server/uploads/game', folderName),
+            `uploads/game/${folderName}`
+        ];
+        
+        console.log('🔍 Chemins possibles:');
+        possiblePaths.forEach((p, i) => console.log(`${i}: ${p}`));
+        
+        // Utiliser le premier chemin qui fonctionne
+        const uploadPath = possiblePaths[0];
+        console.log('📁 Chemin choisi:', uploadPath);
+        
         ensureDirectoryExists(uploadPath);
         cb(null, uploadPath);
     },
     filename: (req, file, cb) => {
-        const imageType = req.body.imageType || 'logo';
+        const imageType = req.params.imageType || req.body.imageType || 'logo';
         const extension = path.extname(file.originalname);
-        cb(null, `${imageType}${extension}`);
+        const filename = `${imageType}${extension}`;
+        cb(null, filename);
     }
 });
 

@@ -168,13 +168,38 @@ export const uploadGameImage = async (req, res) => {
             });
         }
 
-        const gameName = req.params.gameName || req.body.gameName;
-        const imageType = req.body.imageType; // logo, banner, portrait
+        // Extraire les paramètres selon la route utilisée
+        let gameId, gameName, imageType;
         
-        if (!gameName) {
+        // Route: /game/:gameName/:imageType
+        if (req.params.gameName && req.params.imageType) {
+            gameName = req.params.gameName;
+            imageType = req.params.imageType;
+        }
+        // Route: /game/id/:gameId/:imageType
+        else if (req.params.gameId && req.params.imageType) {
+            gameId = req.params.gameId;
+            imageType = req.params.imageType;
+        }
+        // Route: /game/image (avec body)
+        else if (req.body.gameId || req.body.gameName) {
+            gameId = req.body.gameId;
+            gameName = req.body.gameName;
+            imageType = req.body.imageType;
+        }
+        
+        console.log('🔍 Paramètres extraits:', {
+            params: req.params,
+            body: req.body,
+            gameId,
+            gameName,
+            imageType
+        });
+        
+        if (!gameId && !gameName) {
             return res.status(400).json({
                 success: false,
-                message: 'Nom du jeu requis'
+                message: 'ID ou nom du jeu requis'
             });
         }
 
@@ -185,30 +210,156 @@ export const uploadGameImage = async (req, res) => {
             });
         }
 
+        // Utiliser l'ID si disponible, sinon le nom
+        const identifier = gameId || gameName;
+        const isById = !!gameId;
+
         // Supprimer l'ancienne image du même type si elle existe
-        const oldImagePath = getFilePath('game', gameName, imageType);
+        const oldImagePath = getFilePath('game', identifier, imageType);
         const oldImageDir = path.dirname(oldImagePath);
         
         if (fs.existsSync(oldImageDir)) {
             const files = fs.readdirSync(oldImageDir);
             files.forEach(file => {
                 if (file.startsWith(imageType)) {
-                    fs.unlinkSync(path.join(oldImageDir, file));
+                    const fileToDelete = path.join(oldImageDir, file);
+                    try {
+                        // Ne pas supprimer le fichier qui vient d'être uploadé
+                        // Comparer les noms de fichiers sans le chemin absolu
+                        const currentFileName = path.basename(req.file.path);
+                        const fileToDeleteName = path.basename(fileToDelete);
+                        
+                        if (fileToDeleteName !== currentFileName) {
+                            fs.unlinkSync(fileToDelete);
+                            console.log('🗑️ Ancien fichier supprimé:', fileToDelete);
+                        } else {
+                            console.log('🛡️ Fichier actuel protégé:', currentFileName);
+                        }
+                    } catch (error) {
+                        console.log('Erreur lors de la suppression:', error);
+                    }
                 }
             });
         }
 
+        console.log('✅ Fichier uploadé avec succès');
+        console.log('filename:', req.file.filename);
+        console.log('path:', req.file.path);
+        console.log('size:', req.file.size);
+        console.log('mimetype:', req.file.mimetype);
+        console.log('url finale:', `/uploads/game/${identifier}/${req.file.filename}`);
+        
+        // Vérifier que le fichier existe réellement
+        const fileExists = fs.existsSync(req.file.path);
+        console.log('🔍 Vérification du fichier:');
+        console.log('📁 Chemin du fichier:', req.file.path);
+        console.log('📄 Fichier existe:', fileExists);
+        console.log('📊 Taille du fichier:', req.file.size);
+        
+        if (fileExists) {
+            const stats = fs.statSync(req.file.path);
+            console.log('📈 Stats du fichier:', stats);
+        }
+        
+        // Mettre à jour le jeu dans la base de données avec l'URL de l'image
+        try {
+            const Game = (await import('../../resources/game/game.model.js')).default;
+            
+            // Construire l'URL de l'image selon le type d'identifiant
+            const isGameId = /^[0-9a-fA-F]{24}$/.test(identifier);
+            const folderName = isGameId ? `id_${identifier}` : identifier;
+            const imageUrl = `/uploads/game/${folderName}/${req.file.filename}`;
+            
+            console.log('🔗 Construction de l\'URL:', {
+                identifier,
+                isGameId,
+                folderName,
+                imageUrl
+            });
+            
+            console.log('🔧 Debug mise à jour:', {
+                gameId,
+                gameName,
+                identifier,
+                imageType,
+                imageUrl
+            });
+            
+            // Mettre à jour le jeu avec l'URL de l'image
+            // Utiliser l'ID si disponible, sinon chercher par nom
+            let updateResult;
+            if (gameId) {
+                console.log('🆔 Mise à jour par ID:', gameId);
+                // Mise à jour par ID
+                updateResult = await Game.findByIdAndUpdate(
+                    gameId,
+                    { 
+                        $set: { 
+                            [`images.${imageType}`]: imageUrl 
+                        } 
+                    },
+                    { new: true }
+                );
+            } else if (gameName) {
+                console.log('📝 Mise à jour par nom:', gameName);
+                
+                // D'abord, chercher le jeu pour vérifier son nom exact
+                const existingGame = await Game.findOne({ name: { $regex: new RegExp(gameName, 'i') } });
+                if (existingGame) {
+                    console.log('🔍 Jeu trouvé:', {
+                        id: existingGame._id,
+                        name: existingGame.name,
+                        exactMatch: existingGame.name === gameName
+                    });
+                } else {
+                    console.log('❌ Aucun jeu trouvé avec le nom:', gameName);
+                    // Lister tous les jeux pour debug
+                    const allGames = await Game.find({}, 'name');
+                    console.log('📋 Tous les jeux en base:', allGames.map(g => g.name));
+                }
+                
+                // Mise à jour par nom (insensible à la casse)
+                updateResult = await Game.findOneAndUpdate(
+                    { name: { $regex: new RegExp(gameName, 'i') } },
+                    { 
+                        $set: { 
+                            [`images.${imageType}`]: imageUrl 
+                        } 
+                    },
+                    { new: true }
+                );
+            } else {
+                console.log('❌ Ni gameId ni gameName disponible');
+            }
+            
+            if (updateResult) {
+                console.log('✅ Jeu mis à jour avec l\'image:', imageUrl);
+                console.log('📝 Jeu mis à jour:', updateResult.name);
+                console.log('🆔 ID du jeu mis à jour:', updateResult._id);
+            } else {
+                console.log('⚠️ Jeu non trouvé pour la mise à jour');
+                console.log('🔍 Recherche avec:', { gameId, gameName, identifier });
+            }
+        } catch (updateError) {
+            console.error('❌ Erreur lors de la mise à jour du jeu:', updateError);
+            console.error('🔍 Détails de l\'erreur:', {
+                message: updateError.message,
+                stack: updateError.stack
+            });
+        }
+        
         res.status(200).json({
             success: true,
             message: `Image ${imageType} du jeu uploadée avec succès`,
             data: {
+                gameId,
                 gameName,
                 imageType,
                 filename: req.file.filename,
                 path: req.file.path,
                 size: req.file.size,
                 mimetype: req.file.mimetype,
-                url: `/uploads/game/${gameName}/${req.file.filename}`
+                url: `/uploads/game/${identifier}/${req.file.filename}`
             }
         });
     } catch (error) {
