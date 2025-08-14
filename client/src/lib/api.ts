@@ -232,7 +232,10 @@ export const usersApi = {
   updateProfile: (userId: string, data: Partial<User>) => 
     apiCall<User>(`/users/${userId}/profile`, { method: 'PUT', body: JSON.stringify(data) }),
   
-  // Rôle utilisateur
+  // Rôle utilisateur et statut DM
+  updateUser: (userId: string, data: Partial<User>) => 
+    apiCall<User>(`/users/${userId}/role`, { method: 'PUT', body: JSON.stringify(data) }),
+  
   updateRole: (userId: string, role: string) => 
     apiCall<User>(`/users/${userId}/role`, { method: 'PUT', body: JSON.stringify({ role }) }),
   
