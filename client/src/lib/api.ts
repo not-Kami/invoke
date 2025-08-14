@@ -149,15 +149,17 @@ export const adminAPI = {
     dm?: string;
     page?: number;
     limit?: number;
+    showFinished?: boolean;
   }) => {
     const params = new URLSearchParams();
-    if (filters?.search) params.append('search', filters.search);
+    if (filters?.search) params.append('q', filters.search); // Le serveur attend 'q' pas 'search'
     if (filters?.sessionType) params.append('sessionType', filters.sessionType);
     if (filters?.status) params.append('status', filters.status);
     if (filters?.game) params.append('game', filters.game);
     if (filters?.dm) params.append('dm', filters.dm);
     if (filters?.page) params.append('page', filters.page.toString());
     if (filters?.limit) params.append('limit', filters.limit.toString());
+    if (filters?.showFinished) params.append('showFinished', 'true');
     
     const queryString = params.toString();
     const endpoint = queryString ? `/sessions?${queryString}` : '/sessions';
