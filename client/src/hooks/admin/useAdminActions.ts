@@ -100,7 +100,9 @@ export const useAdminActions = () => {
           }
           break;
         case 'session':
+          console.log('useAdminActions: Sending adminUpdateSessionFeatured request:', { id, featured });
           response = await adminAPI.adminUpdateSessionFeatured(id, featured);
+          console.log('useAdminActions: Session featured response received:', response);
           if (response.success && response.data) {
             setter((prev: any[]) => prev.map((item: any) => 
               item._id === id ? { ...item, featured } : item
