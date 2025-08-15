@@ -15,13 +15,13 @@ import {
   Eye, 
   Heart 
 } from 'lucide-react';
-import Button from '../components/ui/Button';
-import { Card, CardContent } from '../components/ui/Card';
-import Badge from '../components/ui/Badge';
-import HeroImage from '../assets/hero_section.webp';
-import { Game, Session } from '../types';
-import { useFavoriteGames } from '../hooks/useFavoriteGames';
-import { useAuth } from '../contexts/AuthContext';
+import Button from '../../components/ui/Button';
+import { Card, CardContent } from '../../components/ui/Card';
+import Badge from '../../components/ui/Badge';
+import HeroImage from '../../assets/hero_section.webp';
+import { Game, Session } from '../../types';
+import { useFavoriteGames } from '../../hooks/useFavoriteGames';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function HomePage() {
   const navigate = useNavigate();
