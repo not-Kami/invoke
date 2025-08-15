@@ -19,6 +19,11 @@ interface User {
   isDM: boolean;
   featured: boolean;
   avatar?: string | null;
+  bio?: string;
+  nickname?: string;
+  favorite_games?: any[];
+  mastered_games?: any[];
+  evaluations?: any[];
   createdAt: string;
   updatedAt: string;
 }
@@ -149,15 +154,17 @@ export const adminAPI = {
     dm?: string;
     page?: number;
     limit?: number;
+    showFinished?: boolean;
   }) => {
     const params = new URLSearchParams();
-    if (filters?.search) params.append('search', filters.search);
+    if (filters?.search) params.append('q', filters.search); // Le serveur attend 'q' pas 'search'
     if (filters?.sessionType) params.append('sessionType', filters.sessionType);
     if (filters?.status) params.append('status', filters.status);
     if (filters?.game) params.append('game', filters.game);
     if (filters?.dm) params.append('dm', filters.dm);
     if (filters?.page) params.append('page', filters.page.toString());
     if (filters?.limit) params.append('limit', filters.limit.toString());
+    if (filters?.showFinished) params.append('showFinished', 'true');
     
     const queryString = params.toString();
     const endpoint = queryString ? `/sessions?${queryString}` : '/sessions';
@@ -229,6 +236,8 @@ export const adminAPI = {
 // ===== USERS API =====
 export const usersApi = {
   // Profil de base
+  getProfile: (userId: string) => 
+    apiCall<User>(`/users/${userId}`),
   updateProfile: (userId: string, data: Partial<User>) => 
     apiCall<User>(`/users/${userId}/profile`, { method: 'PUT', body: JSON.stringify(data) }),
   
@@ -253,8 +262,15 @@ export const usersApi = {
     apiCall<Game[]>(`/users/${userId}/mastered/${gameId}`, { method: 'DELETE' }),
   
   // Avatar
-  uploadAvatar: (userId: string, formData: FormData) => 
-    apiCall<User>(`/users/${userId}/avatar`, { method: 'POST', body: formData }),
+  uploadAvatar: (userId: string, file: File) => {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return apiCall<User>(`/users/${userId}/avatar`, { 
+      method: 'POST', 
+      body: formData,
+      headers: {} // Pas de Content-Type pour FormData
+    });
+  },
   
   // Suppression
   deleteUser: (userId: string) => 
