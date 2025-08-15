@@ -25,7 +25,6 @@ import {
   Eye,
   CheckCircle,
   XCircle,
-  Monitor,
   DollarSign,
   Megaphone,
   Heart,

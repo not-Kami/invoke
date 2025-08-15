@@ -1,44 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import Avatar from '../../components/ui/Avatar';
 import Input from '../../components/ui/Input';
-import { usersApi } from '../../lib/api';
+import { usersApi, publicAPI, Game } from '../../lib/api';
 import { useNotification } from '../../hooks/useNotification';
 import ImagePreview from '../../components/ui/ImagePreview';
 import { 
   User, 
   Mail, 
   Calendar,
-  MapPin,
   Edit,
   Save,
   X,
   Camera,
-  Star,
   Heart,
-  Settings,
   Crown,
-  DollarSign,
-  Monitor,
-  Globe,
-  Shield,
-  Bell,
-  Eye,
-  EyeOff
+  Star
 } from 'lucide-react';
+
+interface ProfileData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  bio: string;
+  nickname: string;
+  avatar?: string | null;
+  isDM: boolean;
+  favorite_games: Game[];
+  mastered_games: Game[];
+  evaluations: any[];
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface ProfilePageProps {
   defaultEditMode?: boolean;
 }
 
 export default function ProfilePage({ defaultEditMode = false }: ProfilePageProps) {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const { success, error, warning } = useNotification();
   const [isEditing, setIsEditing] = useState(defaultEditMode);
-  const [activeTab, setActiveTab] = useState<'personal' | 'preferences' | 'dm-settings' | 'privacy'>('personal');
+  const [activeTab, setActiveTab] = useState<'personal' | 'preferences' | 'dm-settings' | 'feedback'>('personal');
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
@@ -53,63 +59,120 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
     );
   }
 
-  // Données mockées pour le profil
-  const [profileData, setProfileData] = useState({
+  // État pour les données du profil
+  const [profileData, setProfileData] = useState<ProfileData>({
     firstName: user.firstName,
     lastName: user.lastName,
     email: user.email,
-    bio: "Passionate tabletop RPG player with 5+ years of experience. Love exploring new worlds and creating memorable stories with friends.",
-    location: "Paris, France",
-    joinedDate: "2023-06-15",
-    avatar: null,
-    preferences: {
-      favoriteGames: [
-        { name: "Dungeons & Dragons 5e", level: "Expert", favorite: true },
-        { name: "Pathfinder 2e", level: "Intermediate", favorite: true },
-        { name: "Call of Cthulhu", level: "Beginner", favorite: false },
-        { name: "Cyberpunk Red", level: "Intermediate", favorite: false }
-      ],
-      playStyle: ["Roleplay", "Combat", "Exploration"],
-      availability: ["Weekends", "Weekday Evenings"],
-      preferredSessionLength: "3-4 hours"
-    },
-    dmSettings: {
-      isDM: false,
-      experience: "2 years",
-      location: {
-        irl: true,
-        online: true,
-        irlLocation: "Paris 11ème",
-        vtt: ["Roll20", "Foundry VTT"]
-      },
-      pricing: {
-        hourlyRate: 15,
-        currency: "€",
-        freeGames: true
-      },
-      masteredGames: [
-        { name: "D&D 5e", experience: "Advanced", years: 2 },
-        { name: "Call of Cthulhu", experience: "Intermediate", years: 1 }
-      ]
-    },
-    privacy: {
-      profileVisibility: "public",
-      showEmail: false,
-      showLocation: true,
-      allowMessages: true,
-      notifications: {
-        email: true,
-        push: true,
-        gameInvites: true,
-        announcements: false
-      }
-    }
+    bio: user.bio || "Aucune bio pour le moment...",
+    nickname: user.nickname || "",
+    avatar: user.avatar,
+    isDM: user.isDM,
+    favorite_games: [],
+    mastered_games: [],
+    evaluations: [],
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt
   });
 
-  const handleSave = () => {
-    // Ici on sauvegarderait via l'API
-    setIsEditing(false);
-    // API call would go here
+  // État pour les jeux disponibles
+  const [availableGames, setAvailableGames] = useState<Game[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Charger les données du profil
+  const loadProfileData = useCallback(async () => {
+    if (!user?._id) return;
+    
+    setLoading(true);
+    try {
+      // Charger le profil de base
+      const profileResponse = await usersApi.getProfile(user._id);
+      if (profileResponse.success && profileResponse.data) {
+        setProfileData(prev => ({ ...prev, ...profileResponse.data }));
+      }
+
+      // Charger les jeux favoris
+      const favoritesResponse = await usersApi.getFavorites(user._id);
+      if (favoritesResponse.success && favoritesResponse.data) {
+        setProfileData(prev => ({ ...prev, favorite_games: favoritesResponse.data || [] }));
+      }
+
+      // Charger les jeux maîtrisés si l'utilisateur est DM
+      if (user.isDM) {
+        const masteredResponse = await usersApi.getMastered(user._id);
+        if (masteredResponse.success && masteredResponse.data) {
+          setProfileData(prev => ({ ...prev, mastered_games: masteredResponse.data || [] }));
+        }
+      }
+
+      // Charger tous les jeux disponibles
+      const gamesResponse = await publicAPI.getGames();
+      if (gamesResponse.success && gamesResponse.data) {
+        setAvailableGames(gamesResponse.data);
+      }
+    } catch (err) {
+      console.error('Error loading profile data:', err);
+              error('Loading Error', 'Unable to load profile data');
+    } finally {
+      setLoading(false);
+    }
+  }, [user?._id, user?.isDM, error]);
+
+  useEffect(() => {
+    loadProfileData();
+  }, [loadProfileData]);
+
+  // Debug: surveiller les changements de l'état d'édition
+  useEffect(() => {
+    console.log('Editing state changed:', isEditing);
+  }, [isEditing]);
+
+  // Protection contre la remise en édition automatique
+  const [shouldCloseEdit, setShouldCloseEdit] = useState(false);
+
+  useEffect(() => {
+    if (shouldCloseEdit) {
+      setIsEditing(false);
+      setShouldCloseEdit(false);
+    }
+  }, [shouldCloseEdit]);
+
+  const handleSave = async () => {
+    if (!user?._id) return;
+    
+    try {
+      setLoading(true);
+      const response = await usersApi.updateProfile(user._id, {
+        firstName: profileData.firstName,
+        lastName: profileData.lastName,
+        bio: profileData.bio,
+        nickname: profileData.nickname
+      });
+      
+      if (response.success && response.data) {
+        // Mettre à jour le profil local directement
+        setProfileData(prev => ({ ...prev, ...response.data }));
+        
+        // Mettre à jour l'utilisateur dans le contexte d'auth (optionnel)
+        try {
+          await updateUser(response.data);
+        } catch (err) {
+          console.warn('Could not update user in auth context:', err);
+        }
+        
+        success('Profile Updated', 'Your profile has been updated successfully!');
+        
+        // Marquer qu'il faut fermer l'édition
+        setShouldCloseEdit(true);
+      } else {
+        error('Update Error', response.message || 'Error during update');
+      }
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      error('Update Error', 'Error updating profile');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
@@ -123,12 +186,12 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
 
     // Validation du fichier
     if (!file.type.startsWith('image/')) {
-      error('Fichier invalide', 'Veuillez sélectionner un fichier image valide.');
+      error('Invalid File', 'Please select a valid image file.');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) { // 5MB
-      error('Fichier trop volumineux', 'Taille maximale : 5MB.');
+      error('File Too Large', 'Maximum size: 5MB.');
       return;
     }
 
@@ -143,32 +206,26 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
     try {
       const response = await usersApi.uploadAvatar(user._id, selectedImage);
       
-      if (response.success) {
-
-        
+      if (response.success && response.data) {
         // Mettre à jour l'utilisateur local avec le nouvel avatar
-        const updatedUser = { ...user, avatar: response.data.file.url };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        const updatedUser = { ...user, avatar: response.data!.avatar };
         
-        // Mettre à jour l'objet user principal (important pour l'affichage)
-        // Note: Dans un vrai projet, on utiliserait un contexte React ou Redux
-        // Pour l'instant, on force la mise à jour en rechargeant la page
-        success('Avatar mis à jour', 'Votre photo de profil a été modifiée avec succès !');
+        // Mettre à jour l'utilisateur dans le contexte d'auth
+        await updateUser(updatedUser);
+        
+        // Mettre à jour le profil local
+        setProfileData(prev => ({ ...prev, avatar: response.data!.avatar }));
+        
+        success('Avatar Updated', 'Your profile picture has been updated successfully!');
         
         // Réinitialiser l'image sélectionnée
         setSelectedImage(null);
-        
-        // Forcer la mise à jour de l'interface en rechargeant la page
-        // C'est une solution temporaire - idéalement on utiliserait un contexte
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
       } else {
-        error('Erreur d\'upload', response.message || 'Erreur inconnue lors de l\'upload');
+        error('Upload Error', response.message || 'Unknown error during upload');
       }
     } catch (err) {
       console.error('Error uploading avatar:', err);
-      error('Erreur d\'upload', 'Erreur lors de l\'upload de l\'avatar. Veuillez réessayer.');
+      error('Upload Error', 'Error uploading avatar. Please try again.');
     } finally {
       setAvatarLoading(false);
     }
@@ -178,11 +235,13 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
     setSelectedImage(null);
   };
 
+
+
   const tabs = [
-    { id: 'personal', label: 'Personal Info', icon: User },
-    { id: 'preferences', label: 'Game Preferences', icon: Heart },
-    ...(user.isDM || profileData.dmSettings.isDM ? [{ id: 'dm-settings', label: 'DM Settings', icon: Crown }] : []),
-    { id: 'privacy', label: 'Privacy & Notifications', icon: Shield }
+    { id: 'personal', label: 'Personal Information', icon: User },
+    { id: 'preferences', label: 'Favorite Games', icon: Heart },
+    ...(user.isDM || profileData.isDM ? [{ id: 'dm-settings', label: 'Mastered Games', icon: Crown }] : []),
+    { id: 'feedback', label: 'Reviews & Feedback', icon: Star }
   ];
 
   return (
@@ -191,18 +250,13 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-white">Profile Settings</h1>
-            <div className="flex items-center space-x-2">
-              <Badge variant={user.role === 'admin' ? 'success' : 'default'}>
-                {user.role}
+            <h1 className="text-3xl font-bold text-white">Profile</h1>
+            {profileData.isDM && (
+              <Badge variant="warning">
+                <Crown className="h-3 w-3 mr-1" />
+                Dungeon Master
               </Badge>
-              {profileData.dmSettings.isDM && (
-                <Badge variant="warning">
-                  <Crown className="h-3 w-3 mr-1" />
-                  Dungeon Master
-                </Badge>
-              )}
-            </div>
+            )}
           </div>
         </div>
 
@@ -250,7 +304,7 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
                         size="sm"
                         className="bg-purple-600 hover:bg-purple-700 text-white"
                       >
-                        {avatarLoading ? 'Upload en cours...' : 'Confirmer l\'upload'}
+                        {avatarLoading ? 'Uploading...' : 'Confirm Upload'}
                       </Button>
                     </div>
                   </div>
@@ -261,12 +315,12 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
                 
                 {/* Message d'aide pour l'upload */}
                 <p className="text-xs text-gray-400 mb-2">
-                  Cliquez sur l'icône de caméra pour changer votre photo de profil
+                  Click on the camera icon to change your profile picture
                 </p>
                 <p className="text-gray-300 text-sm mb-2">{profileData.email}</p>
                 <div className="flex items-center justify-center space-x-1 text-xs text-gray-400">
                   <Calendar className="h-3 w-3" />
-                  <span>Joined {new Date(profileData.joinedDate).toLocaleDateString()}</span>
+                  <span>Joined {new Date(profileData.createdAt).toLocaleDateString()}</span>
                 </div>
               </CardContent>
             </Card>
@@ -317,10 +371,11 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
                         <Button
                           size="sm"
                           onClick={handleSave}
-                          className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white border-0"
+                          disabled={loading}
+                          className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white border-0 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <Save className="h-4 w-4 mr-2" />
-                          Save Changes
+                          {loading ? 'Saving...' : 'Save Changes'}
                         </Button>
                       </>
                     ) : (
@@ -390,20 +445,17 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
 
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Location
+                        Nickname
                       </label>
                       {isEditing ? (
                         <Input
-                          value={profileData.location}
-                          onChange={(e) => setProfileData({...profileData, location: e.target.value})}
+                          value={profileData.nickname}
+                          onChange={(e) => setProfileData({...profileData, nickname: e.target.value})}
                           className="bg-gray-800/50 border-gray-600 text-white"
-                          placeholder="City, Country"
+                          placeholder="Your nickname (optional)"
                         />
                       ) : (
-                        <div className="flex items-center space-x-2">
-                          <MapPin className="h-4 w-4 text-gray-400" />
-                          <p className="text-white">{profileData.location}</p>
-                        </div>
+                        <p className="text-white">{profileData.nickname || "No nickname"}</p>
                       )}
                     </div>
 
@@ -429,211 +481,108 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
                 {activeTab === 'preferences' && (
                   <div className="space-y-6">
                     <div>
-                      <h3 className="text-lg font-medium text-white mb-4">Game Preferences</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {profileData.preferences.favoriteGames.map((game, index) => (
-                          <div key={index} className="p-4 bg-white/5 rounded-lg border border-white/10">
-                            <div className="flex items-center justify-between mb-2">
-                              <h4 className="font-medium text-white">{game.name}</h4>
-                              <div className="flex items-center space-x-2">
-                                <button className={`p-1 rounded ${game.favorite ? 'text-red-400' : 'text-gray-400'}`}>
-                                  <Heart className={`h-4 w-4 ${game.favorite ? 'fill-current' : ''}`} />
-                                </button>
+                      <h3 className="text-lg font-medium text-white mb-4">Favorite Games</h3>
+                      {profileData.favorite_games.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {profileData.favorite_games.map((game: Game) => (
+                            <div key={game._id} className="p-4 bg-white/5 rounded-lg border border-white/10">
+                              <div className="mb-2">
+                                <h4 className="font-medium text-white">{game.name}</h4>
+                              </div>
+                              <p className="text-sm text-gray-400 mb-2">{game.description}</p>
+                              <div className="flex items-center justify-between">
+                                <Badge variant="info" size="sm">{game.genre}</Badge>
+                                <Badge variant="default" size="sm">{game.system}</Badge>
                               </div>
                             </div>
-                            <div className="flex items-center justify-between">
-                              <Badge variant="info" size="sm">{game.level}</Badge>
-                              <div className="flex items-center space-x-1">
-                                {Array.from({ length: 3 }, (_, i) => (
-                                  <Star 
-                                    key={i} 
-                                    className={`h-3 w-3 ${
-                                      (game.level === 'Expert' && i < 3) ||
-                                      (game.level === 'Intermediate' && i < 2) ||
-                                      (game.level === 'Beginner' && i < 1)
-                                        ? 'text-yellow-400 fill-current' 
-                                        : 'text-gray-600'
-                                    }`} 
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h3 className="text-lg font-medium text-white mb-4">Play Style</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {profileData.preferences.playStyle.map((style) => (
-                          <Badge key={style} variant="default">{style}</Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h3 className="text-lg font-medium text-white mb-4">Availability</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {profileData.preferences.availability.map((time) => (
-                          <Badge key={time} variant="info">{time}</Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h3 className="text-lg font-medium text-white mb-2">Preferred Session Length</h3>
-                      <p className="text-gray-300">{profileData.preferences.preferredSessionLength}</p>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <Heart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-400 mb-4">No favorite games yet</p>
+                          <p className="text-sm text-gray-500">Your favorite games will appear here</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
 
                 {activeTab === 'dm-settings' && (
                   <div className="space-y-6">
-                    <div className="flex items-center justify-between">
+                    <div>
                       <h3 className="text-lg font-medium text-white">Dungeon Master Profile</h3>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm text-gray-300">DM Mode</span>
-                        <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-purple-600">
-                          <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
-                        </button>
-                      </div>
                     </div>
 
                     <div>
-                      <h4 className="text-md font-medium text-white mb-3">Where I Run Games</h4>
-                      <div className="space-y-3">
-                        <div className="flex items-center space-x-2">
-                          <MapPin className="h-4 w-4 text-gray-400" />
-                          <span className="text-gray-300">In Person:</span>
-                          <span className="text-white">{profileData.dmSettings.location.irlLocation}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Monitor className="h-4 w-4 text-gray-400" />
-                          <span className="text-gray-300">Online:</span>
-                          <div className="flex space-x-1">
-                            {profileData.dmSettings.location.vtt.map((vtt) => (
-                              <Badge key={vtt} variant="default" size="sm">{vtt}</Badge>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="text-md font-medium text-white mb-3">Pricing</h4>
-                      <div className="flex items-center space-x-4">
-                        <div className="flex items-center space-x-2">
-                          <DollarSign className="h-4 w-4 text-gray-400" />
-                          <span className="text-white">
-                            {profileData.dmSettings.pricing.hourlyRate}{profileData.dmSettings.pricing.currency}/hour
-                          </span>
-                        </div>
-                        {profileData.dmSettings.pricing.freeGames && (
-                          <Badge variant="success" size="sm">Free games available</Badge>
-                        )}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="text-md font-medium text-white mb-3">Games I Master</h4>
-                      <div className="space-y-3">
-                        {profileData.dmSettings.masteredGames.map((game, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
-                            <div>
-                              <h5 className="font-medium text-white">{game.name}</h5>
-                              <p className="text-sm text-gray-400">{game.years} years experience</p>
+                      <h4 className="text-md font-medium text-white mb-3">Mastered Games</h4>
+                      {profileData.mastered_games.length > 0 ? (
+                        <div className="space-y-3">
+                          {profileData.mastered_games.map((game: Game) => (
+                            <div key={game._id} className="p-3 bg-white/5 rounded-lg border border-white/10">
+                              <div>
+                                <h5 className="font-medium text-white">{game.name}</h5>
+                                <p className="text-sm text-gray-400">{game.system}</p>
+                              </div>
                             </div>
-                            <Badge 
-                              variant={
-                                game.experience === 'Expert' ? 'success' :
-                                game.experience === 'Advanced' ? 'warning' : 'default'
-                              }
-                            >
-                              {game.experience}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-6">
+                          <Crown className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-400 mb-4">No mastered games yet</p>
+                          <p className="text-sm text-gray-500">Your mastered games will appear here</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
 
-                {activeTab === 'privacy' && (
+                {activeTab === 'feedback' && (
                   <div className="space-y-6">
                     <div>
-                      <h3 className="text-lg font-medium text-white mb-4">Profile Visibility</h3>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-white">Profile Visibility</p>
-                            <p className="text-sm text-gray-400">Who can see your profile</p>
-                          </div>
-                          <select className="bg-gray-800 border border-gray-600 text-white rounded px-3 py-1">
-                            <option value="public">Public</option>
-                            <option value="friends">Friends Only</option>
-                            <option value="private">Private</option>
-                          </select>
+                      <h3 className="text-lg font-medium text-white mb-4">Reviews & Feedback Received</h3>
+                      {profileData.evaluations && profileData.evaluations.length > 0 ? (
+                        <div className="space-y-4">
+                          {profileData.evaluations.map((evaluation: any, index: number) => (
+                            <div key={index} className="p-4 bg-white/5 rounded-lg border border-white/10">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center space-x-2">
+                                  <div className="flex items-center space-x-1">
+                                    {Array.from({ length: 5 }, (_, i) => (
+                                      <Star 
+                                        key={i} 
+                                        className={`h-4 w-4 ${
+                                          i < evaluation.rating 
+                                            ? 'text-yellow-400 fill-current' 
+                                            : 'text-gray-500'
+                                        }`} 
+                                      />
+                                    ))}
+                                  </div>
+                                  <span className="text-sm text-gray-400">by {evaluation.author?.firstName || 'Anonymous'}</span>
+                                </div>
+                                <span className="text-xs text-gray-500">
+                                  {new Date(evaluation.createdAt).toLocaleDateString('en-US')}
+                                </span>
+                              </div>
+                              {evaluation.comment && (
+                                <p className="text-gray-300 text-sm">{evaluation.comment}</p>
+                              )}
+                            </div>
+                          ))}
                         </div>
-                        
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-white">Show Email</p>
-                            <p className="text-sm text-gray-400">Display email on profile</p>
-                          </div>
-                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-600">
-                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition" />
-                          </button>
+                      ) : (
+                        <div className="text-center py-8">
+                          <Star className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-400 mb-4">No reviews or feedback yet</p>
+                          <p className="text-sm text-gray-500">Reviews you receive will appear here</p>
                         </div>
-
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-white">Show Location</p>
-                            <p className="text-sm text-gray-400">Display location on profile</p>
-                          </div>
-                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-purple-600">
-                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h3 className="text-lg font-medium text-white mb-4">Notifications</h3>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-white">Email Notifications</p>
-                            <p className="text-sm text-gray-400">Receive updates via email</p>
-                          </div>
-                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-purple-600">
-                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
-                          </button>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-white">Game Invitations</p>
-                            <p className="text-sm text-gray-400">Get notified about game invites</p>
-                          </div>
-                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-purple-600">
-                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
-                          </button>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-white">Announcements</p>
-                            <p className="text-sm text-gray-400">Platform updates and news</p>
-                          </div>
-                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-600">
-                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition" />
-                          </button>
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 )}
+
               </CardContent>
             </Card>
           </div>
