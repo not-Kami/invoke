@@ -63,6 +63,22 @@ Ce fichier liste toutes les tâches à accomplir, organisées par priorité, ses
   * [ ] Ajouter des transitions fluides
   * [ ] Gérer les cas d'erreur d'affichage d'images
 
+### 🆕 **NOUVELLES FONCTIONNALITÉS - Contact & About**
+* [ ] **Page About** - Créer une page "À propos" complète
+  * [ ] Histoire et mission d'Invoke
+  * [ ] Équipe et contributeurs
+  * [ ] Technologies utilisées
+  * [ ] Roadmap et vision
+  * [ ] Intégration dans la navigation
+* [ ] **Système de notifications** pour les conversations
+  * [ ] Notifications push pour nouveaux messages
+  * [ ] Badge de messages non lus
+  * [ ] Historique des conversations côté utilisateur
+* [ ] **Intégration Discord/Email** pour les réponses
+  * [ ] Webhook Discord pour notifications
+  * [ ] Envoi d'emails automatiques
+  * [ ] Synchronisation des statuts
+
 ### Backend API - Fonctionnalités Avancées
 * [ ] **Tests d'intégration** pour tous les endpoints CRUD
   * [ ] Tests pour les nouvelles routes RESTful

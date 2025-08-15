@@ -27,6 +27,12 @@ userRouter.post("/:id/avatar", uploadImage, handleUploadError, userController.up
 // ===== RÔLE UTILISATEUR =====
 userRouter.put("/:id/role", userController.updateRole); // Changer de rôle (devenir DM)
 
+// ===== MISE À JOUR ADMIN (PLUS GÉNÉRALE) =====
+userRouter.put("/:id", restrictTo("admin"), validate(userValidation.updateUserSchema), userController.updateUser); // Mise à jour admin
+
+// ===== FEATURED ADMIN =====
+userRouter.patch("/:id/featured", restrictTo("admin"), userController.updateUserFeatured); // Mise à jour featured
+
 // ===== JEUX FAVORIS =====
 userRouter.get("/:id/favorites", userController.getFavorites);
 userRouter.post("/:id/favorites", userController.addFavorite);

@@ -14,10 +14,13 @@ import CampaignsPage from './pages/campaigns/CampaignsPage';
 import CreateCampaignPage from './pages/campaigns/CreateCampaignPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import ProfilePage from './pages/profile/ProfilePage';
+import ContactPage from './pages/contact/ContactPage';
+import ConversationsPage from './pages/conversations/ConversationsPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import SecureRoute from './components/auth/SecureRoute';
 import AdminLayout from './components/admin/AdminLayout';
 import AdminPage from './pages/admin/AdminPage';
+import ConversationPage from './pages/admin/conversations/ConversationPage';
 
 function App() {
   return (
@@ -50,6 +53,7 @@ function App() {
               </Layout>
             </ProtectedRoute>
           } />
+          <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           
@@ -80,6 +84,15 @@ function App() {
             </ProtectedRoute>
           } />
           
+          {/* Route Conversations - Protégée */}
+          <Route path="/conversations" element={
+            <ProtectedRoute>
+              <Layout>
+                <ConversationsPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
           {/* Routes Admin - Protégées */}
           <Route path="/admin" element={
             <SecureRoute requiredRole="admin" showSecurityInfo={true}>
@@ -87,6 +100,15 @@ function App() {
                 <AdminPage />
               </AdminLayout>
             </SecureRoute>
+          } />
+
+          {/* Route Conversation - Protégée */}
+          <Route path="/admin/conversations/:id" element={
+            <ProtectedRoute>
+              <Layout>
+                <ConversationPage />
+              </Layout>
+            </ProtectedRoute>
           } />
         </Routes>
       </Router>

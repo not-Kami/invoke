@@ -1,0 +1,1199 @@
+type: collection.insomnia.rest/5.0
+name: Invoke API - Complete Collection
+meta:
+  id: wrk_invoke_complete
+  created: 1752340999148
+  modified: 1752340999148
+  description: "API complète pour Invoke - Toutes les ressources et endpoints"
+collection:
+  - name: Auth
+    meta:
+      id: fld_auth
+      created: 1752340999148
+      modified: 1752340999148
+      sortKey: -1752340999148
+      description: "Authentification et gestion des utilisateurs"
+    children:
+      - url: http://localhost:3000/api/v1/auth/signup
+        name: User Signup
+        meta:
+          id: req_signup
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Créer un nouveau compte utilisateur"
+          sortKey: -1752340999148
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "firstName": "John",
+              "lastName": "Doe",
+              "email": "john.doe@example.com",
+              "password": "SecurePass123!",
+              "isDM": false,
+              "avatar": null
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/auth/login
+        name: User Login
+        meta:
+          id: req_login
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Connexion utilisateur"
+          sortKey: -1752340999147
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "email": "john.doe@example.com",
+              "password": "SecurePass123!"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/auth/me
+        name: Get Current User
+        meta:
+          id: req_me
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Récupérer les informations de l'utilisateur connecté"
+          sortKey: -1752340999146
+        method: GET
+        authentication:
+          type: bearer
+          token: {{ _.user_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: Users
+    meta:
+      id: fld_users
+      created: 1752340999148
+      modified: 1752340999148
+      sortKey: -1752340999147
+      description: "Gestion des utilisateurs"
+    children:
+      - url: http://localhost:3000/api/v1/users
+        name: Get All Users
+        meta:
+          id: req_get_users
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Récupérer tous les utilisateurs (admin seulement)"
+          sortKey: -1752340999145
+        method: GET
+        authentication:
+          type: bearer
+          token: {{ _.admin_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/users/{{ _.user_id }}
+        name: Get User by ID
+        meta:
+          id: req_get_user
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Récupérer un utilisateur par ID"
+          sortKey: -1752340999144
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/users/{{ _.user_id }}
+        name: Update User
+        meta:
+          id: req_update_user
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Mettre à jour un utilisateur"
+          sortKey: -1752340999143
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "firstName": "John Updated",
+              "lastName": "Doe Updated",
+              "bio": "Nouvelle bio",
+              "isDM": true
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: {{ _.user_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/users/{{ _.user_id }}/avatar
+        name: Upload User Avatar
+        meta:
+          id: req_upload_avatar
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Upload d'avatar utilisateur"
+          sortKey: -1752340999142
+        method: POST
+        body:
+          mimeType: multipart/form-data
+          params:
+            - name: image
+              value: ""
+              type: file
+              fileName: "avatar.jpg"
+        authentication:
+          type: bearer
+          token: {{ _.user_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: Games
+    meta:
+      id: fld_games
+      created: 1752340999148
+      modified: 1752340999148
+      sortKey: -1752340999146
+      description: "Gestion des jeux"
+    children:
+      - url: http://localhost:3000/api/v1/games
+        name: Get All Games
+        meta:
+          id: req_get_games
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Récupérer tous les jeux avec pagination et filtres"
+          sortKey: -1752340999141
+        method: GET
+        parameters:
+          - name: page
+            value: "1"
+            description: "Numéro de page"
+          - name: limit
+            value: "10"
+            description: "Éléments par page"
+          - name: search
+            value: ""
+            description: "Terme de recherche"
+          - name: genre
+            value: ""
+            description: "Filtrer par genre"
+          - name: system
+            value: ""
+            description: "Filtrer par système"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/games
+        name: Create Game
+        meta:
+          id: req_create_game
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Créer un nouveau jeu (admin seulement)"
+          sortKey: -1752340999140
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "name": "Dungeons & Dragons 5e",
+              "description": "The world's greatest roleplaying game",
+              "genre": "Fantasy",
+              "system": "D&D 5e",
+              "image": "https://example.com/dnd5e.jpg",
+              "isActive": true
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: {{ _.admin_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/games/{{ _.game_id }}
+        name: Get Game by ID
+        meta:
+          id: req_get_game
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Récupérer un jeu par ID"
+          sortKey: -1752340999139
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/games/{{ _.game_id }}
+        name: Update Game
+        meta:
+          id: req_update_game
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Mettre à jour un jeu (admin seulement)"
+          sortKey: -1752340999138
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "name": "D&D 5e Updated",
+              "description": "Description mise à jour"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: {{ _.admin_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/games/{{ _.game_id }}
+        name: Delete Game
+        meta:
+          id: req_delete_game
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Supprimer un jeu (admin seulement)"
+          sortKey: -1752340999137
+        method: DELETE
+        authentication:
+          type: bearer
+          token: {{ _.admin_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: Sessions
+    meta:
+      id: fld_sessions
+      created: 1752340999148
+      modified: 1752340999148
+      sortKey: -1752340999145
+      description: "Gestion des sessions de jeu"
+    children:
+      - url: http://localhost:3000/api/v1/sessions
+        name: Get All Sessions
+        meta:
+          id: req_get_sessions
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Récupérer toutes les sessions avec pagination et filtres"
+          sortKey: -1752340999136
+        method: GET
+        parameters:
+          - name: page
+            value: "1"
+            description: "Numéro de page"
+          - name: limit
+            value: "10"
+            description: "Éléments par page"
+          - name: search
+            value: ""
+            description: "Terme de recherche"
+          - name: sessionType
+            value: ""
+            description: "Filtrer par type (online/offline)"
+          - name: status
+            value: ""
+            description: "Filtrer par statut"
+          - name: game
+            value: ""
+            description: "Filtrer par jeu"
+          - name: dm
+            value: ""
+            description: "Filtrer par DM"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/sessions
+        name: Create Session
+        meta:
+          id: req_create_session
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Créer une nouvelle session (DM seulement)"
+          sortKey: -1752340999135
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "title": "Epic Adventure Begins",
+              "description": "The party embarks on a legendary quest",
+              "date": "2024-02-15T18:00:00.000Z",
+              "sessionType": "online",
+              "isOneShot": false,
+              "game": "{{ _.game_id }}",
+              "dm": "{{ _.user_id }}",
+              "players": [],
+              "status": "open"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: {{ _.user_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/sessions/{{ _.session_id }}
+        name: Get Session by ID
+        meta:
+          id: req_get_session
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Récupérer une session par ID"
+          sortKey: -1752340999134
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/sessions/{{ _.session_id }}
+        name: Update Session
+        meta:
+          id: req_update_session
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Mettre à jour une session (DM seulement)"
+          sortKey: -1752340999133
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "title": "Updated Session Title",
+              "description": "Updated session description",
+              "status": "full"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: {{ _.user_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/sessions/{{ _.session_id }}
+        name: Delete Session
+        meta:
+          id: req_delete_session
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Supprimer une session (DM seulement)"
+          sortKey: -1752340999132
+        method: DELETE
+        authentication:
+          type: bearer
+          token: {{ _.user_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: Campaigns
+    meta:
+      id: fld_campaigns
+      created: 1752340999148
+      modified: 1752340999148
+      sortKey: -1752340999144
+      description: "Gestion des campagnes"
+    children:
+      - url: http://localhost:3000/api/v1/campaigns
+        name: Get All Campaigns
+        meta:
+          id: req_get_campaigns
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Récupérer toutes les campagnes"
+          sortKey: -1752340999131
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/campaigns
+        name: Create Campaign
+        meta:
+          id: req_create_campaign
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Créer une nouvelle campagne (DM seulement)"
+          sortKey: -1752340999130
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "name": "The Lost Mines of Phandelver",
+              "description": "A D&D 5e adventure for levels 1-5",
+              "startDate": "2024-01-15T00:00:00.000Z",
+              "endDate": "2024-06-15T00:00:00.000Z",
+              "game": "{{ _.game_id }}",
+              "dm": "{{ _.user_id }}",
+              "players": [],
+              "sessions": [],
+              "active": true
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: {{ _.user_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/campaigns/{{ _.campaign_id }}
+        name: Get Campaign by ID
+        meta:
+          id: req_get_campaign
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Récupérer une campagne par ID"
+          sortKey: -1752340999129
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/campaigns/{{ _.campaign_id }}
+        name: Update Campaign
+        meta:
+          id: req_update_campaign
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Mettre à jour une campagne (DM seulement)"
+          sortKey: -1752340999128
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "name": "Updated Campaign Name",
+              "description": "Updated campaign description",
+              "active": false
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: {{ _.user_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/campaigns/{{ _.campaign_id }}
+        name: Delete Campaign
+        meta:
+          id: req_delete_campaign
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Supprimer une campagne (DM seulement)"
+          sortKey: -1752340999127
+        method: DELETE
+        authentication:
+          type: bearer
+          token: {{ _.user_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: Feedback
+    meta:
+      id: fld_feedback
+      created: 1752340999148
+      modified: 1752340999148
+      sortKey: -1752340999143
+      description: "Gestion des retours et évaluations"
+    children:
+      - url: http://localhost:3000/api/v1/feedback
+        name: Create Feedback
+        meta:
+          id: req_create_feedback
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Créer un nouveau retour"
+          sortKey: -1752340999126
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "rating": 5,
+              "comment": "Amazing session! The DM was fantastic.",
+              "target": "{{ _.user_id }}",
+              "session": "{{ _.session_id }}"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: {{ _.user_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/feedback
+        name: Get All Feedback
+        meta:
+          id: req_get_feedback
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Récupérer tous les retours"
+          sortKey: -1752340999125
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/feedback/{{ _.feedback_id }}
+        name: Get Feedback by ID
+        meta:
+          id: req_get_feedback_by_id
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Récupérer un retour par ID"
+          sortKey: -1752340999124
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/feedback/{{ _.feedback_id }}
+        name: Update Feedback
+        meta:
+          id: req_update_feedback
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Mettre à jour un retour"
+          sortKey: -1752340999123
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "rating": 4,
+              "comment": "Updated feedback comment"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: {{ _.user_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/feedback/{{ _.feedback_id }}
+        name: Delete Feedback
+        meta:
+          id: req_delete_feedback
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Supprimer un retour"
+          sortKey: -1752340999122
+        method: DELETE
+        authentication:
+          type: bearer
+          token: {{ _.user_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: Characters
+    meta:
+      id: fld_characters
+      created: 1752340999148
+      modified: 1752340999148
+      sortKey: -1752340999142
+      description: "Gestion des personnages"
+    children:
+      - url: http://localhost:3000/api/v1/characters
+        name: Get All Characters
+        meta:
+          id: req_get_characters
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Récupérer tous les personnages"
+          sortKey: -1752340999121
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/characters
+        name: Create Character
+        meta:
+          id: req_create_character
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Créer un nouveau personnage"
+          sortKey: -1752340999120
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "name": "Gandalf the Grey",
+              "avatar": null,
+              "meta": {
+                "class": "Wizard",
+                "level": 5,
+                "race": "Maia"
+              }
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: {{ _.user_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/characters/{{ _.character_id }}/avatar
+        name: Upload Character Avatar
+        meta:
+          id: req_upload_character_avatar
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Upload d'avatar de personnage"
+          sortKey: -1752340999119
+        method: POST
+        body:
+          mimeType: multipart/form-data
+          params:
+            - name: image
+              value: ""
+              type: file
+              fileName: "character.jpg"
+        authentication:
+          type: bearer
+          token: {{ _.user_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: Uploads
+    meta:
+      id: fld_uploads
+      created: 1752340999148
+      modified: 1752340999148
+      sortKey: -1752340999141
+      description: "Gestion des uploads de fichiers"
+    children:
+      - url: http://localhost:3000/api/v1/upload
+        name: Upload File
+        meta:
+          id: req_upload_file
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Upload de fichier générique"
+          sortKey: -1752340999118
+        method: POST
+        body:
+          mimeType: multipart/form-data
+          params:
+            - name: file
+              value: ""
+              type: file
+              fileName: "document.pdf"
+        authentication:
+          type: bearer
+          token: {{ _.user_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: Conversations
+    meta:
+      id: fld_conversations
+      created: 1752340999148
+      modified: 1752340999148
+      sortKey: -1752340999140
+      description: "Gestion des conversations et support client"
+    children:
+      - url: http://localhost:3000/api/v1/conversations
+        name: Create Conversation
+        meta:
+          id: req_create_conversation
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Créer une nouvelle conversation (endpoint public)"
+          sortKey: -1752340999117
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "conversationType": "contact_admin",
+              "userEmail": "user@example.com",
+              "subject": "Question sur les jeux",
+              "content": "Bonjour, j'aimerais savoir quels sont les jeux les plus populaires sur la plateforme ?"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/conversations/{{ _.conversation_id }}
+        name: Get Conversation
+        meta:
+          id: req_get_conversation
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Récupérer une conversation par ID (endpoint public)"
+          sortKey: -1752340999116
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/conversations/{{ _.conversation_id }}/reply
+        name: User Reply
+        meta:
+          id: req_user_reply
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "L'utilisateur répond à une conversation (endpoint public)"
+          sortKey: -1752340999115
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "content": "Merci pour votre réponse !",
+              "userEmail": "user@example.com"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/conversations
+        name: Get All Conversations (Admin)
+        meta:
+          id: req_get_all_conversations
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Récupérer toutes les conversations avec pagination et filtres (admin seulement)"
+          sortKey: -1752340999114
+        method: GET
+        parameters:
+          - name: status
+            value: "open"
+            description: "Filtrer par statut (open, in_progress, closed)"
+          - name: assignedTo
+            value: ""
+            description: "Filtrer par admin assigné"
+          - name: page
+            value: "1"
+            description: "Numéro de page"
+          - name: limit
+            value: "20"
+            description: "Éléments par page"
+        authentication:
+          type: bearer
+          token: {{ _.admin_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/conversations/{{ _.conversation_id }}/admin-reply
+        name: Admin Reply
+        meta:
+          id: req_admin_reply
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "L'admin répond à une conversation (admin seulement)"
+          sortKey: -1752340999113
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "content": "Bonjour ! Merci pour votre message. Nous allons vous aider avec votre question."
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: {{ _.admin_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/conversations/{{ _.conversation_id }}/read
+        name: Mark as Read
+        meta:
+          id: req_mark_read
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Marquer une conversation comme lue (admin seulement)"
+          sortKey: -1752340999112
+        method: PATCH
+        authentication:
+          type: bearer
+          token: {{ _.admin_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/conversations/{{ _.conversation_id }}/close
+        name: Close Conversation
+        meta:
+          id: req_close_conversation
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Fermer une conversation (admin seulement)"
+          sortKey: -1752340999111
+        method: PATCH
+        authentication:
+          type: bearer
+          token: {{ _.admin_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/conversations/{{ _.conversation_id }}/assign
+        name: Assign Conversation
+        meta:
+          id: req_assign_conversation
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Assigner une conversation à un admin (admin seulement)"
+          sortKey: -1752340999110
+        method: PATCH
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "assignedTo": "{{ _.admin_user_id }}"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: {{ _.admin_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      
+      - url: http://localhost:3000/api/v1/conversations/{{ _.conversation_id }}
+        name: Delete Conversation
+        meta:
+          id: req_delete_conversation
+          created: 1752340999148
+          modified: 1752340999148
+          isPrivate: false
+          description: "Supprimer une conversation (admin seulement)"
+          sortKey: -1752340999109
+        method: DELETE
+        authentication:
+          type: bearer
+          token: {{ _.admin_token }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+environments:
+  name: Base Environment
+  meta:
+    id: env_base
+    created: 1752340999148
+    modified: 1752340999148
+    isPrivate: false
+  data:
+    base_url: http://localhost:3000/api/v1
+    user_id: "{{ _.user_id }}"
+    game_id: "{{ _.game_id }}"
+    session_id: "{{ _.session_id }}"
+    campaign_id: "{{ _.campaign_id }}"
+    feedback_id: "{{ _.feedback_id }}"
+    character_id: "{{ _.character_id }}"
+    conversation_id: "{{ _.conversation_id }}"
+    user_token: "{{ _.user_token }}"
+    admin_token: "{{ _.admin_token }}"
+    admin_user_id: "{{ _.admin_user_id }}"

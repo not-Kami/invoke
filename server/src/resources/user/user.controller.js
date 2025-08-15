@@ -383,3 +383,83 @@ export const getFeaturedDMs = catchAsync(async (req, res) => {
         data: featuredDMs
     });
 });
+
+// ===== UPDATE USER (Admin uniquement) =====
+export const updateUser = catchAsync(async (req, res, next) => {
+    const { id } = req.params;
+    const updateData = req.body;
+    
+    console.log('updateUser called:', { 
+        id, 
+        updateData, 
+        updateDataKeys: Object.keys(updateData),
+        updateDataFeatured: updateData.featured,
+        adminUser: req.user.role,
+        bodyRaw: req.body,
+        contentType: req.get('Content-Type')
+    });
+    
+    // Vérification admin
+    if (req.user.role !== 'admin') {
+        console.log('Access denied: user is not admin');
+        return next(new AppError('Only admins can update users', 403));
+    }
+    
+    // Vérifier que l'utilisateur existe
+    const user = await User.findById(id);
+    if (!user) {
+        console.log('User not found:', id);
+        return next(new AppError('User not found', 404));
+    }
+    
+    console.log('User found:', { userId: user._id, currentFeatured: user.featured, newFeatured: updateData.featured });
+    
+    // Mise à jour avec validation
+    const updatedUser = await User.findByIdAndUpdate(id, updateData, { 
+        new: true, 
+        runValidators: true 
+    });
+    
+    console.log('User updated successfully:', { userId: updatedUser._id, newFeatured: updatedUser.featured });
+    
+    res.json({
+        success: true,
+        data: updatedUser,
+        message: 'User updated successfully'
+    });
+});
+
+// ===== UPDATE USER FEATURED (Admin uniquement) =====
+export const updateUserFeatured = catchAsync(async (req, res, next) => {
+    const { id } = req.params;
+    const { featured } = req.body;
+    
+    console.log('updateUserFeatured called:', { id, featured, adminUser: req.user.role });
+    
+    // Vérification admin
+    if (req.user.role !== 'admin') {
+        return next(new AppError('Only admins can update user featured status', 403));
+    }
+    
+    // Vérifier que l'utilisateur existe
+    const user = await User.findById(id);
+    if (!user) {
+        return next(new AppError('User not found', 404));
+    }
+    
+    console.log('User found:', { userId: user._id, currentFeatured: user.featured, newFeatured: featured });
+    
+    // Mise à jour du statut featured uniquement
+    const updatedUser = await User.findByIdAndUpdate(id, { featured }, { 
+        new: true, 
+        runValidators: true 
+    });
+    
+    console.log('User featured updated successfully:', { userId: updatedUser._id, newFeatured: updatedUser.featured });
+    
+    res.json({
+        success: true,
+        data: updatedUser,
+        message: 'User featured status updated successfully'
+    });
+});

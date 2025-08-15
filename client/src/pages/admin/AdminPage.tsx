@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
-import DataTable from '../../components/admin/DataTable';
-import ExpandableDataTable from '../../components/admin/ExpandableDataTable';
-import SessionExpandedContent from '../../components/admin/SessionExpandedContent';
-import GameExpandedContent from '../../components/admin/GameExpandedContent';
 import GameModal from '../../components/admin/GameModal';
-import FeaturedToggle from '../../components/admin/FeaturedToggle';
-import Badge from '../../components/ui/Badge';
-import Button from '../../components/ui/Button';
 import NotificationContainer from '../../components/ui/NotificationContainer';
 
-import { adminAPI, User, Session, Campaign, Game } from '../../lib/api';
+// Import des composants d'onglets
+import UsersTab from '../../components/admin/tabs/UsersTab';
+import SessionsTab from '../../components/admin/tabs/SessionsTab';
+import CampaignsTab from '../../components/admin/tabs/CampaignsTab';
+import GamesTab from '../../components/admin/tabs/GamesTab';
+import ConversationsTab from '../../components/admin/tabs/ConversationsTab';
+
+// Import des modals
+import ReplyModal from '../../components/admin/modals/ReplyModal';
+
+// Import des hooks
+import { useAdminData } from '../../hooks/admin/useAdminData';
+import { useAdminActions } from '../../hooks/admin/useAdminActions';
+
+import { adminAPI, Game, Conversation } from '../../lib/api';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useNotifications } from '../../hooks/useNotifications';
 import { 
@@ -18,168 +25,59 @@ import {
   Calendar, 
   Gamepad2, 
   BookOpen, 
-  Download,
+  MessageSquare,
   Plus,
-  Edit,
-  Trash2,
-  Star,
   Shield,
-  AlertTriangle,
-  RefreshCw,
-  CheckCircle,
-  XCircle
+  AlertTriangle
 } from 'lucide-react';
 
-type TabType = 'users' | 'sessions' | 'campaigns' | 'games';
+type TabType = 'users' | 'sessions' | 'campaigns' | 'games' | 'conversations';
 
 const AdminPage: React.FC = () => {
-  const { canViewAdminPanel, canManageUsers, canManageSessions, canManageCampaigns } = usePermissions();
-  const { notifications, addSuccess, addError, addInfo, removeNotification } = useNotifications();
+  const { canViewAdminPanel } = usePermissions();
+  const { notifications, removeNotification } = useNotifications();
   const [activeTab, setActiveTab] = useState<TabType>('users');
-  const [users, setUsers] = useState<User[]>([]);
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [originalSessions, setOriginalSessions] = useState<Session[]>([]); // Pour sauvegarder les sessions originales
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [games, setGames] = useState<Game[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isLoadingData, setIsLoadingData] = useState(false); // Protection contre les appels multiples
+  
+  // États pour les modals
   const [gameModalOpen, setGameModalOpen] = useState(false);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  const [replyModalOpen, setReplyModalOpen] = useState(false);
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
 
-  // Vérification de sécurité - double protection
+  // Hook pour les données admin
+  const {
+    users,
+    setUsers,
+    sessions,
+    setSessions,
+    campaigns,
+    setCampaigns,
+    games,
+    setGames,
+    conversations,
+    loading
+  } = useAdminData(activeTab);
+
+  // Hook pour les actions admin
+  const {
+    deleteUser,
+    deleteSession,
+    deleteCampaign,
+    deleteGame,
+    toggleFeatured,
+    exportSession,
+    replyToConversation
+  } = useAdminActions();
+
+  // Vérification de sécurité
   useEffect(() => {
     if (!canViewAdminPanel()) {
       console.log('AdminPage: Access denied - user is not admin');
       return;
     }
     
-    console.log('AdminPage: User has admin access, loading data...');
-    loadData();
-  }, []); // Charger une seule fois au montage du composant
-
-  // Recharger les données quand l'onglet change
-  useEffect(() => {
-    if (canViewAdminPanel()) {
-      loadData();
-    }
-  }, [activeTab]);
-
-  const loadData = async () => {
-    // Protection contre les appels multiples
-    if (isLoadingData) {
-      console.log('AdminPage: Chargement déjà en cours, ignoré');
-      return;
-    }
-    
-    setIsLoadingData(true);
-    setLoading(true);
-    
-    try {
-      console.log('AdminPage: Chargement des données...');
-      
-      // Charger seulement l'onglet actif pour plus de rapidité
-      let usersRes: any = null, sessionsRes: any = null, campaignsRes: any = null, gamesRes: any = null;
-      
-      switch (activeTab) {
-        case 'users':
-          usersRes = await adminAPI.getUsers();
-          // Filtrer les utilisateurs supprimés côté frontend
-          if (usersRes.success && usersRes.data) {
-            const activeUsers = usersRes.data.filter((user: any) => !user.deletedAt);
-            usersRes.data = activeUsers;
-          }
-          break;
-        case 'sessions':
-          sessionsRes = await adminAPI.getSessions({ limit: 100 }); // Limite élevée = détection admin automatique
-          break;
-        case 'campaigns':
-          campaignsRes = await adminAPI.getCampaigns();
-          break;
-        case 'games':
-          gamesRes = await adminAPI.getGames();
-          break;
-      }
-
-      console.log('AdminPage: Réponses API reçues:', {
-        users: usersRes,
-        sessions: sessionsRes,
-        campaigns: campaignsRes,
-        games: gamesRes
-      });
-
-      // Traitement des utilisateurs
-      if (usersRes && usersRes.success && usersRes.data) {
-        setUsers(usersRes.data);
-        console.log('AdminPage: Utilisateurs chargés:', usersRes.data.length);
-      } else if (usersRes && Array.isArray(usersRes)) {
-        // Fallback : si l'API retourne directement un tableau
-        setUsers(usersRes);
-        console.log('AdminPage: Utilisateurs chargés (format direct):', usersRes.length);
-      } else if (usersRes && usersRes.error) {
-        console.error('AdminPage: Erreur lors du chargement des utilisateurs:', usersRes.error);
-        // Ne pas afficher d'erreur si c'est juste une absence de données
-        if (!usersRes.error.includes('Données invalides')) {
-          addError(`Erreur utilisateurs: ${usersRes.error}`);
-        }
-      }
-
-      // Traitement des sessions
-      if (sessionsRes && sessionsRes.success && sessionsRes.data) {
-        setSessions(sessionsRes.data);
-        setOriginalSessions(sessionsRes.data); // Sauvegarder les sessions originales
-        console.log('AdminPage: Sessions chargées:', sessionsRes.data.length);
-      } else if (sessionsRes && Array.isArray(sessionsRes)) {
-        // Fallback : si l'API retourne directement un tableau
-        setSessions(sessionsRes);
-        setOriginalSessions(sessionsRes); // Sauvegarder les sessions originales
-        console.log('AdminPage: Sessions chargées (format direct):', sessionsRes.length);
-      } else if (sessionsRes && sessionsRes.error) {
-        console.error('AdminPage: Erreur lors du chargement des sessions:', sessionsRes.error);
-        if (!sessionsRes.error.includes('Données invalides')) {
-          addError(`Erreur sessions: ${sessionsRes.error}`);
-        }
-      }
-
-      // Traitement des campagnes
-      if (campaignsRes && campaignsRes.success && campaignsRes.data) {
-        setCampaigns(campaignsRes.data);
-        console.log('AdminPage: Campagnes chargées:', campaignsRes.data.length);
-      } else if (campaignsRes && Array.isArray(campaignsRes)) {
-        // Fallback : si l'API retourne directement un tableau
-        setCampaigns(campaignsRes);
-        console.log('AdminPage: Campagnes chargées (format direct):', campaignsRes.length);
-      } else if (campaignsRes && campaignsRes.error) {
-        console.error('AdminPage: Erreur lors du chargement des campagnes:', campaignsRes.error);
-        if (!campaignsRes.error.includes('Données invalides')) {
-          addError(`Erreur campagnes: ${campaignsRes.error}`);
-        }
-      }
-
-      // Traitement des jeux
-      if (gamesRes && gamesRes.success && gamesRes.data) {
-        setGames(gamesRes.data);
-        console.log('AdminPage: Jeux chargés:', gamesRes.data.length);
-      } else if (gamesRes && Array.isArray(gamesRes)) {
-        // Fallback : si l'API retourne directement un tableau
-        setGames(gamesRes);
-        console.log('AdminPage: Jeux chargés (format direct):', gamesRes.length);
-      } else if (gamesRes && gamesRes.error) {
-        console.error('AdminPage: Erreur lors du chargement des jeux:', gamesRes.error);
-        if (!gamesRes.error.includes('Données invalides')) {
-          addError(`Erreur jeux: ${gamesRes.error}`);
-        }
-      }
-
-      // Une seule notification de succès au lieu de multiples
-      addSuccess('Données chargées avec succès');
-    } catch (error) {
-      console.error('AdminPage: Erreur lors du chargement des données:', error);
-      addError(`Erreur de connexion: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
-    } finally {
-      setLoading(false);
-      setIsLoadingData(false);
-    }
-  };
+    console.log('AdminPage: User has admin access');
+  }, []);
 
   // Vérification de sécurité au rendu
   if (!canViewAdminPanel) {
@@ -202,627 +100,184 @@ const AdminPage: React.FC = () => {
     );
   }
 
-  const handleDeleteUser = async (userId: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
-      return;
-    }
-    
-    try {
-      const response = await adminAPI.deleteUser(userId);
-      if (response.success) {
-        setUsers(prev => prev.filter(user => user._id !== userId));
-        addSuccess('Utilisateur supprimé avec succès');
-      } else {
-        throw new Error(response.error || 'Erreur lors de la suppression');
-      }
-    } catch (error) {
-      console.error('AdminPage: Erreur lors de la suppression:', error);
-      addError(`Erreur de suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
-    }
+  // Handlers pour les actions
+  const handleDeleteUser = (userId: string) => {
+    deleteUser(userId, setUsers);
   };
 
-  const handleToggleFeatured = async (type: string, id: string, featured: boolean) => {
-    try {
-      console.log(`AdminPage: Mise à jour featured ${type} ${id} -> ${featured}`);
-      
-      let response;
+  const handleDeleteSession = (sessionId: string) => {
+    deleteSession(sessionId, setSessions);
+  };
+
+  const handleDeleteCampaign = (campaignId: string) => {
+    deleteCampaign(campaignId, setCampaigns);
+  };
+
+  const handleDeleteGame = (gameId: string) => {
+    deleteGame(gameId, setGames);
+  };
+
+  const handleToggleFeatured = (type: string, id: string, featured: boolean) => {
+    let setter;
       switch (type) {
         case 'user':
-          response = await adminAPI.updateUser(id, { featured });
-          if (response.success && response.data) {
-            setUsers(prev => prev.map(user => 
-              user._id === id ? { ...user, featured } : user
-            ));
-            addSuccess('Utilisateur mis à jour avec succès');
-          } else {
-            throw new Error(response.error || 'Erreur lors de la mise à jour');
-          }
+        setter = setUsers;
           break;
         case 'session':
-          response = await adminAPI.adminUpdateSessionFeatured(id, featured);
-          if (response.success && response.data) {
-            setSessions(prev => prev.map(session => 
-              session._id === id ? { ...session, featured } : session
-            ));
-            addSuccess('Session mise à jour avec succès');
-          } else {
-            throw new Error(response.error || 'Erreur lors de la mise à jour');
-          }
+        setter = setSessions;
           break;
         case 'campaign':
-          response = await adminAPI.updateCampaign(id, { featured });
-          if (response.success && response.data) {
-            setCampaigns(prev => prev.map(campaign => 
-              campaign._id === id ? { ...campaign, featured } : campaign
-            ));
-            addSuccess('Campagne mise à jour avec succès');
-          } else {
-            throw new Error(response.error || 'Erreur lors de la mise à jour');
-          }
+        setter = setCampaigns;
           break;
         case 'game':
-          response = await adminAPI.updateGame(id, { featured });
-          if (response.success && response.data) {
-            setGames(prev => prev.map(game => 
-              game._id === id ? { ...game, featured } : game
-            ));
-            addSuccess('Jeu mis à jour avec succès');
-          } else {
-            throw new Error(response.error || 'Erreur lors de la mise à jour');
-          }
+        setter = setGames;
           break;
-      }
-    } catch (error) {
-      console.error('AdminPage: Erreur lors de la mise à jour:', error);
-      addError(`Erreur de mise à jour: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+      default:
+        return;
     }
+    toggleFeatured(type, id, featured, setter);
+  };
+
+  const handleExportSession = (sessionId: string) => {
+    exportSession(sessionId);
+  };
+
+  const handleOpenGameModal = (game?: Game) => {
+    setSelectedGame(game || null);
+    setGameModalOpen(true);
   };
 
   const handleSaveGame = async (gameData: Partial<Game>) => {
     try {
-      let response: any;
-      if (gameData._id) {
-        // Modification
-        response = await adminAPI.updateGame(gameData._id, gameData);
-        if (response.success && response.data) {
+      if (selectedGame) {
+        // Mise à jour
+        const response = await adminAPI.updateGame(selectedGame._id, gameData);
+        if (response.success) {
           setGames(prev => prev.map(game => 
-            game._id === gameData._id ? response.data : game
+            game._id === selectedGame._id ? { ...game, ...gameData } : game
           ));
-          addSuccess('Jeu modifié avec succès');
-        } else {
-          throw new Error(response.error || 'Erreur lors de la modification');
         }
       } else {
         // Création
-        response = await adminAPI.createGame(gameData);
-        if (response.success && response.data) {
+        const response = await adminAPI.createGame(gameData);
+        if (response.success) {
           setGames(prev => [...prev, response.data]);
-          addSuccess('Jeu créé avec succès');
-        } else {
-          throw new Error(response.error || 'Erreur lors de la création');
         }
       }
-      
       setGameModalOpen(false);
       setSelectedGame(null);
     } catch (error) {
-      console.error('AdminPage: Erreur lors de la sauvegarde du jeu:', error);
-      addError(`Erreur de sauvegarde: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+      console.error('Erreur lors de la sauvegarde du jeu:', error);
     }
   };
 
-  const handleDeleteGame = async (gameId: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce jeu ?')) {
-      return;
-    }
-    
-    try {
-      const response = await adminAPI.deleteGame(gameId);
-      if (response.success) {
-        setGames(prev => prev.filter(game => game._id !== gameId));
-        addSuccess('Jeu supprimé avec succès');
-      } else {
-        throw new Error(response.error || 'Erreur lors de la suppression');
-      }
-    } catch (error) {
-      console.error('AdminPage: Erreur lors de la suppression du jeu:', error);
-      addError(`Erreur de suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
-    }
+  const handleOpenReplyModal = (conversation: Conversation) => {
+    setSelectedConversation(conversation);
+    setReplyModalOpen(true);
   };
 
-  const handleExportUsers = () => {
-    const exportData = users.map(user => ({
-      id: user._id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      role: user.role,
-      isDM: user.isDM,
-      featured: user.featured,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt
-    }));
-
-    const csvContent = [
-      ['ID', 'Prénom', 'Nom', 'Email', 'Rôle', 'MJ', 'Mis en avant', 'Date création', 'Dernière connexion'],
-      ...exportData.map(user => {
-        const createdDate = new Date(user.createdAt);
-        const updatedDate = new Date(user.updatedAt);
-        const formattedCreatedDate = createdDate.toLocaleDateString('fr-FR', { 
-          day: '2-digit', 
-          month: '2-digit', 
-          year: 'numeric' 
-        });
-        const formattedUpdatedDate = updatedDate.toLocaleDateString('fr-FR', { 
-          day: '2-digit', 
-          month: '2-digit', 
-          year: 'numeric' 
-        });
-        
-        return [
-          user.id,
-          user.firstName,
-          user.lastName,
-          user.email,
-          user.role,
-          user.isDM ? 'Oui' : 'Non',
-          user.featured ? 'Oui' : 'Non',
-          formattedCreatedDate,
-          formattedUpdatedDate
-        ];
-      })
-    ].map(row => row.join(',')).join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `users_export_${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-    
-    addSuccess('Export des utilisateurs réussi');
+  const handleSendReply = (conversationId: string, content: string) => {
+    replyToConversation(conversationId, content);
   };
-
-  const renderUsersTable = () => (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-cinzel font-semibold text-white">Gestion des utilisateurs</h3>
-        <div className="flex space-x-2">
-          <Button onClick={handleExportUsers} variant="primary">
-            <Download className="w-4 h-4 mr-2" />
-            Exporter
-          </Button>
-        </div>
-      </div>
-      <DataTable
-        columns={[
-          { key: 'firstName', label: 'Prénom' },
-          { key: 'lastName', label: 'Nom' },
-          { key: 'email', label: 'Email' },
-          { 
-            key: 'role', 
-            label: 'Rôle',
-            render: (value: string) => (
-              <Badge variant={value === 'admin' ? 'danger' : 'default'}>
-                {value === 'admin' ? 'Admin' : 'Utilisateur'}
-              </Badge>
-            )
-          },
-          { 
-            key: 'isDM', 
-            label: 'MJ',
-            render: (value: boolean) => (
-              <Badge variant={value ? 'success' : 'default'}>
-                {value ? 'Oui' : 'Non'}
-              </Badge>
-            )
-          },
-          { 
-            key: 'featured', 
-            label: 'Mis en avant',
-            render: (value: boolean, row: any) => (
-              <FeaturedToggle
-                isFeatured={value}
-                onToggle={(featured) => handleToggleFeatured('user', row._id, featured)}
-              />
-            )
-          },
-          { 
-            key: 'createdAt', 
-            label: 'Date création',
-            render: (value: string) => {
-              const date = new Date(value);
-              return date.toLocaleDateString('fr-FR', { 
-                day: '2-digit', 
-                month: '2-digit', 
-                year: 'numeric' 
-              });
-            }
-          },
-          { 
-            key: 'updatedAt', 
-            label: 'Dernière connexion',
-            render: (value: string) => {
-              const date = new Date(value);
-              return date.toLocaleDateString('fr-FR', { 
-                day: '2-digit', 
-                month: '2-digit', 
-                year: 'numeric' 
-              });
-            }
-          },
-        ]}
-        data={users}
-        onDelete={(user) => handleDeleteUser(user._id)}
-      />
-    </div>
-  );
-
-  const renderSessionsTable = () => (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-cinzel font-semibold text-white">Gestion des sessions</h3>
-      </div>
-      
-      {/* Filtres pour les sessions */}
-      <div className="bg-slate-800/50 rounded-lg p-4 space-y-4">
-        <h4 className="text-sm font-medium text-slate-300">Filtres</h4>
-        <div className="flex flex-wrap gap-4">
-          {/* Filtre par statut */}
-          <div className="flex items-center space-x-2">
-            <label className="text-sm text-slate-400">Statut:</label>
-            <select 
-              className="bg-slate-700 border border-slate-600 rounded px-3 py-1 text-sm text-white"
-                             onChange={(e) => {
-                 const status = e.target.value;
-                 if (status === 'all') {
-                   setSessions(originalSessions); // Restaurer toutes les sessions
-                 } else {
-                   // Filtrer côté client
-                   const filteredSessions = originalSessions.filter(s => s.status === status);
-                   setSessions(filteredSessions);
-                 }
-               }}
-            >
-              <option value="all">Tous les statuts</option>
-              <option value="open">Ouvertes</option>
-              <option value="full">Complètes</option>
-              <option value="finished">Terminées</option>
-              <option value="cancelled">Annulées</option>
-            </select>
-          </div>
-          
-          {/* Filtre par type de session */}
-          <div className="flex items-center space-x-2">
-            <label className="text-sm text-slate-400">Type:</label>
-            <select 
-              className="bg-slate-700 border border-slate-600 rounded px-3 py-1 text-sm text-white"
-                             onChange={(e) => {
-                 const sessionType = e.target.value;
-                 if (sessionType === 'all') {
-                   setSessions(originalSessions); // Restaurer toutes les sessions
-                 } else {
-                   // Filtrer côté client
-                   const filteredSessions = originalSessions.filter(s => s.sessionType === sessionType);
-                   setSessions(filteredSessions);
-                 }
-               }}
-            >
-              <option value="all">Tous les types</option>
-              <option value="online">En ligne</option>
-              <option value="offline">En présentiel</option>
-            </select>
-          </div>
-          
-          {/* Bouton pour réinitialiser les filtres */}
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => {
-              setSessions(originalSessions); // Restaurer toutes les sessions
-            }}
-            className="text-slate-400 hover:text-white"
-          >
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Réinitialiser
-          </Button>
-        </div>
-        
-        {/* Affichage du nombre de sessions filtrées */}
-        <div className="text-sm text-slate-400">
-          Affichage de {sessions.length} session(s)
-        </div>
-      </div>
-      <ExpandableDataTable
-        columns={[
-          { key: 'title', label: 'Titre' },
-          { 
-            key: 'game', 
-            label: 'Jeu',
-            render: (value: any) => value?.name || 'N/A'
-          },
-          { 
-            key: 'dm', 
-            label: 'MJ',
-            render: (value: any) => value ? `${value.firstName} ${value.lastName}` : 'N/A'
-          },
-          { 
-            key: 'status', 
-            label: 'Statut',
-            render: (value: string) => {
-              let variant: 'success' | 'warning' | 'default' | 'danger' = 'default';
-              let label = value;
-              
-              switch (value) {
-                case 'open':
-                  variant = 'success';
-                  label = 'Ouvert';
-                  break;
-                case 'full':
-                  variant = 'warning';
-                  label = 'Complet';
-                  break;
-                case 'finished':
-                  variant = 'default';
-                  label = 'Terminé';
-                  break;
-                case 'cancelled':
-                  variant = 'danger';
-                  label = 'Annulé';
-                  break;
-                default:
-                  variant = 'default';
-                  label = value;
-              }
-              
-              return (
-                <Badge variant={variant}>
-                  {label}
-                </Badge>
-              );
-            }
-          },
-          { 
-            key: 'players', 
-            label: 'Joueurs',
-            render: (value: any, row: any) => {
-              const playerCount = Array.isArray(value) ? value.length : (typeof value === 'number' ? value : 0);
-              const maxPlayers = row.maxPlayers || '?';
-              return `${playerCount}/${maxPlayers}`;
-            }
-          },
-          { 
-            key: 'date', 
-            label: 'Date de session',
-            render: (value: string) => {
-              const date = new Date(value);
-              return date.toLocaleDateString('fr-FR', { 
-                day: '2-digit', 
-                month: '2-digit', 
-                year: 'numeric' 
-              });
-            }
-          },
-          { 
-            key: 'featured', 
-            label: 'Mis en avant',
-            render: (value: boolean, row: any) => (
-              <FeaturedToggle
-                isFeatured={value}
-                onToggle={(featured) => handleToggleFeatured('session', row._id, featured)}
-              />
-            )
-          },
-        ]}
-        data={sessions}
-        expandableContent={(session) => <SessionExpandedContent session={session} />}
-      />
-    </div>
-  );
-
-  const renderCampaignsTable = () => (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-cinzel font-semibold text-white">Gestion des campagnes</h3>
-      </div>
-      <DataTable
-        columns={[
-          { key: 'title', label: 'Titre' },
-          { 
-            key: 'game', 
-            label: 'Jeu',
-            render: (value: any) => value?.name || 'N/A'
-          },
-          { 
-            key: 'dm', 
-            label: 'MJ',
-            render: (value: any) => value ? `${value.firstName} ${value.lastName}` : 'N/A'
-          },
-          { 
-            key: 'status', 
-            label: 'Statut',
-            render: (value: string) => (
-              <Badge variant={value === 'active' ? 'success' : 'warning'}>
-                {value === 'active' ? 'Active' : 'En pause'}
-              </Badge>
-            )
-          },
-          { 
-            key: 'players', 
-            label: 'Joueurs',
-            render: (value: number, row: any) => `${value}/${row.maxPlayers}`
-          },
-          { 
-            key: 'featured', 
-            label: 'Mis en avant',
-            render: (value: boolean, row: any) => (
-              <FeaturedToggle
-                isFeatured={value}
-                onToggle={(featured) => handleToggleFeatured('campaign', row._id, featured)}
-              />
-            )
-          },
-          { 
-            key: 'createdAt', 
-            label: 'Date création',
-            render: (value: string) => {
-              const date = new Date(value);
-              return date.toLocaleDateString('fr-FR', { 
-                day: '2-digit', 
-                month: '2-digit', 
-                year: 'numeric' 
-              });
-            }
-          },
-        ]}
-        data={campaigns}
-      />
-    </div>
-  );
-
-  const renderGamesTable = () => (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-cinzel font-semibold text-white">Gestion des jeux</h3>
-        <Button 
-          onClick={() => setGameModalOpen(true)} 
-          variant="primary"
-          className="flex items-center space-x-2"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Ajouter un jeu</span>
-        </Button>
-      </div>
-      
-
-      
-      <ExpandableDataTable
-        columns={[
-          { key: 'name', label: 'Nom' },
-          { key: 'system', label: 'Système' },
-          { 
-            key: 'sessionsCount', 
-            label: 'Sessions',
-            render: (value: number) => (
-              <Badge variant="info">{value || 0}</Badge>
-            )
-          },
-          { 
-            key: 'featured', 
-            label: 'Mis en avant',
-            render: (value: boolean, row: any) => (
-              <FeaturedToggle
-                isFeatured={value}
-                onToggle={(featured) => handleToggleFeatured('game', row._id, featured)}
-              />
-            )
-          },
-          { 
-            key: 'createdAt', 
-            label: 'Date création',
-            render: (value: string) => {
-              const date = new Date(value);
-              return date.toLocaleDateString('fr-FR', { 
-                day: '2-digit', 
-                month: '2-digit', 
-                year: 'numeric' 
-              });
-            }
-          },
-        ]}
-        data={games}
-        onEdit={(game) => {
-          setSelectedGame(game);
-          setGameModalOpen(true);
-        }}
-        onDelete={(game) => handleDeleteGame(game._id)}
-        expandableContent={(game) => <GameExpandedContent game={game} />}
-      />
-    </div>
-  );
 
   const tabs = [
-    { id: 'users', label: 'Utilisateurs', icon: Users },
-    { id: 'sessions', label: 'Sessions', icon: Calendar },
-    { id: 'campaigns', label: 'Campagnes', icon: BookOpen },
-    { id: 'games', label: 'Jeux', icon: Gamepad2 },
+    { id: 'users' as TabType, label: 'Utilisateurs', icon: Users },
+    { id: 'sessions' as TabType, label: 'Sessions', icon: Calendar },
+    { id: 'campaigns' as TabType, label: 'Campagnes', icon: BookOpen },
+    { id: 'games' as TabType, label: 'Jeux', icon: Gamepad2 },
+    { id: 'conversations' as TabType, label: 'Conversations', icon: MessageSquare }
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Notifications */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
       <NotificationContainer
         notifications={notifications}
         onRemove={removeNotification}
-        maxNotifications={5}
-        position="top-right"
       />
 
-
-
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-cinzel font-bold text-white mb-2">
-            Administration
+      {/* Header */}
+      <div className="max-w-7xl mx-auto mb-8">
+        <div className="text-center">
+          <h1 className="text-4xl font-cinzel font-bold text-white mb-4">
+            Panel d'Administration
           </h1>
-          <p className="text-slate-400">
-            Gérez les utilisateurs, sessions, campagnes et jeux
+          <p className="text-slate-400 text-lg">
+            Gérez votre plateforme de jeux de rôle
           </p>
         </div>
-        <Button onClick={loadData} variant="outline" disabled={loading}>
-          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Actualiser
-        </Button>
       </div>
 
-      {/* Onglets */}
-      <Card>
-        <CardContent className="p-0">
-          <div className="flex border-b border-slate-700/50">
+      {/* Navigation par onglets */}
+      <div className="max-w-7xl mx-auto mb-6">
+        <div className="flex flex-wrap justify-center gap-2">
             {tabs.map((tab) => {
               const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as TabType)}
-                  className={`flex items-center space-x-2 px-6 py-4 transition-all duration-200 ${
-                    isActive
-                      ? 'text-purple-300 border-b-2 border-purple-500 bg-purple-500/10'
-                      : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/30'
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                  activeTab === tab.id
+                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/25'
+                    : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700 hover:text-white'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
                   <span className="font-medium">{tab.label}</span>
                 </button>
               );
             })}
           </div>
-        </CardContent>
-      </Card>
+      </div>
 
       {/* Contenu des onglets */}
-      <Card>
-        <CardContent className="p-6">
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="flex items-center space-x-3 text-slate-400">
-                <RefreshCw className="w-6 h-6 animate-spin" />
-                <span>Chargement des données...</span>
-              </div>
-            </div>
-          ) : (
-            <>
-              {activeTab === 'users' && renderUsersTable()}
-              {activeTab === 'sessions' && renderSessionsTable()}
-              {activeTab === 'campaigns' && renderCampaignsTable()}
-              {activeTab === 'games' && renderGamesTable()}
-            </>
-          )}
-        </CardContent>
-      </Card>
+      <div className="max-w-7xl mx-auto">
+        {activeTab === 'users' && (
+          <UsersTab
+            users={users}
+            loading={loading}
+            onDeleteUser={handleDeleteUser}
+            onToggleFeatured={handleToggleFeatured}
+          />
+        )}
+        
+        {activeTab === 'sessions' && (
+          <SessionsTab
+            sessions={sessions}
+            loading={loading}
+            onDeleteSession={handleDeleteSession}
+            onToggleFeatured={handleToggleFeatured}
+            onExportSession={handleExportSession}
+          />
+        )}
+        
+        {activeTab === 'campaigns' && (
+          <CampaignsTab
+            campaigns={campaigns}
+            loading={loading}
+            onDeleteCampaign={handleDeleteCampaign}
+            onToggleFeatured={handleToggleFeatured}
+          />
+        )}
+        
+        {activeTab === 'games' && (
+          <GamesTab
+            games={games}
+            loading={loading}
+            onDeleteGame={handleDeleteGame}
+            onToggleFeatured={handleToggleFeatured}
+            onOpenGameModal={handleOpenGameModal}
+          />
+        )}
+        
+        {activeTab === 'conversations' && (
+          <ConversationsTab
+            conversations={conversations}
+            loading={loading}
+            onOpenReplyModal={handleOpenReplyModal}
+          />
+        )}
+      </div>
 
       {/* Modal des jeux */}
       {gameModalOpen && (
@@ -836,6 +291,17 @@ const AdminPage: React.FC = () => {
           game={selectedGame}
         />
       )}
+
+      {/* Modal de réponse aux conversations */}
+      <ReplyModal
+        isOpen={replyModalOpen}
+        conversation={selectedConversation}
+        onClose={() => {
+                  setReplyModalOpen(false);
+                  setSelectedConversation(null);
+        }}
+        onSendReply={handleSendReply}
+      />
     </div>
   );
 };

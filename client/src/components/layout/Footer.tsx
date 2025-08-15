@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Github, Twitter, MessageCircle, Mail } from 'lucide-react';
+import { Github, Instagram, MessageCircle } from 'lucide-react';
 import InvokeLogo from '../../assets/invoke-logo.svg';
 
 export default function Footer() {
@@ -9,7 +9,6 @@ export default function Footer() {
       { name: 'Sessions', href: '/sessions' },
       { name: 'Games', href: '/games' },
       { name: 'Campaigns', href: '/campaigns' },
-      { name: 'Players', href: '/players' },
       { name: 'About', href: '/about' },
       { name: 'Contact', href: '/contact' },
     ],
@@ -20,19 +19,14 @@ export default function Footer() {
         icon: MessageCircle,
       },
       {
-        name: 'Twitter',
-        href: '#',
-        icon: Twitter,
+        name: 'Instagram',
+        href: 'https://instagram.com/nacho_fuerte',
+        icon: Instagram,
       },
       {
         name: 'GitHub',
-        href: '#',
+        href: 'https://github.com/not-kami',
         icon: Github,
-      },
-      {
-        name: 'Email',
-        href: 'mailto:contact@invoke.com',
-        icon: Mail,
       },
     ],
   };
@@ -57,6 +51,8 @@ export default function Footer() {
                   key={item.name}
                   href={item.href}
                   className="text-gray-400 hover:text-white transition-colors"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   <span className="sr-only">{item.name}</span>
                   <item.icon className="h-6 w-6" />
