@@ -7,6 +7,7 @@ import seedGames from './gameSeeder.js';
 import seedSessions from './sessionSeeder.js';
 import seedCampaigns from './campaignSeeder.js';
 import seedFeedback from './feedbackSeeder.js';
+import seedConversations from './conversationSeeder.js';
 import testDuplicateHandling from './testSeeder.js';
 
 console.log('✅ All modules loaded successfully');
@@ -46,8 +47,12 @@ const seedDatabase = async () => {
         const feedback = await seedFeedback(users, sessions);
         console.log('Feedback created:', feedback.length);
 
+        console.log('📧 Seeding conversations...');
+        const conversations = await seedConversations();
+        console.log('Conversations created:', conversations.length);
+
         console.log('✅ Database seeded successfully!');
-        console.log(`📊 Created ${users.length} users, ${games.length} games, ${sessions.length} sessions, ${campaigns.length} campaigns`);
+        console.log(`📊 Created ${users.length} users, ${games.length} games, ${sessions.length} sessions, ${campaigns.length} campaigns, ${conversations.length} conversations`);
 
         // Test duplicate handling
         console.log('\n🧪 Testing duplicate handling...');

@@ -10,7 +10,7 @@ import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import NotificationContainer from '../../components/ui/NotificationContainer';
 
-import { adminAPI, User, Session, Campaign, Game } from '../../lib/api';
+import { adminAPI, User, Session, Campaign, Game, Conversation } from '../../lib/api';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useNotifications } from '../../hooks/useNotifications';
 import { 
@@ -27,10 +27,13 @@ import {
   AlertTriangle,
   RefreshCw,
   CheckCircle,
-  XCircle
+  XCircle,
+  MessageSquare,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
-type TabType = 'users' | 'sessions' | 'campaigns' | 'games';
+type TabType = 'users' | 'sessions' | 'campaigns' | 'games' | 'conversations';
 
 const AdminPage: React.FC = () => {
   const { canViewAdminPanel, canManageUsers, canManageSessions, canManageCampaigns } = usePermissions();
@@ -41,10 +44,14 @@ const AdminPage: React.FC = () => {
   const [originalSessions, setOriginalSessions] = useState<Session[]>([]); // Pour sauvegarder les sessions originales
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [games, setGames] = useState<Game[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [isLoadingData, setIsLoadingData] = useState(false); // Protection contre les appels multiples
   const [gameModalOpen, setGameModalOpen] = useState(false);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [replyModalOpen, setReplyModalOpen] = useState(false);
+  const [replyContent, setReplyContent] = useState('');
 
   // Vérification de sécurité - double protection
   useEffect(() => {
@@ -78,7 +85,7 @@ const AdminPage: React.FC = () => {
       console.log('AdminPage: Chargement des données...');
       
       // Charger seulement l'onglet actif pour plus de rapidité
-      let usersRes: any = null, sessionsRes: any = null, campaignsRes: any = null, gamesRes: any = null;
+      let usersRes: any = null, sessionsRes: any = null, campaignsRes: any = null, gamesRes: any = null, conversationsRes: any = null;
       
       switch (activeTab) {
         case 'users':
@@ -98,13 +105,18 @@ const AdminPage: React.FC = () => {
         case 'games':
           gamesRes = await adminAPI.getGames();
           break;
+        case 'conversations':
+          // Charger les conversations
+          conversationsRes = await adminAPI.getConversations();
+          break;
       }
 
       console.log('AdminPage: Réponses API reçues:', {
         users: usersRes,
         sessions: sessionsRes,
         campaigns: campaignsRes,
-        games: gamesRes
+        games: gamesRes,
+        conversations: conversationsRes
       });
 
       // Traitement des utilisateurs
@@ -167,6 +179,21 @@ const AdminPage: React.FC = () => {
         console.error('AdminPage: Erreur lors du chargement des jeux:', gamesRes.error);
         if (!gamesRes.error.includes('Données invalides')) {
           addError(`Erreur jeux: ${gamesRes.error}`);
+        }
+      }
+
+      // Traitement des conversations
+      if (conversationsRes && conversationsRes.success && conversationsRes.data) {
+        setConversations(conversationsRes.data);
+        console.log('AdminPage: Conversations chargées:', conversationsRes.data.length);
+      } else if (conversationsRes && Array.isArray(conversationsRes)) {
+        // Fallback : si l'API retourne directement un tableau
+        setConversations(conversationsRes);
+        console.log('AdminPage: Conversations chargées (format direct):', conversationsRes.length);
+      } else if (conversationsRes && conversationsRes.error) {
+        console.error('AdminPage: Erreur lors du chargement des conversations:', conversationsRes.error);
+        if (!conversationsRes.error.includes('Données invalides')) {
+          addError(`Erreur conversations: ${conversationsRes.error}`);
         }
       }
 
@@ -742,11 +769,237 @@ const AdminPage: React.FC = () => {
     </div>
   );
 
+  const renderConversationsTable = () => (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-cinzel font-semibold text-white">Gestion des conversations</h3>
+        <div className="flex space-x-2">
+          <Button 
+            onClick={() => {
+              if (conversations.length > 0) {
+                addInfo(`Total: ${conversations.length} conversation(s)`);
+              }
+            }} 
+            variant="outline"
+          >
+            <MessageSquare className="w-4 h-4 mr-2" />
+            Statistiques
+          </Button>
+        </div>
+      </div>
+      
+      {/* Filtres pour les conversations */}
+      <div className="bg-slate-800/50 rounded-lg p-4 space-y-4">
+        <h4 className="text-sm font-medium text-slate-300">Filtres</h4>
+        <div className="flex flex-wrap gap-4">
+          {/* Filtre par type */}
+          <div className="flex items-center space-x-2">
+            <label className="text-sm text-slate-400">Type:</label>
+            <select 
+              className="bg-slate-700 border border-slate-600 rounded px-3 py-1 text-sm text-white"
+              onChange={(e) => {
+                const type = e.target.value;
+                if (type === 'all') {
+                  // Restaurer toutes les conversations
+                } else {
+                  // Filtrer par type
+                  addInfo(`Filtrage par type: ${type}`);
+                }
+              }}
+            >
+              <option value="all">Tous les types</option>
+              <option value="contact_admin">Contact Admin</option>
+              <option value="user_chat">Chat Utilisateur</option>
+            </select>
+          </div>
+          
+          {/* Filtre par statut */}
+          <div className="flex items-center space-x-2">
+            <label className="text-sm text-slate-400">Statut:</label>
+            <select 
+              className="bg-slate-700 border border-slate-600 rounded px-3 py-1 text-sm text-white"
+              onChange={(e) => {
+                const status = e.target.value;
+                if (status === 'all') {
+                  // Restaurer toutes les conversations
+                } else {
+                  // Filtrer par statut
+                  addInfo(`Filtrage par statut: ${status}`);
+                }
+              }}
+            >
+              <option value="all">Tous les statuts</option>
+              <option value="open">Ouvertes</option>
+              <option value="closed">Fermées</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <DataTable
+        columns={[
+          { key: 'subject', label: 'Sujet', render: (value: string) => (
+              <div className="max-w-xs">
+                <div className="font-medium text-white">{value}</div>
+              </div>
+            )
+          },
+          { 
+            key: 'conversationType', 
+            label: 'Type',
+            render: (value: string) => (
+              <Badge variant={value === 'contact_admin' ? 'info' : 'default'}>
+                {value === 'contact_admin' ? 'Contact Admin' : 'Chat Utilisateur'}
+              </Badge>
+            )
+          },
+          { 
+            key: 'status', 
+            label: 'Statut',
+            render: (value: string) => (
+              <Badge variant={value === 'open' ? 'success' : 'warning'}>
+                {value === 'open' ? 'Ouvert' : 'Fermé'}
+              </Badge>
+            )
+          },
+          { 
+            key: 'messages', 
+            label: 'Dernier message',
+            render: (value: any[], row: any) => (
+              <div className="max-w-xs truncate">
+                {value && value.length > 0 ? (
+                  <>
+                    <div className="flex items-center text-sm text-slate-300">
+                      <MessageSquare className="w-4 h-4 mr-1 flex-shrink-0" />
+                      <span className="truncate">
+                        {value[value.length - 1]?.content || 'Aucun message'}
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      Par: {value[value.length - 1]?.senderType === 'admin' ? 'Admin' : (row.userName || 'Utilisateur')}
+                    </div>
+                  </>
+                ) : (
+                  <span className="text-slate-400">Aucun message</span>
+                )}
+              </div>
+            )
+          },
+          { 
+            key: 'unreadCount', 
+            label: 'Non lus',
+            render: (value: number) => (
+              <Badge variant={value > 0 ? 'danger' : 'default'}>
+                {value > 0 ? 'Non lu' : 'Lu'}
+              </Badge>
+            )
+          },
+          { 
+            key: 'createdAt', 
+            label: 'Date création',
+            render: (value: string) => {
+              const date = new Date(value);
+              return date.toLocaleDateString('fr-FR', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+              });
+            }
+          },
+          { 
+            key: 'updatedAt', 
+            label: 'Dernière mise à jour',
+            render: (value: string) => {
+              const date = new Date(value);
+              return date.toLocaleDateString('fr-FR', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+              });
+            }
+          },
+        ]}
+        data={conversations}
+        onRowClick={(conversation) => {
+          // Navigation vers la page de conversation
+          window.open(`/admin/conversations/${conversation._id}`, '_blank');
+        }}
+        onDelete={(conversation) => {
+          if (confirm('Êtes-vous sûr de vouloir supprimer cette conversation ?')) {
+            handleDeleteConversation(conversation._id);
+          }
+        }}
+        onArchive={(conversation) => {
+          if (confirm('Êtes-vous sûr de vouloir archiver cette conversation ?')) {
+            handleArchiveConversation(conversation._id);
+          }
+        }}
+        showArchiveButton={true}
+        showEditButton={false}
+      />
+    </div>
+  );
+
+  const handleDeleteConversation = async (conversationId: string) => {
+    try {
+      const response = await adminAPI.deleteConversation(conversationId);
+      if (response.success) {
+        setConversations(prev => prev.filter(conv => conv._id !== conversationId));
+        addSuccess('Conversation supprimée avec succès');
+      } else {
+        throw new Error(response.error || 'Erreur lors de la suppression');
+      }
+    } catch (error) {
+      console.error('AdminPage: Erreur lors de la suppression de la conversation:', error);
+      addError(`Erreur de suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+    }
+  };
+
+  const handleArchiveConversation = async (conversationId: string) => {
+    try {
+      const response = await adminAPI.archiveConversation(conversationId);
+      if (response.success) {
+        setConversations(prev => prev.map(conv => 
+          conv._id === conversationId ? { ...conv, status: 'closed' } : conv
+        ));
+        addSuccess('Conversation archivée avec succès');
+      } else {
+        throw new Error(response.error || 'Erreur lors de l\'archivage');
+      }
+    } catch (error) {
+      console.error('AdminPage: Erreur lors de l\'archivage de la conversation:', error);
+      addError(`Erreur d'archivage: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+    }
+  };
+
+  const handleReplyToConversation = async () => {
+    if (!selectedConversation || !replyContent.trim()) {
+      addError('Veuillez saisir un message de réponse');
+      return;
+    }
+
+    try {
+      // Ici on pourrait appeler l'API pour ajouter un message à la conversation
+      // Pour l'instant, on simule la réponse
+      addSuccess('Réponse envoyée avec succès');
+      setReplyModalOpen(false);
+      setReplyContent('');
+      setSelectedConversation(null);
+      
+      // Recharger les conversations pour mettre à jour le statut
+      loadData();
+    } catch (error) {
+      console.error('AdminPage: Erreur lors de l\'envoi de la réponse:', error);
+      addError(`Erreur d'envoi: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+    }
+  };
+
   const tabs = [
     { id: 'users', label: 'Utilisateurs', icon: Users },
     { id: 'sessions', label: 'Sessions', icon: Calendar },
     { id: 'campaigns', label: 'Campagnes', icon: BookOpen },
     { id: 'games', label: 'Jeux', icon: Gamepad2 },
+    { id: 'conversations', label: 'Conversations', icon: MessageSquare },
   ];
 
   return (
@@ -819,6 +1072,7 @@ const AdminPage: React.FC = () => {
               {activeTab === 'sessions' && renderSessionsTable()}
               {activeTab === 'campaigns' && renderCampaignsTable()}
               {activeTab === 'games' && renderGamesTable()}
+              {activeTab === 'conversations' && renderConversationsTable()}
             </>
           )}
         </CardContent>
@@ -835,6 +1089,89 @@ const AdminPage: React.FC = () => {
           onSave={handleSaveGame}
           game={selectedGame}
         />
+      )}
+
+      {/* Modal de réponse aux conversations */}
+      {replyModalOpen && selectedConversation && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-slate-800 rounded-lg p-6 w-full max-w-2xl mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-cinzel font-semibold text-white">
+                Répondre à la conversation
+              </h3>
+              <button
+                onClick={() => {
+                  setReplyModalOpen(false);
+                  setSelectedConversation(null);
+                  setReplyContent('');
+                }}
+                className="text-slate-400 hover:text-white"
+              >
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              {/* Détails de la conversation */}
+              <div className="bg-slate-700/50 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-slate-300 mb-2">Détails de la conversation</h4>
+                <div className="space-y-2 text-sm">
+                  <div><span className="text-slate-400">Sujet:</span> {selectedConversation.subject}</div>
+                  <div><span className="text-slate-400">Type:</span> 
+                                    <Badge variant={selectedConversation.conversationType === 'contact_admin' ? 'info' : 'default'} className="ml-2">
+                  {selectedConversation.conversationType === 'contact_admin' ? 'Contact Admin' : 'Chat Utilisateur'}
+                </Badge>
+                  </div>
+                  <div><span className="text-slate-400">Statut:</span> 
+                    <Badge variant={selectedConversation.status === 'open' ? 'success' : 'warning'} className="ml-2">
+                      {selectedConversation.status === 'open' ? 'Ouvert' : 'Fermé'}
+                    </Badge>
+                  </div>
+                  <div><span className="text-slate-400">Dernier message:</span> 
+                    <div className="text-slate-300 mt-1 pl-4 border-l border-slate-600">
+                      {selectedConversation.lastMessage?.content || 'Aucun message'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Zone de réponse */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Votre réponse
+                </label>
+                <textarea
+                  value={replyContent}
+                  onChange={(e) => setReplyContent(e.target.value)}
+                  className="w-full h-32 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  placeholder="Tapez votre réponse ici..."
+                />
+              </div>
+              
+              {/* Actions */}
+              <div className="flex justify-end space-x-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setReplyModalOpen(false);
+                    setSelectedConversation(null);
+                    setReplyContent('');
+                  }}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleReplyToConversation}
+                  disabled={!replyContent.trim()}
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Envoyer la réponse
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

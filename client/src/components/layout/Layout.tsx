@@ -1,6 +1,7 @@
 import React from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import ConversationsBubble from '../ConversationsBubble';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -12,6 +13,7 @@ export default function Layout({ children }: LayoutProps) {
       <Navbar />
       <main>{children}</main>
       <Footer />
+      <ConversationsBubble />
     </div>
   );
 }

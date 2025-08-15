@@ -11,7 +11,8 @@ import {
   Bell,
   Settings,
   LayoutDashboard,
-  Search
+  Search,
+  MessageSquare
 } from 'lucide-react';
 import InvokeLogo from '../../assets/invoke-logo.svg';
 

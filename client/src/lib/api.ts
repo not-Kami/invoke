@@ -65,11 +65,47 @@ interface Game {
   description: string;
   genre: string;
   system: string;
-  image?: string; // Nom du fichier ou URL
+  image?: string; // Nom du fichier ou URL (pour compatibilité)
+  images?: {
+    logo?: string | File;
+    portrait?: string | File;
+    banner?: string | File;
+  }; // Structure pour GameModal
   featured: boolean;
   sessionsCount?: number;
   createdAt: string;
   updatedAt?: string;
+}
+
+// Type pour les conversations
+export interface Conversation {
+  _id: string;
+  conversationType: 'contact_admin' | 'user_chat';
+  userEmail: string;
+  participants: string[];
+  subject: string;
+  status: 'open' | 'in_progress' | 'closed';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  messages: Array<{
+    _id: string;
+    content: string;
+    timestamp: string;
+    sender: string;
+    senderType: 'user' | 'admin';
+    isRead: boolean;
+  }>;
+  metadata: {
+    userAgent: string;
+    ipAddress: string;
+    referrer: string | null;
+  };
+  lastMessageAt: string;
+  assignedTo: string | null;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+  unreadCount: number;
+  isUnread: boolean;
 }
 
 // Fonction utilitaire pour les appels API
@@ -231,6 +267,38 @@ export const adminAPI = {
     }),
   deleteCampaign: (id: string) => 
     apiCall(`/campaigns/${id}`, { method: 'DELETE' }),
+
+  // Conversations
+  getConversations: () => apiCall<Conversation[]>('/conversations'),
+  getConversation: (id: string) => apiCall<Conversation>(`/conversations/${id}`),
+  createContactAdmin: (data: {
+    userEmail: string;
+    content: string;
+    conversationType: string;
+    subject: string;
+    userName?: string;
+  }) => 
+    apiCall<Conversation>('/conversations', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  updateConversation: (id: string, data: Partial<Conversation>) => 
+    apiCall<Conversation>(`/conversations/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  deleteConversation: (id: string) => 
+    apiCall(`/conversations/${id}`, { method: 'DELETE' }),
+  archiveConversation: (id: string) => 
+    apiCall<Conversation>(`/conversations/${id}/archive`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: 'closed' }),
+    }),
+  replyToConversation: (id: string, content: string) => 
+    apiCall<Conversation>(`/conversations/${id}/admin-reply`, {
+      method: 'POST',
+      body: JSON.stringify({ content }),
+    }),
 };
 
 // ===== USERS API =====
@@ -249,32 +317,66 @@ export const usersApi = {
   getFavorites: (userId: string) => 
     apiCall<Game[]>(`/users/${userId}/favorites`),
   addFavorite: (userId: string, gameId: string) => 
-    apiCall<Game[]>(`/users/${userId}/favorites`, { method: 'POST', body: JSON.stringify({ gameId }) }),
+    apiCall<User>(`/users/${userId}/favorites`, { method: 'POST', body: JSON.stringify({ gameId }) }),
   removeFavorite: (userId: string, gameId: string) => 
-    apiCall<Game[]>(`/users/${userId}/favorites/${gameId}`, { method: 'DELETE' }),
+    apiCall<User>(`/users/${userId}/favorites/${gameId}`, { method: 'DELETE' }),
   
-  // Jeux maîtrisés
-  getMastered: (userId: string) => 
-    apiCall<Game[]>(`/users/${userId}/mastered`),
-  addMastered: (userId: string, gameId: string) => 
-    apiCall<Game[]>(`/users/${userId}/mastered`, { method: 'POST', body: JSON.stringify({ gameId }) }),
-  removeMastered: (userId: string, gameId: string) => 
-    apiCall<Game[]>(`/users/${userId}/mastered/${gameId}`, { method: 'DELETE' }),
-  
-  // Avatar
-  uploadAvatar: (userId: string, file: File) => {
-    const formData = new FormData();
-    formData.append('avatar', file);
-    return apiCall<User>(`/users/${userId}/avatar`, { 
-      method: 'POST', 
-      body: formData,
-      headers: {} // Pas de Content-Type pour FormData
-    });
-  },
-  
-  // Suppression
-  deleteUser: (userId: string) => 
-    apiCall<{ success: boolean }>(`/users/${userId}`, { method: 'DELETE' })
+  // Évaluations
+  getEvaluations: (userId: string) => 
+    apiCall<any[]>(`/users/${userId}/evaluations`),
+  addEvaluation: (userId: string, data: any) => 
+    apiCall<any>(`/users/${userId}/evaluations`, { method: 'POST', body: JSON.stringify(data) }),
+  updateEvaluation: (userId: string, evaluationId: string, data: any) => 
+    apiCall<any>(`/users/${userId}/evaluations/${evaluationId}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteEvaluation: (userId: string, evaluationId: string) => 
+    apiCall(`/users/${userId}/evaluations/${evaluationId}`, { method: 'DELETE' }),
+};
+
+// ===== CONVERSATIONS API =====
+export const conversationsApi = {
+  // Créer une nouvelle conversation (contact admin)
+  createContactAdmin: (data: {
+    userEmail: string;
+    content: string;
+    conversationType: string;
+    subject: string;
+    userName?: string;
+  }) => 
+    apiCall<Conversation>('/conversations', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  // Récupérer les conversations de l'utilisateur connecté
+  getUserConversations: () => 
+    apiCall<Conversation[]>('/conversations/user'),
+
+  // Récupérer les conversations d'un utilisateur spécifique (par ID)
+  getUserConversationsById: (userId: string) => 
+    apiCall<{ data: Conversation[]; user: { _id: string; email: string; firstName: string; lastName: string } }>(`/conversations/user/${userId}`),
+
+  // Récupérer une conversation spécifique
+  getConversation: (conversationId: string) => 
+    apiCall<Conversation>(`/conversations/${conversationId}`),
+
+  // Ajouter un message à une conversation
+  addMessage: (conversationId: string, message: string) => 
+    apiCall<Conversation>(`/conversations/${conversationId}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ content: message }),
+    }),
+
+  // Marquer une conversation comme lue
+  markAsRead: (conversationId: string) => 
+    apiCall<Conversation>(`/conversations/${conversationId}/read`, {
+      method: 'PATCH',
+    }),
+
+  // Fermer une conversation
+  closeConversation: (conversationId: string) => 
+    apiCall<Conversation>(`/conversations/${conversationId}/close`, {
+      method: 'PATCH',
+    }),
 };
 
 // ===== ENDPOINTS AUTH =====
