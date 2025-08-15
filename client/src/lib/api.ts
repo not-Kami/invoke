@@ -176,6 +176,13 @@ export const adminAPI = {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
+    
+  // Fonction admin pour mettre à jour le statut featured
+  adminUpdateUserFeatured: (id: string, featured: boolean) => 
+    apiCall<User>(`/users/${id}/featured`, {
+      method: 'PATCH',
+      body: JSON.stringify({ featured }),
+    }),
   
   // Supprimer un utilisateur
   deleteUser: (id: string) => 
