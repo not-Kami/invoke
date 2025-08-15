@@ -81,18 +81,13 @@ export default function GameCard({
         <p className="text-gray-200 text-sm mb-3 line-clamp-2">{game.description}</p>
         
         {/* Métadonnées compactes */}
-        <div className="flex items-center justify-between text-xs text-gray-300 mb-3">
+        <div className="flex items-center justify-between text-xs text-gray-300">
           <span className="bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
             {game.genre}
           </span>
           <span className="bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
             {game.system}
           </span>
-        </div>
-
-        {/* Date de création */}
-        <div className="text-xs text-gray-300">
-          Ajouté le {new Date(game.createdAt).toLocaleDateString('fr-FR')}
         </div>
       </div>
     </Card>
