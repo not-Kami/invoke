@@ -181,11 +181,11 @@ const AdminPage: React.FC = () => {
   };
 
   const tabs = [
-    { id: 'users' as TabType, label: 'Utilisateurs', icon: Users, count: users.length },
-    { id: 'sessions' as TabType, label: 'Sessions', icon: Calendar, count: sessions.length },
-    { id: 'campaigns' as TabType, label: 'Campagnes', icon: BookOpen, count: campaigns.length },
-    { id: 'games' as TabType, label: 'Jeux', icon: Gamepad2, count: games.length },
-    { id: 'conversations' as TabType, label: 'Conversations', icon: MessageSquare, count: conversations.length }
+    { id: 'users' as TabType, label: 'Utilisateurs', icon: Users },
+    { id: 'sessions' as TabType, label: 'Sessions', icon: Calendar },
+    { id: 'campaigns' as TabType, label: 'Campagnes', icon: BookOpen },
+    { id: 'games' as TabType, label: 'Jeux', icon: Gamepad2 },
+    { id: 'conversations' as TabType, label: 'Conversations', icon: MessageSquare }
   ];
 
   return (
@@ -224,9 +224,6 @@ const AdminPage: React.FC = () => {
               >
                 <Icon className="w-4 h-4" />
                   <span className="font-medium">{tab.label}</span>
-                <span className="bg-slate-600/50 px-2 py-1 rounded-full text-xs">
-                  {tab.count}
-                </span>
                 </button>
               );
             })}

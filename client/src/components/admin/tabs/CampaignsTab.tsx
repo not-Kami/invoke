@@ -21,109 +21,66 @@ const CampaignsTab: React.FC<CampaignsTabProps> = ({
   onToggleFeatured
 }) => {
   const columns = [
-    {
-      key: 'title',
-      label: 'Titre de la campagne',
-      render: (value: string, row: Campaign) => (
-        <div className="max-w-xs">
-          <div className="font-medium text-white">{value}</div>
-          <div className="text-sm text-slate-400">
-            {row.description ? row.description.substring(0, 60) + '...' : 'Aucune description'}
-          </div>
-        </div>
-      )
+    { key: 'title', label: 'Titre' },
+    { 
+      key: 'game', 
+      label: 'Jeu',
+      render: (value: any) => value?.name || 'N/A'
     },
-    {
-      key: 'gameMaster',
-      label: 'Maître de jeu',
-      render: (value: string) => (
-        <div className="text-sm text-slate-300">{value}</div>
-      )
+    { 
+      key: 'dm', 
+      label: 'MJ',
+      render: (value: any) => value ? `${value.firstName} ${value.lastName}` : 'N/A'
     },
-    {
-      key: 'status',
+    { 
+      key: 'status', 
       label: 'Statut',
       render: (value: string) => (
         <Badge variant={value === 'active' ? 'success' : 'warning'}>
-          {value === 'active' ? 'Active' : 'Terminée'}
+          {value === 'active' ? 'Active' : 'En pause'}
         </Badge>
       )
     },
-    {
-      key: 'featured',
+    { 
+      key: 'players', 
+      label: 'Joueurs',
+      render: (value: number, row: any) => `${value}/${row.maxPlayers}`
+    },
+    { 
+      key: 'featured', 
       label: 'Mis en avant',
-      render: (value: boolean, row: Campaign) => (
+      render: (value: boolean, row: any) => (
         <FeaturedToggle
-          featured={value}
+          isFeatured={value}
           onToggle={(featured) => onToggleFeatured('campaign', row._id, featured)}
         />
       )
     },
-    {
-      key: 'createdAt',
-      label: 'Date de création',
-      render: (value: string) => (
-        <div className="text-sm text-slate-300">
-          {new Date(value).toLocaleDateString('fr-FR')}
-        </div>
-      )
+    { 
+      key: 'createdAt', 
+      label: 'Date création',
+      render: (value: string) => {
+        const date = new Date(value);
+        return date.toLocaleDateString('fr-FR', { 
+          day: '2-digit', 
+          month: '2-digit', 
+          year: 'numeric' 
+        });
+      }
     },
-    {
-      key: 'actions',
-      label: 'Actions',
-      render: (_: any, row: Campaign) => (
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {/* TODO: Implémenter l'édition */}}
-          >
-            <Edit className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onDeleteCampaign(row._id)}
-            className="text-red-400 hover:text-red-300 hover:border-red-400"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </div>
-      )
-    }
   ];
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
-      </div>
-    );
-  }
-
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center space-x-3">
-          <BookOpen className="w-6 h-6 text-purple-400" />
-          <div>
-            <h3 className="text-lg font-cinzel font-semibold text-white">
-              Gestion des Campagnes
-            </h3>
-            <p className="text-sm text-slate-400">
-              {campaigns.length} campagne{campaigns.length > 1 ? 's' : ''} au total
-            </p>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <DataTable
-          data={campaigns}
-          columns={columns}
-          emptyMessage="Aucune campagne trouvée"
-        />
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-cinzel font-semibold text-white">Gestion des campagnes</h3>
+      </div>
+      
+      <DataTable
+        columns={columns}
+        data={campaigns}
+      />
+    </div>
   );
 };
 

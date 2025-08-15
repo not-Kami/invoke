@@ -113,7 +113,9 @@ export const useAdminActions = () => {
           }
           break;
         case 'campaign':
+          console.log('useAdminActions: Sending updateCampaign request:', { id, featured });
           response = await adminAPI.updateCampaign(id, { featured });
+          console.log('useAdminActions: Campaign featured response received:', response);
           if (response.success && response.data) {
             setter((prev: any[]) => prev.map((item: any) => 
               item._id === id ? { ...item, featured } : item
@@ -124,7 +126,9 @@ export const useAdminActions = () => {
           }
           break;
         case 'game':
+          console.log('useAdminActions: Sending updateGame request:', { id, featured });
           response = await adminAPI.updateGame(id, { featured });
+          console.log('useAdminActions: Game featured response received:', response);
           if (response.success && response.data) {
             setter((prev: any[]) => prev.map((item: any) => 
               item._id === id ? { ...item, featured } : item
