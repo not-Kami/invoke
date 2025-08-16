@@ -2,16 +2,15 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '../ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
+
 import { 
   Menu, 
   X, 
   User, 
   LogIn, 
   UserPlus,
-  Bell,
-  Settings,
+  Shield,
   LayoutDashboard,
-  Search,
   MessageSquare
 } from 'lucide-react';
 import InvokeLogo from '../../assets/invoke-logo.svg';
@@ -24,6 +23,7 @@ export default function Navbar() {
     { name: 'Games', href: '/games' },
     { name: 'Sessions', href: '/sessions' },
     { name: 'Campaigns', href: '/campaigns' },
+    { name: 'About', href: '/about' },
   ];
 
   return (
@@ -57,34 +57,22 @@ export default function Navbar() {
               </Link>
             ))}
             
-            {/* Search Bar - Intégré dans la navigation */}
-            <div className="flex items-center max-w-md mx-4">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Rechercher des sessions, campagnes, joueurs..."
-                  className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
-              </div>
-            </div>
+
           </div>
 
           {/* Desktop Actions - Fixés à droite */}
           <div className="hidden md:flex items-center space-x-4 flex-shrink-0">
             {user ? (
               <>
-                <button className="text-gray-300 hover:text-white transition-colors relative">
-                  <Bell className="h-5 w-5" />
-                  <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
-                </button>
+
                 {user.role === 'admin' && (
                   <Link to="/admin">
                     <Button variant="ghost" className="text-gray-300 hover:text-white">
-                      <Settings className="h-4 w-4" />
+                      <Shield className="h-4 w-4 text-purple-400" />
                     </Button>
                   </Link>
                 )}
+
                 <Link to="/profile">
                   <Button variant="ghost" className="text-gray-300 hover:text-white">
                     <User className="h-4 w-4 mr-2" />
@@ -131,17 +119,7 @@ export default function Navbar() {
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden">
-            {/* Mobile Search */}
-            <div className="px-2 pt-2 pb-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Rechercher..."
-                  className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
-              </div>
-            </div>
+
             
             <div className="px-2 pt-2 pb-3 space-y-1 rounded-lg">
               {user && (

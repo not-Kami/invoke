@@ -15,12 +15,14 @@ import CreateCampaignPage from './pages/campaigns/CreateCampaignPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import ContactPage from './pages/contact/ContactPage';
+import AboutPage from './pages/AboutPage';
 import ConversationsPage from './pages/conversations/ConversationsPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import SecureRoute from './components/auth/SecureRoute';
 import AdminLayout from './components/admin/AdminLayout';
 import AdminPage from './pages/admin/AdminPage';
 import ConversationPage from './pages/admin/conversations/ConversationPage';
+import OnboardingDemo from './components/onboarding/OnboardingDemo';
 
 function App() {
   return (
@@ -54,6 +56,7 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
+          <Route path="/about" element={<Layout><AboutPage /></Layout>} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           
@@ -100,6 +103,13 @@ function App() {
                 <AdminPage />
               </AdminLayout>
             </SecureRoute>
+          } />
+
+          {/* Route Demo Onboarding - Pour les tests */}
+          <Route path="/demo/onboarding" element={
+            <Layout>
+              <OnboardingDemo />
+            </Layout>
           } />
 
           {/* Route Conversation - Protégée */}
