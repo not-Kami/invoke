@@ -1,114 +1,111 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Github, Instagram, MessageCircle } from 'lucide-react';
+import { Heart, BookOpen, HelpCircle, Shield } from 'lucide-react';
 import InvokeLogo from '../../assets/invoke-logo.svg';
 
-export default function Footer() {
-  const navigation = {
-    main: [
-      { name: 'Sessions', href: '/sessions' },
-      { name: 'Games', href: '/games' },
-      { name: 'Campaigns', href: '/campaigns' },
-      { name: 'About', href: '/about' },
-      { name: 'Contact', href: '/contact' },
-    ],
-    social: [
-      {
-        name: 'Discord',
-        href: '#',
-        icon: MessageCircle,
-      },
-      {
-        name: 'Instagram',
-        href: 'https://instagram.com/nacho_fuerte',
-        icon: Instagram,
-      },
-      {
-        name: 'GitHub',
-        href: 'https://github.com/not-kami',
-        icon: Github,
-      },
-    ],
-  };
+const Footer: React.FC = () => {
+  const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-900/50 backdrop-blur-sm border-t border-white/20">
-      <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="xl:grid xl:grid-cols-3 xl:gap-8">
-          {/* Brand */}
-          <div className="space-y-8 xl:col-span-1">
-            <Link to="/" className="flex items-center space-x-2">
-              <img src={InvokeLogo} alt="Invoke" className="h-12 w-12" />
-              <span className="font-display text-xl font-bold text-white">Invoke</span>
-            </Link>
-            <p className="text-gray-400 text-sm max-w-md">
-              Embark on epic quests, forge legendary characters, and discover master dungeon masters 
-              in a world where every roll of the dice tells a story.
+    <footer className="bg-slate-900 border-t border-slate-700">
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Logo et description */}
+          <div className="col-span-1 md:col-span-2">
+            <div className="flex items-center space-x-3 mb-4">
+              <img src={InvokeLogo} alt="Invoke" className="w-10 h-10" />
+              <span className="text-xl font-cinzel font-bold text-white">Invoke</span>
+            </div>
+            <p className="text-slate-400 mb-4 max-w-md">
+              Your community platform for tabletop RPGs. 
+              Connect with passionate players and create memorable adventures.
             </p>
-            <div className="flex space-x-6">
-              {navigation.social.map((item) => (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  className="text-gray-400 hover:text-white transition-colors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span className="sr-only">{item.name}</span>
-                  <item.icon className="h-6 w-6" />
-                </a>
-              ))}
+            <div className="flex items-center space-x-2 text-slate-400">
+              <Heart className="w-4 h-4 text-red-400" />
+              <span className="text-sm">Built with passion</span>
             </div>
           </div>
 
-          {/* Navigation */}
-          <div className="mt-12 grid grid-cols-2 gap-8 xl:mt-0 xl:col-span-2">
-            <div className="md:grid md:grid-cols-2 md:gap-8">
-              <div>
-                <h3 className="font-display text-sm font-semibold text-white tracking-wider uppercase">
-                  Explore
-                </h3>
-                <ul className="mt-4 space-y-4">
-                  {navigation.main.slice(0, 3).map((item) => (
-                    <li key={item.name}>
-                      <Link
-                        to={item.href}
-                        className="text-gray-400 hover:text-white transition-colors text-sm"
-                      >
-                        {item.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="mt-12 md:mt-0">
-                <h3 className="font-display text-sm font-semibold text-white tracking-wider uppercase">
-                  Support
-                </h3>
-                <ul className="mt-4 space-y-4">
-                  {navigation.main.slice(3).map((item) => (
-                    <li key={item.name}>
-                      <Link
-                        to={item.href}
-                        className="text-gray-400 hover:text-white transition-colors text-sm"
-                      >
-                        {item.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+          {/* Liens rapides */}
+          <div>
+            <h3 className="text-white font-semibold mb-4">Navigation</h3>
+            <ul className="space-y-2">
+              <li>
+                <Link to="/" className="text-slate-400 hover:text-white transition-colors">
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link to="/games" className="text-slate-400 hover:text-white transition-colors">
+                  Games
+                </Link>
+              </li>
+              <li>
+                <Link to="/sessions" className="text-slate-400 hover:text-white transition-colors">
+                  Sessions
+                </Link>
+              </li>
+              <li>
+                <Link to="/campaigns" className="text-slate-400 hover:text-white transition-colors">
+                  Campaigns
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Support et aide */}
+          <div>
+            <h3 className="text-white font-semibold mb-4">Support</h3>
+            <ul className="space-y-2">
+              <li>
+                <Link to="/about" className="text-slate-400 hover:text-white transition-colors flex items-center space-x-2">
+                  <span>About</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="text-slate-400 hover:text-white transition-colors">
+                  Contact
+                </Link>
+              </li>
+              <li>
+                <button 
+                  onClick={() => {
+                    localStorage.removeItem('invoke_onboarding_completed');
+                    window.location.reload();
+                  }}
+                  className="text-slate-400 hover:text-white transition-colors flex items-center space-x-2"
+                >
+                  <span>Onboarding</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Séparateur */}
+        <div className="border-t border-slate-700 mt-8 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="text-slate-400 text-sm">
+              © {currentYear} Invoke. All rights reserved.
+            </div>
+            <div className="flex items-center space-x-4 mt-4 md:mt-0">
+              <div className="flex items-center space-x-2 text-slate-400 text-sm">
+                <Shield className="w-4 h-4" />
+                <span>Privacy protected</span>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Bottom */}
-        <div className="mt-12 border-t border-white/20 pt-8">
-          <p className="text-gray-400 text-sm text-center">
-            © {new Date().getFullYear()} Invoke. All rights reserved. May your dice roll true.
+        
+        {/* Message de fin */}
+        <div className="text-center mt-6">
+          <p className="text-slate-500 text-sm italic">
+            May your dice roll true.
           </p>
         </div>
       </div>
     </footer>
   );
-}
+};
+
+export default Footer;
