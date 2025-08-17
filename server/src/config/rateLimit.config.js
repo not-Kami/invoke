@@ -93,12 +93,4 @@ export const getRateLimitStatus = () => ({
     : 'Rate limiting activé pour la production'
 });
 
-// Log du statut au démarrage
-if (shouldDisableRateLimit) {
-  console.log('🔄 Rate limiting désactivé:', {
-    reason: disableRateLimit ? 'explicitement désactivé' : 'mode développement',
-    environment: env.NODE_ENV || 'development'
-  });
-} else {
-  console.log('🛡️ Rate limiting activé pour la production');
-}
+// Log du statut au démarrage (via logger si nécessaire)

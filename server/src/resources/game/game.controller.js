@@ -33,9 +33,6 @@ const gameController = {
                 featured: game.featured !== undefined ? game.featured : false
             }));
             
-            console.log('🔍 Jeux avant transformation:', games);
-            console.log('✨ Jeux après transformation:', gamesWithFeatured);
-            
             const total = await Game.countDocuments(filter);
             res.status(200).json({
                 success: true,

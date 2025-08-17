@@ -18,7 +18,7 @@ async function updateSessionStatuses() {
         );
         
         if (finishedSessions.modifiedCount > 0) {
-            console.log(`Updated ${finishedSessions.modifiedCount} sessions to finished status`);
+            // Sessions mises à jour vers le statut terminé
         }
         
         // Mettre à jour les sessions pleines qui ont des places libres
@@ -34,7 +34,7 @@ async function updateSessionStatuses() {
         }
         
         if (fullSessions.length > 0) {
-            console.log(`Updated ${fullSessions.length} sessions from full to open status`);
+            // Sessions pleines mises à jour vers le statut ouvert
         }
         
     } catch (error) {
@@ -45,9 +45,6 @@ async function updateSessionStatuses() {
 const sessionController = {
     createSession: async (req, res) => {
         try {
-            console.log('Creating session with data:', req.body);
-            console.log('maxPlayers from request:', req.body.maxPlayers);
-            
             // Validation des données requises
             const { title, description, date, game, dm } = req.body;
             if (!title || !description || !date || !game || !dm) {
@@ -59,13 +56,6 @@ const sessionController = {
 
             // Créer la session
             const session = await Session.create(req.body);
-            
-            console.log('Session created successfully:', session._id);
-            console.log('Session data after creation:', {
-                title: session.title,
-                maxPlayers: session.maxPlayers,
-                players: session.players.length
-            });
             
             res.status(201).json({
                 success: true,
@@ -167,8 +157,6 @@ const sessionController = {
             const sessionId = req.params.id;
             const userId = req.user._id;
 
-            console.log(`Updating session ${sessionId} by user ${userId}`);
-
             // Vérifier que la session existe
             const existingSession = await Session.findById(sessionId);
             if (!existingSession) {
@@ -188,8 +176,6 @@ const sessionController = {
 
             // Mettre à jour la session
             const session = await Session.findByIdAndUpdate(sessionId, req.body, { new: true });
-            
-            console.log(`Session ${sessionId} updated successfully by user ${userId}`);
             
             res.status(200).json({
                 success: true,
@@ -248,8 +234,6 @@ const sessionController = {
             const sessionId = req.params.id;
             const { featured } = req.body;
 
-            console.log(`Admin updating session ${sessionId} featured status to ${featured}`);
-
             // Vérifier que la session existe
             const existingSession = await Session.findById(sessionId);
             if (!existingSession) {
@@ -265,8 +249,6 @@ const sessionController = {
                 { featured }, 
                 { new: true }
             );
-            
-            console.log(`Session ${sessionId} featured status updated to ${featured}`);
             
             res.status(200).json({
                 success: true,
@@ -288,8 +270,6 @@ const sessionController = {
         try {
             const { sessionId } = req.params;
             const { playerId } = req.body;
-
-            console.log(`Inviting player ${playerId} to session ${sessionId}`);
 
             // Vérifier que la session existe
             const session = await Session.findById(sessionId);
@@ -334,8 +314,6 @@ const sessionController = {
 
             await session.save();
 
-            console.log(`Player ${playerId} successfully invited to session ${sessionId}`);
-
             res.status(200).json({
                 success: true,
                 message: 'Player invited successfully',
@@ -356,8 +334,6 @@ const sessionController = {
         try {
             const sessionId = req.params.sessionId;
             const { playerId } = req.body;
-
-            console.log(`Removing player ${playerId} from session ${sessionId}`);
 
             // Vérifier que la session existe
             const session = await Session.findById(sessionId);
@@ -386,8 +362,6 @@ const sessionController = {
 
             await session.save();
 
-            console.log(`Player ${playerId} successfully removed from session ${sessionId}`);
-
             res.status(200).json({
                 success: true,
                 message: 'Player removed successfully',
@@ -408,8 +382,6 @@ const sessionController = {
         try {
             const sessionId = req.params.id;
             const userId = req.user._id;
-
-            console.log(`User ${userId} attempting to join session ${sessionId}`);
 
             // Vérifier que la session existe
             const session = await Session.findById(sessionId);
@@ -461,8 +433,6 @@ const sessionController = {
             }
 
             await session.save();
-
-            console.log(`User ${userId} successfully joined session ${sessionId}`);
 
             res.status(200).json({
                 success: true,

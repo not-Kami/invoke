@@ -119,10 +119,6 @@ export const login = async (req, res) => {
 
         logger.info(`User logged in: ${user.email}`);
 
-        console.log('Login Debug - Token generated:', token ? 'Present' : 'Missing');
-        console.log('Login Debug - User response:', userResponse);
-        console.log('Login Debug - User role:', userResponse.role);
-        
         // Définir le cookie HTTP-only
         res.cookie('token', token, {
             httpOnly: true,

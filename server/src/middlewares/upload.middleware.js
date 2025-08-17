@@ -116,12 +116,6 @@ const gameImageStorage = multer.diskStorage({
         const isGameId = /^[0-9a-fA-F]{24}$/.test(gameName);
         const folderName = isGameId ? `id_${gameName}` : gameName;
         
-        console.log('🔍 Type d\'identifiant:', {
-            gameName,
-            isGameId,
-            folderName
-        });
-        
         // Essayer plusieurs chemins possibles
         const possiblePaths = [
             path.join(__dirname, '../../uploads/game', folderName),
@@ -130,12 +124,8 @@ const gameImageStorage = multer.diskStorage({
             `uploads/game/${folderName}`
         ];
         
-        console.log('🔍 Chemins possibles:');
-        possiblePaths.forEach((p, i) => console.log(`${i}: ${p}`));
-        
         // Utiliser le premier chemin qui fonctionne
         const uploadPath = possiblePaths[0];
-        console.log('📁 Chemin choisi:', uploadPath);
         
         ensureDirectoryExists(uploadPath);
         cb(null, uploadPath);

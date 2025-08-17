@@ -12,11 +12,11 @@ app.use(loggerMiddleware);
 app.listen(env.PORT || 3000, async () => {
     try {
         await connectDatabase();
-        console.log(`✅ Database connected successfully`);
-        console.log(`🚀 Server is running on port ${env.PORT || 3000}`);
-        console.log(`📊 Health check: http://localhost:${env.PORT || 3000}/api/v1/health`);
+        // Database connected successfully
+        // Server is running
+        // Health check available
     } catch (error) {
-        console.error(`❌ Database connection failed:`, error.message);
+        console.error(`Database connection failed:`, error.message);
         process.exit(1);
     }
 });
