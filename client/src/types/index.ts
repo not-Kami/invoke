@@ -5,7 +5,7 @@ export interface User {
   email: string;
   role: 'user' | 'admin';
   isDM: boolean;
-  avatar?: string;
+  avatar?: string | null;
   bio?: string;
   nickname?: string;
   favorite_games?: string[]; // IDs des jeux favoris
@@ -19,7 +19,7 @@ export interface Game {
   description: string;
   genre: string;
   system: string;
-  images: {
+  images?: {
     logo?: string;
     portrait?: string;
     banner?: string;
@@ -34,25 +34,30 @@ export interface Session {
   title: string;
   description: string;
   date: string;
+  timezone?: string;
   sessionType: 'online' | 'offline';
   isOneShot: boolean;
-  game: Game;
-  dm: User;
-  players: User[];
+  game: string | Game; // Peut être un ID ou un objet Game
+  dm: string | User; // Peut être un ID ou un objet User
+  players: string[] | User[]; // Peut être des IDs ou des objets User
+  maxPlayers?: number;
   status: 'open' | 'full' | 'finished' | 'cancelled';
+  image?: string;
+  featured?: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface Campaign {
   _id: string;
-  name: string;
+  title: string; // Changé de 'name' à 'title' pour correspondre à l'API
   description: string;
-  game: Game;
-  dm: User;
-  players: User[];
-  sessions: Session[];
-  active: boolean;
+  game: string | Game; // Peut être un ID ou un objet Game
+  dm: string | User; // Peut être un ID ou un objet User
+  players: number; // Nombre de joueurs
+  maxPlayers: number;
+  status: 'active' | 'paused' | 'completed';
+  featured?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -86,6 +91,12 @@ export interface AuthResponse {
     user: User;
     token: string;
   };
+}
+
+export interface PopulatedSession extends Omit<Session, 'game' | 'dm' | 'players'> {
+  game: Game;
+  dm: User;
+  players: User[];
 }
 
 export interface ApiResponse<T> {

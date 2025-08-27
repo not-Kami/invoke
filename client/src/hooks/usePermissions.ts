@@ -8,7 +8,7 @@ export interface Permission {
 }
 
 export const usePermissions = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   const hasRole = (requiredRole: 'user' | 'admin'): boolean => {
     if (!user) return false;
@@ -75,6 +75,7 @@ export const usePermissions = () => {
 
   return {
     user,
+    loading,
     hasRole,
     isAdmin,
     isUser,

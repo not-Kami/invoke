@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import GameModal from '../../components/admin/GameModal';
 import NotificationContainer from '../../components/ui/NotificationContainer';
 
@@ -27,7 +26,6 @@ import {
   Gamepad2, 
   BookOpen, 
   MessageSquare,
-  Plus,
   Shield,
   AlertTriangle
 } from 'lucide-react';
@@ -161,7 +159,7 @@ const AdminPage: React.FC = () => {
       } else {
         // Création
         const response = await adminAPI.createGame(gameData);
-        if (response.success) {
+        if (response.success && response.data) {
           setGames(prev => [...prev, response.data]);
         }
       }
@@ -291,7 +289,7 @@ const AdminPage: React.FC = () => {
             setSelectedGame(null);
           }}
           onSave={handleSaveGame}
-          game={selectedGame}
+          game={selectedGame || undefined}
         />
       )}
 

@@ -5,7 +5,7 @@ import Badge from '../../ui/Badge';
 import Button from '../../ui/Button';
 import FeaturedToggle from '../FeaturedToggle';
 import { User } from '../../../lib/api';
-import { Users, Edit, Trash2, Star, Shield, Download } from 'lucide-react';
+import { Users, Edit, Shield, Download } from 'lucide-react';
 
 interface UsersTabProps {
   users: User[];

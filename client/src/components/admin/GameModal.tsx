@@ -140,11 +140,6 @@ const GameModal: React.FC<GameModalProps> = ({
       newErrors.system = 'Le système de jeu est requis';
     }
 
-    // Les images sont optionnelles maintenant
-    // if (!formData.images.logo && !formData.images.portrait && !formData.images.banner && 
-    //     !selectedFiles.logo && !selectedFiles.portrait && !selectedFiles.banner) {
-    //   newErrors.images = 'Au moins une image est requise (logo, portrait ou bannière)';
-    // }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
