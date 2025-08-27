@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { User } from '../../types';
 import { usersApi } from '../../lib/api';
-import { Card, CardContent, CardHeader } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Avatar from '../../components/ui/Avatar';
 import Input from '../../components/ui/Input';
@@ -17,9 +17,9 @@ export default function PlayersPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await usersApi.getUsers();
-        setUsers(response.data);
-        setFilteredUsers(response.data);
+        const response = await usersApi.getProfile('all');
+        setUsers(Array.isArray(response.data) ? response.data : []);
+        setFilteredUsers(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
         console.error('Error fetching users:', error);
       } finally {
@@ -125,7 +125,7 @@ export default function PlayersPage() {
                   <Avatar
                     firstName={user.firstName}
                     lastName={user.lastName}
-                    src={user.avatar}
+                                         src={user.avatar || undefined}
                     size="xl"
                     className="mx-auto mb-4"
                   />
@@ -136,7 +136,7 @@ export default function PlayersPage() {
                   
                   <div className="flex items-center justify-center space-x-2 mb-3">
                     {user.isDM && (
-                      <Badge variant="secondary">
+                      <Badge variant="default">
                         <Shield className="h-3 w-3 mr-1" />
                         Dungeon Master
                       </Badge>

@@ -12,7 +12,7 @@ import { Conversation } from '../../../lib/api';
 const ConversationPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addSuccess, addError, addInfo } = useNotifications();
+  const { addSuccess, addError } = useNotifications();
   
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [loading, setLoading] = useState(true);
@@ -55,7 +55,7 @@ const ConversationPage: React.FC = () => {
     }
   };
 
-  const markConversationAsRead = async (conversationId: string) => {
+  const markConversationAsRead = async (_conversationId: string) => {
     try {
       // Ici on appellerait l'API pour marquer comme lu
       // Pour l'instant, on met à jour localement
@@ -265,7 +265,7 @@ const ConversationPage: React.FC = () => {
                {conversation.messages && conversation.messages.length > 0 ? (
                  conversation.messages.map((message, index) => (
                    <div
-                     key={message._id || index}
+                     key={index}
                      className={`flex ${message.senderType === 'admin' ? 'justify-end' : 'justify-start'}`}
                    >
                      <div

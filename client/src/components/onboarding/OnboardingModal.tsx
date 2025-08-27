@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, ChevronLeft, ChevronRight, Check, Gamepad2, Users, BookOpen, Shield, Star, User, Crown, Heart, Camera, SkipForward } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, ChevronLeft, ChevronRight, Check, Gamepad2, Users, BookOpen, Shield, Star, User, Crown, Heart, SkipForward } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useUserPreferences } from '../../hooks/useUserPreferences';
 
@@ -18,14 +18,14 @@ interface OnboardingModalProps {
   onComplete: () => void;
 }
 
-const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose, onComplete }) => {
+const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onComplete }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const { user } = useAuth();
   const { 
     preferences, 
     updateMultiplePreferences, 
-    updatePreference 
+ 
   } = useUserPreferences();
   
   const [userPreferences, setUserPreferences] = useState({

@@ -1,10 +1,7 @@
 import React from 'react';
-import { Card, CardContent, CardHeader } from '../../ui/Card';
 import DataTable from '../DataTable';
 import Badge from '../../ui/Badge';
-import Button from '../../ui/Button';
 import { Conversation } from '../../../lib/api';
-import { MessageSquare, Eye, EyeOff, Reply } from 'lucide-react';
 
 interface ConversationsTabProps {
   conversations: Conversation[];
@@ -14,8 +11,7 @@ interface ConversationsTabProps {
 
 const ConversationsTab: React.FC<ConversationsTabProps> = ({
   conversations,
-  loading,
-  onOpenReplyModal
+
 }) => {
   const columns = [
     { 
@@ -81,12 +77,12 @@ const ConversationsTab: React.FC<ConversationsTabProps> = ({
           // Navigation vers la page de conversation
           window.open(`/admin/conversations/${conversation._id}`, '_blank');
         }}
-        onDelete={(conversation) => {
+        onDelete={() => {
           if (confirm('Êtes-vous sûr de vouloir supprimer cette conversation ?')) {
             // TODO: Implémenter handleDeleteConversation
           }
         }}
-        onArchive={(conversation) => {
+        onArchive={() => {
           if (confirm('Êtes-vous sûr de vouloir archiver cette conversation ?')) {
             // TODO: Implémenter handleArchiveConversation
           }

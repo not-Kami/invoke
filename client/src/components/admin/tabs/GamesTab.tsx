@@ -1,11 +1,10 @@
 import React from 'react';
-import { Card, CardContent, CardHeader } from '../../ui/Card';
 import DataTable from '../DataTable';
 import Badge from '../../ui/Badge';
-import Button from '../../ui/Button';
 import FeaturedToggle from '../FeaturedToggle';
-import { Game } from '../../../lib/api';
-import { Gamepad2, Edit, Trash2, Star, Plus } from 'lucide-react';
+import Button from '../../ui/Button';
+import { Game } from '../../../types';
+import { Plus } from 'lucide-react';
 
 interface GamesTabProps {
   games: Game[];
@@ -17,8 +16,6 @@ interface GamesTabProps {
 
 const GamesTab: React.FC<GamesTabProps> = ({
   games,
-  loading,
-  onDeleteGame,
   onToggleFeatured,
   onOpenGameModal
 }) => {
@@ -28,8 +25,8 @@ const GamesTab: React.FC<GamesTabProps> = ({
     { 
       key: 'sessionsCount', 
       label: 'Sessions',
-      render: (value: number) => (
-        <Badge variant="info">{value || 0}</Badge>
+      render: (_value: any) => (
+        <Badge variant="default">{0}</Badge>
       )
     },
     { 

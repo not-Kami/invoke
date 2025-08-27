@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { publicAPI, usersApi } from '../lib/api';
+import { usersApi } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 
 export function useFavoriteGames() {
@@ -27,7 +27,7 @@ export function useFavoriteGames() {
         
         if (response.success && response.data) {
           console.log('✅ Favorite games fetched:', response.data);
-          setFavoriteGames(response.data);
+          setFavoriteGames(Array.isArray(response.data) ? response.data : [response.data]);
         } else {
           console.error('❌ Failed to fetch favorite games:', response.error);
           setError(response.error || 'Failed to fetch favorite games');
@@ -59,7 +59,7 @@ export function useFavoriteGames() {
       }
       
       // Mettre à jour la liste locale avec la réponse de l'API
-      setFavoriteGames(response.data || []);
+      setFavoriteGames(Array.isArray(response.data) ? response.data : [response.data]);
       console.log('✅ Favorite game added and saved to backend:', game.name);
     } catch (error) {
       console.error('❌ Error adding favorite game:', error);
@@ -81,7 +81,7 @@ export function useFavoriteGames() {
       }
       
       // Mettre à jour la liste locale avec la réponse de l'API
-      setFavoriteGames(response.data || []);
+      setFavoriteGames(Array.isArray(response.data) ? response.data : [response.data]);
       console.log('✅ Favorite game removed and saved to backend:', gameId);
     } catch (error) {
       console.error('❌ Error removing favorite game:', error);

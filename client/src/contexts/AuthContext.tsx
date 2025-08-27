@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       console.log('Login Debug - Response data:', response.data);
-      const userData = response.data?.user;
+      const userData = response.data as any;
       
       if (!userData) {
         throw new Error('No user data received from server');
@@ -89,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error(response.error || 'Signup failed');
       }
       
-      const userData = response.data?.user;
+      const userData = response.data as any;
       setToken('cookie'); // Le token est maintenant dans un cookie HTTP-only
       setUser(userData);
     } catch (error: any) {

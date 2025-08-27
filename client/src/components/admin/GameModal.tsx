@@ -3,23 +3,14 @@ import { X, Gamepad2, Save, Plus, Star } from 'lucide-react';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
 import { normalizeGameName } from '../../utils/gameUtils';
+import { Game } from '../../types';
 
-interface Game {
+// Type pour le formulaire (sans les propriétés requises par la base de données)
+type GameForm = Omit<Game, '_id' | 'createdAt' | 'updatedAt'> & {
   _id?: string;
-  name: string;
-  description: string;
-  genre: string;
-  system: string;
-  images: {
-    logo?: string | File;
-    portrait?: string | File;
-    banner?: string | File;
-  };
-  featured: boolean;
-  sessionsCount?: number;
   createdAt?: string;
   updatedAt?: string;
-}
+};
 
 interface GameModalProps {
   isOpen: boolean;
@@ -36,7 +27,7 @@ const GameModal: React.FC<GameModalProps> = ({
   game, 
   loading = false 
 }) => {
-  const [formData, setFormData] = useState<Game>({
+  const [formData, setFormData] = useState<GameForm>({
     name: '',
     description: '',
     genre: '',
@@ -171,8 +162,10 @@ const GameModal: React.FC<GameModalProps> = ({
       // Nettoyer les objets File des données envoyées
       if (gameDataToSend.images) {
         Object.keys(gameDataToSend.images).forEach(key => {
-          if (gameDataToSend.images[key] instanceof File) {
-            delete gameDataToSend.images[key];
+          const imageKey = key as keyof typeof gameDataToSend.images;
+          const imageValue = gameDataToSend.images[imageKey];
+          if (imageValue && typeof imageValue === 'object' && (imageValue as any).constructor?.name === 'File') {
+            delete gameDataToSend.images[imageKey];
           }
         });
       }
@@ -185,7 +178,7 @@ const GameModal: React.FC<GameModalProps> = ({
         const cleanGameData = { ...gameDataToSend };
         if (cleanGameData.images) {
           // Supprimer toutes les images (même les chaînes vides)
-          delete cleanGameData.images;
+          cleanGameData.images = {} as any;
         }
         
         // Si c'est une modification, s'assurer que l'ID est présent
@@ -193,11 +186,11 @@ const GameModal: React.FC<GameModalProps> = ({
           cleanGameData._id = game._id;
         }
         
-        const savedGame = await onSave(cleanGameData);
+        const savedGame = await onSave(cleanGameData as Game);
         
         console.log('🔍 Debug onSave:', {
           savedGame,
-          savedGameId: savedGame?._id,
+          savedGameId: (savedGame as any)?._id,
           gameDataToSend,
           gameDataToSendId: gameDataToSend._id,
           hasSelectedFiles: Object.keys(selectedFiles).length > 0
@@ -622,7 +615,7 @@ const GameModal: React.FC<GameModalProps> = ({
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-slate-400">Sessions:</span>
-                  <span className="text-white ml-2">{game.sessionsCount || 0}</span>
+                  <span className="text-white ml-2">0</span>
                 </div>
                 
                 <div>

@@ -1,5 +1,4 @@
-import React from 'react';
-import { X, Crown, AlertTriangle, Users, Gamepad2, Calendar } from 'lucide-react';
+import { X, AlertTriangle, Users, Gamepad2, Calendar } from 'lucide-react';
 import Button from './Button';
 
 interface StopDMConfirmationModalProps {

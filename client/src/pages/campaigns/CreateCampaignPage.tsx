@@ -5,7 +5,7 @@ import { Game, User } from '../../types';
 import Button from '../../components/ui/Button';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import Input from '../../components/ui/Input';
-import { Gamepad2, Users, Plus, X, AlertCircle, BookOpen, Calendar } from 'lucide-react';
+import { Plus, X, AlertCircle, Calendar } from 'lucide-react';
 
 export default function CreateCampaignPage() {
   const navigate = useNavigate();
@@ -33,90 +33,31 @@ export default function CreateCampaignPage() {
   const [availablePlayers, setAvailablePlayers] = useState<User[]>([]);
 
   useEffect(() => {
-    // Charger les jeux disponibles
+    // Charger les jeux disponibles depuis l'API
     const fetchGames = async () => {
       try {
-        // Simuler l'API - à remplacer par un vrai appel
-        const mockGames: Game[] = [
-          {
-            _id: '1',
-            name: 'Dungeons & Dragons 5e',
-            description: 'Le jeu de rôle fantastique par excellence',
-            genre: 'Fantasy',
-            system: 'D&D 5e',
-            image: '/images/dnd5e.jpg',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          },
-          {
-            _id: '2',
-            name: 'Pathfinder 2e',
-            description: 'Un système de jeu de rôle tactique et flexible',
-            genre: 'Fantasy',
-            system: 'Pathfinder 2e',
-            image: '/images/pathfinder2e.jpg',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          },
-          {
-            _id: '3',
-            name: 'Call of Cthulhu',
-            description: 'Horreur cosmique et mystères insondables',
-            genre: 'Horreur',
-            system: 'Call of Cthulhu',
-            image: '/images/callofcthulhu.jpg',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }
-        ];
-        setAvailableGames(mockGames);
+        const response = await fetch('/api/v1/games');
+        if (response.ok) {
+          const data = await response.json();
+          setAvailableGames(data.data || []);
+        }
       } catch (error) {
         console.error('Error fetching games:', error);
+        setAvailableGames([]);
       }
     };
 
-    // Charger les joueurs disponibles
+    // Charger les joueurs disponibles depuis l'API
     const fetchPlayers = async () => {
       try {
-        // Simuler l'API - à remplacer par un vrai appel
-        const mockPlayers: User[] = [
-          {
-            _id: '1',
-            firstName: 'Alice',
-            lastName: 'Johnson',
-            email: 'alice@example.com',
-            role: 'user',
-            isDM: false,
-            avatar: '/avatars/alice.jpg',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          },
-          {
-            _id: '2',
-            firstName: 'Bob',
-            lastName: 'Smith',
-            email: 'bob@example.com',
-            role: 'user',
-            isDM: false,
-            avatar: '/avatars/bob.jpg',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          },
-          {
-            _id: '3',
-            firstName: 'Charlie',
-            lastName: 'Brown',
-            email: 'charlie@example.com',
-            role: 'user',
-            isDM: false,
-            avatar: '/avatars/charlie.jpg',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }
-        ];
-        setAvailablePlayers(mockPlayers);
+        const response = await fetch('/api/v1/users');
+        if (response.ok) {
+          const data = await response.json();
+          setAvailablePlayers(data.data || []);
+        }
       } catch (error) {
         console.error('Error fetching players:', error);
+        setAvailablePlayers([]);
       }
     };
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+
 
 export interface UserPreferences {
   wantsToBeDM: boolean;
@@ -26,7 +26,7 @@ export const useUserPreferences = () => {
     lastUpdated: new Date()
   });
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
+
 
   // Charger les préférences depuis le localStorage
   useEffect(() => {

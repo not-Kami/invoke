@@ -9,7 +9,7 @@ const NotificationTest: React.FC = () => {
     <div className="p-4 space-y-4 bg-slate-800 rounded-lg">
       <h3 className="text-lg font-semibold text-white">Test des notifications</h3>
       <div className="flex space-x-2">
-        <Button onClick={() => addSuccess('Opération réussie !')} variant="success">
+        <Button onClick={() => addSuccess('Opération réussie !')} variant="primary">
           Succès
         </Button>
         <Button onClick={() => addError('Une erreur est survenue !')} variant="danger">

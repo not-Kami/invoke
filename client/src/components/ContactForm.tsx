@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { MessageSquare, Send, User, Mail, FileText, AlertCircle, CheckCircle, ExternalLink } from 'lucide-react';
+import { MessageSquare, Send, User, Mail, AlertCircle, CheckCircle, ExternalLink } from 'lucide-react';
 import Button from './ui/Button';
-import Badge from './ui/Badge';
+
 import { conversationsApi } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 

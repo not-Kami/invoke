@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Game } from '../../lib/api';
 import GameFilters from '../../components/games/GameFilters';
-import { Loader2, AlertCircle, Heart } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 import { publicAPI } from '../../lib/api';
 import { Card } from '../../components/ui/Card';
 
@@ -26,9 +26,9 @@ function SimpleGameCard({ game, onClick, className = "" }: {
         </div>
         
         {/* Image du jeu si disponible */}
-        {game.image ? (
+        {game.images?.logo ? (
           <img 
-            src={game.image} 
+            src={game.images.logo} 
             alt={`Image ${game.name}`}
             className="absolute inset-0 w-full h-full object-cover"
           />

@@ -13,7 +13,7 @@ import {
 
 const AdminSidebar: React.FC = () => {
   const location = useLocation();
-  const { canManageUsers, canManageSessions, canManageCampaigns } = usePermissions();
+  const { canManageUsers } = usePermissions();
 
   const menuItems = [
     { path: '/admin', icon: LayoutDashboard, label: 'Dashboard', required: 'admin' },

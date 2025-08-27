@@ -99,7 +99,7 @@ const SessionExpandedContent: React.FC<SessionExpandedContentProps> = ({ session
                 <span className="text-slate-400">Tags:</span>
                 <div className="flex flex-wrap gap-1">
                   {session.tags.map((tag: string, index: number) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
+                    <Badge key={index} variant="default" className="text-xs">
                       {tag}
                     </Badge>
                   ))}

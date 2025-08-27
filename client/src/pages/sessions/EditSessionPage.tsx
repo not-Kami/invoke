@@ -5,7 +5,7 @@ import { adminAPI } from '../../lib/api';
 import { Game, User } from '../../types';
 import Button from '../../components/ui/Button';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
-import { Calendar, Users, Gamepad2, Plus, X, AlertCircle, Image as ImageIcon, Upload, Search, Clock, ArrowLeft } from 'lucide-react';
+import { Users, Plus, X, AlertCircle, ArrowLeft } from 'lucide-react';
 
 export default function EditSessionPage() {
   const navigate = useNavigate();
@@ -30,7 +30,7 @@ export default function EditSessionPage() {
   const [selectedPlayers, setSelectedPlayers] = useState<User[]>([]);
   const [availableGames, setAvailableGames] = useState<Game[]>([]);
   const [availablePlayers, setAvailablePlayers] = useState<User[]>([]);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
   
   // États pour la recherche de joueurs
   const [playerSearchOpen, setPlayerSearchOpen] = useState(false);
@@ -80,7 +80,7 @@ export default function EditSessionPage() {
           timezone: session.timezone || 'UTC',
           sessionType: session.sessionType,
           isOneShot: session.isOneShot,
-          gameId: session.game,
+          gameId: typeof session.game === 'string' ? session.game : session.game._id,
           maxPlayers: session.maxPlayers
         });
 
@@ -89,7 +89,9 @@ export default function EditSessionPage() {
           const playersResponse = await adminAPI.getUsers();
           if (playersResponse.success && playersResponse.data) {
             const existingPlayers = playersResponse.data.filter(player => 
-              session.players.includes(player._id)
+              session.players.some(sessionPlayer => 
+                typeof sessionPlayer === 'string' ? sessionPlayer === player._id : sessionPlayer._id === player._id
+              )
             );
             setSelectedPlayers(existingPlayers);
           }
@@ -97,7 +99,7 @@ export default function EditSessionPage() {
 
         // Charger l'image si elle existe
         if (session.image) {
-          setImagePreview(session.image);
+
         }
       } else {
         setError(response.message || 'Failed to fetch session');

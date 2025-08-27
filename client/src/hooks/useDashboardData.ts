@@ -32,7 +32,7 @@ export function useDashboardData() {
         let campaignsData: Campaign[] = [];
         
         if (campaignsResponse.success && campaignsResponse.data) {
-          campaignsData = campaignsResponse.data.data || campaignsResponse.data;
+          campaignsData = Array.isArray(campaignsResponse.data) ? campaignsResponse.data : [campaignsResponse.data];
         }
 
         setSessions(sessionsData);
@@ -49,14 +49,18 @@ export function useDashboardData() {
 
   // Filter sessions and campaigns for the current user
   const userSessions = sessions.filter(session => {
-    const isPlayer = session.players.some(player => player._id === user?._id);
-    const isDM = session.dm._id === user?._id;
+    const isPlayer = session.players.some(player => 
+      typeof player === 'string' ? player === user?._id : player._id === user?._id
+    );
+    const isDM = typeof session.dm === 'string' ? session.dm === user?._id : session.dm._id === user?._id;
     return isPlayer || isDM;
   });
 
   const userCampaigns = campaigns.filter(campaign => {
-    const isPlayer = campaign.players.some(player => player._id === user?._id);
-    const isDM = campaign.dm._id === user?._id;
+    const isPlayer = campaign.players.some(player => 
+      typeof player === 'string' ? player === user?._id : player._id === user?._id
+    );
+    const isDM = typeof campaign.dm === 'string' ? campaign.dm === user?._id : campaign.dm._id === user?._id;
     return isPlayer || isDM;
   });
 

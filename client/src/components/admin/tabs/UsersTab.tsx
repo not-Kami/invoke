@@ -5,7 +5,7 @@ import Badge from '../../ui/Badge';
 import Button from '../../ui/Button';
 import FeaturedToggle from '../FeaturedToggle';
 import { User } from '../../../lib/api';
-import { Users, Edit, Shield, Download } from 'lucide-react';
+import { Users, Shield, Download } from 'lucide-react';
 
 interface UsersTabProps {
   users: User[];
@@ -99,7 +99,7 @@ const UsersTab: React.FC<UsersTabProps> = ({
     { 
       key: 'role', 
       label: 'Rôle',
-      render: (value: string, row: User) => {
+      render: (_value: string, row: User) => {
         const displayRole = getDisplayRole(row);
         const badgeVariant = getRoleBadgeVariant(row);
         

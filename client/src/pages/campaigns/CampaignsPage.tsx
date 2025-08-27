@@ -1,13 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Campaign, adminAPI } from '../../lib/api';
+import { Campaign } from '../../types';
 import Button from '../../components/ui/Button';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Avatar from '../../components/ui/Avatar';
 import Input from '../../components/ui/Input';
-import { Calendar, Users, Plus, Search, Gamepad2 } from 'lucide-react';
+import { Users, Plus, Search } from 'lucide-react';
+
+// Fonction utilitaire pour formater les dates
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
 
 export default function CampaignsPage() {
   const { user } = useAuth();
@@ -18,17 +27,16 @@ export default function CampaignsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
-    // Simuler un chargement API avec des données mockées
+    // Charger les campagnes depuis l'API
     const fetchCampaigns = async () => {
       try {
-        // Simuler un délai de chargement
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Pour l'instant, on utilise un tableau vide en attendant l'API
-        const mockCampaigns: Campaign[] = [];
-        
-        setCampaigns(mockCampaigns);
-        setFilteredCampaigns(mockCampaigns);
+        setLoading(true);
+        const response = await fetch('/api/v1/campaigns');
+        if (response.ok) {
+          const data = await response.json();
+          setCampaigns(data.data || []);
+          setFilteredCampaigns(data.data || []);
+        }
       } catch (error) {
         console.error('Error fetching campaigns:', error);
         setCampaigns([]);
@@ -47,14 +55,14 @@ export default function CampaignsPage() {
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(campaign =>
-        campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        campaign.game.toLowerCase().includes(searchTerm.toLowerCase())
+        campaign.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (typeof campaign.game === 'string' ? campaign.game : campaign.game.name).toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     // Status filter
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(campaign => campaign.status === statusFilter);
+      filtered = filtered.filter(campaign => campaign.active === (statusFilter === 'active'));
     }
 
     setFilteredCampaigns(filtered);
@@ -115,8 +123,7 @@ export default function CampaignsPage() {
               >
                 <option value="all">All Campaigns</option>
                 <option value="active">Active</option>
-                <option value="paused">Paused</option>
-                <option value="completed">Completed</option>
+                <option value="inactive">Inactive</option>
               </select>
             </div>
           </div>
@@ -127,7 +134,9 @@ export default function CampaignsPage() {
         {filteredCampaigns.length === 0 ? (
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardContent className="p-12 text-center">
-              <Gamepad2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <div className="h-12 w-12 bg-gray-400 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                <span className="text-white text-2xl">🎲</span>
+              </div>
               <h3 className="text-lg font-medium text-white mb-2">
                 No campaigns found
               </h3>
@@ -157,14 +166,14 @@ export default function CampaignsPage() {
                       {campaign.name}
                     </h3>
                     <p className="text-sm text-gray-600 mb-3">
-                      {campaign.game.name}
+                      {typeof campaign.game === 'string' ? campaign.game : campaign.game.name}
                     </p>
                     <div className="flex items-center space-x-2">
                       <Badge variant={campaign.active ? 'success' : 'default'}>
                         {campaign.active ? 'Active' : 'Inactive'}
                       </Badge>
-                      <Badge variant="info" size="sm">
-                        {campaign.sessions.length} sessions
+                      <Badge variant="default" size="sm">
+                        {Array.isArray(campaign.sessions) ? campaign.sessions.length : 0} sessions
                       </Badge>
                     </div>
                   </div>
@@ -177,21 +186,21 @@ export default function CampaignsPage() {
                 
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center text-gray-600">
-                    <Calendar className="h-4 w-4 mr-2" />
+                    <span className="h-4 w-4 mr-2">📅</span>
                     Started {formatDate(campaign.createdAt)}
                   </div>
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <Avatar
-                        firstName={campaign.dm.firstName}
-                        lastName={campaign.dm.lastName}
-                        src={campaign.dm.avatar}
+                        firstName={typeof campaign.dm === 'string' ? '' : campaign.dm.firstName}
+                        lastName={typeof campaign.dm === 'string' ? '' : campaign.dm.lastName}
+                        src={typeof campaign.dm === 'string' ? undefined : campaign.dm.avatar || undefined}
                         size="sm"
                       />
                       <div className="ml-2">
                         <p className="text-gray-900 font-medium">
-                          {campaign.dm.firstName} {campaign.dm.lastName}
+                          {typeof campaign.dm === 'string' ? campaign.dm : `${campaign.dm.firstName} ${campaign.dm.lastName}`}
                         </p>
                         <p className="text-xs text-gray-500">Dungeon Master</p>
                       </div>
@@ -199,20 +208,20 @@ export default function CampaignsPage() {
                     
                     <div className="flex items-center text-gray-500">
                       <Users className="h-4 w-4 mr-1" />
-                      {campaign.players.length} players
+                      {Array.isArray(campaign.players) ? campaign.players.length : 0} players
                     </div>
                   </div>
 
-                  {campaign.players.length > 0 && (
+                  {Array.isArray(campaign.players) && campaign.players.length > 0 && (
                     <div>
                       <p className="text-xs text-gray-500 mb-2">Players:</p>
                       <div className="flex -space-x-2">
                         {campaign.players.slice(0, 4).map((player) => (
                           <Avatar
-                            key={player._id}
-                            firstName={player.firstName}
-                            lastName={player.lastName}
-                            src={player.avatar}
+                            key={typeof player === 'string' ? player : player._id}
+                            firstName={typeof player === 'string' ? '' : player.firstName}
+                            lastName={typeof player === 'string' ? '' : player.lastName}
+                            src={typeof player === 'string' ? undefined : player.avatar || undefined}
                             size="sm"
                             className="border-2 border-white"
                           />

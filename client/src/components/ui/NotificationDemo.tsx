@@ -48,7 +48,7 @@ const NotificationDemo: React.FC = () => {
           <div className="flex flex-wrap gap-2">
             <Button 
               onClick={() => addSuccess('Opération réussie !')} 
-              variant="success"
+              variant="primary"
               disabled={isLoading}
             >
               ✅ Succès

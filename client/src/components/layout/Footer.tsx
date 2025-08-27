@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, BookOpen, HelpCircle, Shield } from 'lucide-react';
+import { Heart, Shield } from 'lucide-react';
 import InvokeLogo from '../../assets/invoke-logo.svg';
 
 const Footer: React.FC = () => {

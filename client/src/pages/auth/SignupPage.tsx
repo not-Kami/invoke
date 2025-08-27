@@ -11,8 +11,7 @@ export default function SignupPage() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState<string>('');
-  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -20,24 +19,18 @@ export default function SignupPage() {
     password: '',
     confirmPassword: '',
     isDM: false,
-    avatar: null as string | null,
+    avatar: undefined as string | undefined,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
     
     // Validation côté client
     if (!isPasswordValid) {
-      setError('Password must be at least 8 characters long');
-      setLoading(false);
       return;
     }
     
     if (!isPasswordMatch) {
-      setError('Passwords do not match');
-      setLoading(false);
       return;
     }
     
@@ -47,13 +40,7 @@ export default function SignupPage() {
       // Succès → redirection
       navigate('/');
     } catch (error: any) {
-      if (error.message?.includes('already exists')) {
-        setError('This email is already registered');
-      } else {
-        setError('Something went wrong. Please try again.');
-      }
-    } finally {
-      setLoading(false);
+      console.error('Signup error:', error);
     }
   };
 
@@ -68,7 +55,7 @@ export default function SignupPage() {
   const handleImageChange = (imageData: string | null) => {
     setFormData({
       ...formData,
-      avatar: imageData,
+      avatar: imageData || undefined,
     });
   };
 

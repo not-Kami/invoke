@@ -72,10 +72,10 @@ export default function JoinSessionModal({
           {/* Game Info */}
           <div className="bg-gray-50 rounded-lg p-3">
             <p className="text-sm text-gray-600">
-              <span className="font-medium">Game:</span> {session.game.name}
+              <span className="font-medium">Game:</span> {typeof session.game === 'string' ? session.game : session.game.name}
             </p>
             <p className="text-sm text-gray-600">
-              <span className="font-medium">DM:</span> {session.dm.firstName} {session.dm.lastName}
+              <span className="font-medium">DM:</span> {typeof session.dm === 'string' ? session.dm : `${session.dm.firstName} ${session.dm.lastName}`}
             </p>
           </div>
 

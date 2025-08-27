@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { Edit3, Save, X, Crown, Heart, Gamepad2, User, Camera } from 'lucide-react';
+import { Edit3, Save, X, Crown, Heart, Gamepad2, Camera } from 'lucide-react';
 import { useUserPreferences } from '../../hooks/useUserPreferences';
 
 const UserPreferencesSection: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const {
+    const {
     preferences,
     updateMultiplePreferences,
-    updatePreference,
     isLoading
   } = useUserPreferences();
 

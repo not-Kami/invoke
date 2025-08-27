@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Send, MessageSquare, Lock, User, Clock, AlertCircle } from 'lucide-react';
+import { X, Send, MessageSquare, Lock, AlertCircle } from 'lucide-react';
 import Button from './ui/Button';
 import Badge from './ui/Badge';
 import { conversationsApi, Conversation } from '../lib/api';
@@ -56,9 +56,13 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
       const mockMessages: Message[] = [
         {
           _id: '1',
-          content: conversation?.lastMessage?.content || 'Initial message',
-          sender: conversation?.lastMessage?.sender || 'User',
-          timestamp: conversation?.lastMessage?.timestamp || new Date().toISOString(),
+          content: conversation?.messages && conversation.messages.length > 0 
+            ? conversation.messages[conversation.messages.length - 1].content 
+            : 'Initial message',
+          sender: 'User',
+          timestamp: conversation?.messages && conversation.messages.length > 0 
+            ? conversation.messages[conversation.messages.length - 1].timestamp 
+            : new Date().toISOString(),
           isAdmin: false
         }
       ];

@@ -224,7 +224,7 @@ export default function FeaturedGamesSection({
               className="flex transition-transform duration-300 ease-out"
               style={{ transform: `translateX(${getSliderTransform()}px)` }}
             >
-              {featuredGames.map((game, index) => (
+              {featuredGames.map((game) => (
                 <div 
                   key={game._id} 
                   className={`flex-shrink-0 ${isMobile ? 'w-60 mx-1' : 'w-80 mx-2'}`}

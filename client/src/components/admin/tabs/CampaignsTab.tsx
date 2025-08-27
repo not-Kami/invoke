@@ -1,11 +1,8 @@
 import React from 'react';
-import { Card, CardContent, CardHeader } from '../../ui/Card';
 import DataTable from '../DataTable';
 import Badge from '../../ui/Badge';
-import Button from '../../ui/Button';
 import FeaturedToggle from '../FeaturedToggle';
 import { Campaign } from '../../../lib/api';
-import { BookOpen, Edit, Trash2, Star, Users } from 'lucide-react';
 
 interface CampaignsTabProps {
   campaigns: Campaign[];
@@ -16,8 +13,6 @@ interface CampaignsTabProps {
 
 const CampaignsTab: React.FC<CampaignsTabProps> = ({
   campaigns,
-  loading,
-  onDeleteCampaign,
   onToggleFeatured
 }) => {
   const columns = [

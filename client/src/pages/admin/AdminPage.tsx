@@ -17,7 +17,8 @@ import ReplyModal from '../../components/admin/modals/ReplyModal';
 import { useAdminData } from '../../hooks/admin/useAdminData';
 import { useAdminActions } from '../../hooks/admin/useAdminActions';
 
-import { adminAPI, Game, Conversation } from '../../lib/api';
+import { adminAPI, Conversation } from '../../lib/api';
+import { Game } from '../../types';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useNotifications } from '../../hooks/useNotifications';
 import { 
@@ -160,7 +161,7 @@ const AdminPage: React.FC = () => {
         // Création
         const response = await adminAPI.createGame(gameData);
         if (response.success && response.data) {
-          setGames(prev => [...prev, response.data]);
+          setGames(prev => [...prev, response.data as Game]);
         }
       }
       setGameModalOpen(false);

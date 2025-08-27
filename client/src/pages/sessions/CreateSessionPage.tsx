@@ -6,7 +6,7 @@ import { adminAPI } from '../../lib/api';
 import Button from '../../components/ui/Button';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import Input from '../../components/ui/Input';
-import { Calendar, Users, Gamepad2, Plus, X, AlertCircle, Image as ImageIcon, Upload, Search, Clock } from 'lucide-react';
+import { Users, Plus, X, AlertCircle, Image as ImageIcon, Search } from 'lucide-react';
 
 export default function CreateSessionPage() {
   const navigate = useNavigate();

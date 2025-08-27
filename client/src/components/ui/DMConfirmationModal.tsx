@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { X, Crown, Users, Gamepad2, Calendar, CheckCircle, Clock, Star } from 'lucide-react';
 import Button from './Button';
 

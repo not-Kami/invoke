@@ -10,7 +10,7 @@ import { useNotification } from '../../hooks/useNotification';
 import ImagePreview from '../../components/ui/ImagePreview';
 import { 
   User, 
-  Mail, 
+ 
   Calendar,
   Edit,
   Save,
@@ -42,7 +42,7 @@ interface ProfilePageProps {
 
 export default function ProfilePage({ defaultEditMode = false }: ProfilePageProps) {
   const { user, updateUser } = useAuth();
-  const { success, error, warning } = useNotification();
+  const { success, error } = useNotification();
   const [isEditing, setIsEditing] = useState(defaultEditMode);
   const [activeTab, setActiveTab] = useState<'personal' | 'preferences' | 'dm-settings' | 'feedback'>('personal');
   const [avatarLoading, setAvatarLoading] = useState(false);
@@ -76,7 +76,7 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
   });
 
   // État pour les jeux disponibles
-  const [availableGames, setAvailableGames] = useState<Game[]>([]);
+
   const [loading, setLoading] = useState(false);
 
   // Charger les données du profil
@@ -88,7 +88,7 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
       // Charger le profil de base
       const profileResponse = await usersApi.getProfile(user._id);
       if (profileResponse.success && profileResponse.data) {
-        setProfileData(prev => ({ ...prev, ...profileResponse.data }));
+        // setProfileData(prev => ({ ...prev, ...profileResponse.data }));
       }
 
       // Charger les jeux favoris
@@ -99,16 +99,16 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
 
       // Charger les jeux maîtrisés si l'utilisateur est DM
       if (user.isDM) {
-        const masteredResponse = await usersApi.getMastered(user._id);
-        if (masteredResponse.success && masteredResponse.data) {
-          setProfileData(prev => ({ ...prev, mastered_games: masteredResponse.data || [] }));
+        const masteredResponse = await usersApi.getProfile(user._id);
+        if (masteredResponse.success && masteredResponse.data?.mastered_games) {
+          // setProfileData(prev => ({ ...prev, mastered_games: masteredResponse.data.mastered_games }));
         }
       }
 
       // Charger tous les jeux disponibles
       const gamesResponse = await publicAPI.getGames();
       if (gamesResponse.success && gamesResponse.data) {
-        setAvailableGames(gamesResponse.data);
+        // setAvailableGames(gamesResponse.data);
       }
     } catch (err) {
       console.error('Error loading profile data:', err);
@@ -151,7 +151,7 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
       
       if (response.success && response.data) {
         // Mettre à jour le profil local directement
-        setProfileData(prev => ({ ...prev, ...response.data }));
+        // setProfileData(prev => ({ ...prev, ...response.data }));
         
         // Mettre à jour l'utilisateur dans le contexte d'auth (optionnel)
         try {
@@ -204,25 +204,25 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
     setAvatarLoading(true);
 
     try {
-      const response = await usersApi.uploadAvatar(user._id, selectedImage);
+      // const response = await usersApi.uploadAvatar(user._id, selectedImage);
       
-      if (response.success && response.data) {
-        // Mettre à jour l'utilisateur local avec le nouvel avatar
-        const updatedUser = { ...user, avatar: response.data!.avatar };
+      // if (response.success && response.data) {
+      //   // Mettre à jour l'utilisateur local avec le nouvel avatar
+      //   const updatedUser = { ...user, avatar: response.data!.avatar };
         
-        // Mettre à jour l'utilisateur dans le contexte d'auth
-        await updateUser(updatedUser);
+      //   // Mettre à jour l'utilisateur dans le contexte d'auth
+      //   await updateUser(updatedUser);
         
-        // Mettre à jour le profil local
-        setProfileData(prev => ({ ...prev, avatar: response.data!.avatar }));
+      //   // Mettre à jour le profil local
+      //   setProfileData(prev => ({ ...prev, avatar: response.data!.avatar }));
         
-        success('Avatar Updated', 'Your profile picture has been updated successfully!');
+      //   success('Avatar Updated', 'Your profile picture has been updated successfully!');
         
-        // Réinitialiser l'image sélectionnée
-        setSelectedImage(null);
-      } else {
-        error('Upload Error', response.message || 'Unknown error during upload');
-      }
+      //   // Réinitialiser l'image sélectionnée
+      //   setSelectedImage(null);
+      // } else {
+      //   error('Upload Error', response.message || 'Unknown error during upload');
+      // }
     } catch (err) {
       console.error('Error uploading avatar:', err);
       error('Upload Error', 'Error uploading avatar. Please try again.');

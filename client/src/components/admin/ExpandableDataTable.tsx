@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '../ui/Card';
-import { Trash2, ChevronDown, ChevronRight, Users, Gamepad2, Calendar, User } from 'lucide-react';
-import Badge from '../ui/Badge';
+import { Trash2, ChevronDown, ChevronRight } from 'lucide-react';
 
 interface Column {
   key: string;

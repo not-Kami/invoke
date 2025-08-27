@@ -15,15 +15,18 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
-  role: 'user' | 'admin';
+  role: string;
   isDM: boolean;
   featured: boolean;
-  avatar?: string | null;
-  bio?: string;
+  avatar: string | null;
+  bio: string | null;
   nickname?: string;
-  favorite_games?: any[];
-  mastered_games?: any[];
-  evaluations?: any[];
+  favorite_games: string[];
+  mastered_games: string[];
+  evaluations: string[];
+  sessionsCreated: string[];
+  sessionsJoined: string[];
+  verified: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -36,27 +39,29 @@ interface Session {
   timezone: string;
   sessionType: 'online' | 'offline';
   isOneShot: boolean;
-  game: string; // ID du jeu
-  dm: string; // ID du DM
-  players: string[]; // IDs des joueurs
+  game: string | Game;
+  dm: string | User;
+  players: string[] | User[];
   maxPlayers: number;
   status: 'open' | 'full' | 'finished' | 'cancelled';
   featured: boolean;
-  image?: string; // URL de l'image
+  image: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
 interface Campaign {
   _id: string;
-  title: string;
-  game: string;
-  dm: string;
-  status: 'active' | 'paused' | 'completed';
-  players: number;
-  maxPlayers: number;
+  name: string;
+  description: string;
+  game: string | Game;
+  dm: string | User;
+  players: string[] | User[];
+  sessions: string[] | Session[];
+  active: boolean;
   featured: boolean;
   createdAt: string;
+  updatedAt: string;
 }
 
 interface Game {
@@ -65,47 +70,43 @@ interface Game {
   description: string;
   genre: string;
   system: string;
-  image?: string; // Nom du fichier ou URL (pour compatibilité)
-  images?: {
-    logo?: string | File;
-    portrait?: string | File;
-    banner?: string | File;
-  }; // Structure pour GameModal
+  images: {
+    logo?: string;
+    portrait?: string;
+    banner?: string;
+  };
   featured: boolean;
-  sessionsCount?: number;
   createdAt: string;
-  updatedAt?: string;
+  updatedAt: string;
 }
 
 // Type pour les conversations
 export interface Conversation {
   _id: string;
   conversationType: 'contact_admin' | 'user_chat';
-  userEmail: string;
-  participants: string[];
+  userEmail?: string;
+  userName?: string;
+  participants: string[] | User[];
   subject: string;
   status: 'open' | 'in_progress' | 'closed';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   messages: Array<{
-    _id: string;
     content: string;
     timestamp: string;
-    sender: string;
+    sender: string | User;
     senderType: 'user' | 'admin';
     isRead: boolean;
   }>;
   metadata: {
-    userAgent: string;
-    ipAddress: string;
-    referrer: string | null;
+    userAgent?: string;
+    ipAddress?: string;
+    referrer?: string;
   };
   lastMessageAt: string;
-  assignedTo: string | null;
+  assignedTo?: string | User;
   tags: string[];
   createdAt: string;
   updatedAt: string;
-  unreadCount: number;
-  isUnread: boolean;
 }
 
 // Fonction utilitaire pour les appels API

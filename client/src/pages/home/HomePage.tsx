@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { useFavoriteGames } from '../../hooks/useFavoriteGames';
 import { useAuth } from '../../contexts/AuthContext';
 import { useHomePageData } from './hooks/useHomePageData';
@@ -11,7 +11,7 @@ import WelcomeBanner from '../../components/onboarding/WelcomeBanner';
 
 export default function HomePage() {
   const { user } = useAuth();
-  const { favoriteGames, addFavoriteGame, removeFavoriteGame, isFavorite } = useFavoriteGames();
+  const { addFavoriteGame, removeFavoriteGame, isFavorite } = useFavoriteGames();
   const { featuredGames, gamesLoading, featuredSessions, sessionsLoading } = useHomePageData();
   const { showOnboarding, showWelcomeBanner, completeOnboarding, skipOnboarding, dismissWelcomeBanner } = useOnboarding();
 

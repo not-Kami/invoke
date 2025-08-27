@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { cn } from '../../lib/utils';
 import { getInitials } from '../../lib/utils';
 
@@ -19,7 +19,7 @@ export default function Avatar({
   size = 'md', 
   className 
 }: AvatarProps) {
-  const [imageLoaded, setImageLoaded] = useState(false);
+
   const [imageError, setImageError] = useState(false);
   
   const sizes = {
@@ -47,12 +47,12 @@ export default function Avatar({
           alt={alt || `${firstName} ${lastName}`}
           className="h-full w-full rounded-full object-cover"
           onLoad={() => {
-            setImageLoaded(true);
+
             setImageError(false);
           }}
           onError={() => {
             setImageError(true);
-            setImageLoaded(false);
+
           }}
         />
       ) : (

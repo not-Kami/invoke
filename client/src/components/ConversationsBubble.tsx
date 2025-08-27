@@ -72,7 +72,9 @@ const ConversationsBubble: React.FC<ConversationsBubbleProps> = ({ className = '
     return null;
   }
 
-  const unreadCount = conversations ? conversations.filter(conv => conv.isUnread).length : 0;
+  const unreadCount = conversations ? conversations.filter(conv => 
+    conv.messages && conv.messages.some(msg => !msg.isRead)
+  ).length : 0;
 
   return (
     <div className={`fixed bottom-6 right-6 z-50 ${className}`}>
@@ -145,7 +147,7 @@ const ConversationsBubble: React.FC<ConversationsBubbleProps> = ({ className = '
                           }`}>
                             {conversation.status === 'open' ? 'Ouvert' : 'Fermé'}
                           </span>
-                          {conversation.isUnread && (
+                          {conversation.messages && conversation.messages.some(msg => !msg.isRead) && (
                             <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
                               Nouveau
                             </span>

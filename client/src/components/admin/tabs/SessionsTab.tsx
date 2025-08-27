@@ -1,12 +1,9 @@
 import React from 'react';
-import { Card, CardContent, CardHeader } from '../../ui/Card';
 import ExpandableDataTable from '../ExpandableDataTable';
 import SessionExpandedContent from '../SessionExpandedContent';
 import Badge from '../../ui/Badge';
-import Button from '../../ui/Button';
 import FeaturedToggle from '../FeaturedToggle';
 import { Session } from '../../../lib/api';
-import { Calendar, Edit, Trash2, Star, Download } from 'lucide-react';
 
 interface SessionsTabProps {
   sessions: Session[];
@@ -18,10 +15,7 @@ interface SessionsTabProps {
 
 const SessionsTab: React.FC<SessionsTabProps> = ({
   sessions,
-  loading,
-  onDeleteSession,
-  onToggleFeatured,
-  onExportSession
+  onToggleFeatured
 }) => {
   const columns = [
     { 

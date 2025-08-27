@@ -16,7 +16,7 @@ import {
   Lock,
   X,
   CheckCircle,
-  XCircle,
+
   AlertTriangle
 } from 'lucide-react';
 

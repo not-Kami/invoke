@@ -8,7 +8,7 @@ import Badge from '../../components/ui/Badge';
 import Avatar from '../../components/ui/Avatar';
 import Input from '../../components/ui/Input';
 import { formatDateShort } from '../../lib/utils';
-import { Calendar, Users, Plus, Search, UserPlus, RefreshCw, X, Clock } from 'lucide-react';
+import { Calendar, Users, Plus, Search, UserPlus, RefreshCw, X } from 'lucide-react';
 import JoinSessionModal from '../../components/sessions/JoinSessionModal';
 import { useJoinSession } from '../../hooks/useJoinSession';
 

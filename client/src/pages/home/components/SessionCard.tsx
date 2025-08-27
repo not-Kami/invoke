@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Users, Calendar } from 'lucide-react';
 import { Card } from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
@@ -37,13 +37,13 @@ export default function SessionCard({
           </div>
           
           {/* Image portrait du jeu si disponible */}
-          {session.game.images?.portrait ? (
+          {typeof session.game === 'object' && session.game.images?.portrait ? (
             <img 
               src={session.game.images.portrait} 
               alt={`Portrait ${session.game.name}`}
               className="absolute inset-0 w-full h-full object-cover"
-              onLoad={() => console.log('✅ Image portrait chargée pour', session.game.name, ':', session.game.images.portrait)}
-              onError={(e) => console.error('❌ Erreur chargement image pour', session.game.name, ':', e)}
+              onLoad={() => console.log('✅ Image portrait chargée pour', typeof session.game === 'object' ? session.game.name : 'N/A', ':', typeof session.game === 'object' ? session.game.images?.portrait : 'N/A')}
+              onError={(e) => console.error('❌ Erreur chargement image pour', typeof session.game === 'object' ? session.game.name : 'N/A', ':', e)}
             />
           ) : null}
           
@@ -76,10 +76,10 @@ export default function SessionCard({
           {/* Métadonnées compactes */}
           <div className="flex items-center justify-between text-xs text-gray-300 mb-3">
             <span className="bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
-              {session.game.genre}
+              {typeof session.game === 'object' ? session.game.genre : 'N/A'}
             </span>
             <span className="bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
-              {session.game.system}
+              {typeof session.game === 'object' ? session.game.system : 'N/A'}
             </span>
           </div>
 

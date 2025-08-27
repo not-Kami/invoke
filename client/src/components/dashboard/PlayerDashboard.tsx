@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Card, CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
@@ -11,10 +11,7 @@ import {
   User,
   Gamepad2,
   Heart,
-  X,
-  Settings,
-  Crown,
-  BarChart3
+  X
 } from 'lucide-react';
 
 interface PlayerDashboardProps {

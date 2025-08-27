@@ -64,7 +64,9 @@ const ReplyModal: React.FC<ReplyModalProps> = ({
               </div>
               <div><span className="text-slate-400">Dernier message:</span> 
                 <div className="text-slate-300 mt-1 pl-4 border-l border-slate-600">
-                  {conversation.lastMessage?.content || 'Aucun message'}
+                  {conversation.messages && conversation.messages.length > 0 
+                    ? conversation.messages[conversation.messages.length - 1].content 
+                    : 'Aucun message'}
                 </div>
               </div>
             </div>

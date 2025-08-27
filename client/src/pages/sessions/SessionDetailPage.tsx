@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { publicAPI } from '../../lib/api';
@@ -60,7 +60,7 @@ export default function SessionDetailPage() {
       const response = await publicAPI.getSession(id!);
       
       if (response.success && response.data) {
-        setSession(response.data);
+        setSession(response.data as PopulatedSession);
       } else {
         setError(response.message || 'Failed to fetch session');
       }
@@ -76,12 +76,14 @@ export default function SessionDetailPage() {
     if (!user || !session) return false;
     
     // Le MJ ne peut pas rejoindre sa propre session
-    if (session.dm._id === user._id) {
+    if (typeof session.dm === 'string' ? session.dm === user._id : session.dm._id === user._id) {
       return false;
     }
     
     // Vérifier si l'utilisateur est déjà dans la session
-    const isAlreadyPlayer = session.players.some(player => player._id === user._id);
+    const isAlreadyPlayer = session.players.some(player => 
+      typeof player === 'string' ? player === user._id : player._id === user._id
+    );
     if (isAlreadyPlayer) return false;
     
     // Vérifier si la session peut accepter de nouveaux joueurs
@@ -272,7 +274,7 @@ export default function SessionDetailPage() {
                 </div>
                 
                 {session.isOneShot && (
-                  <Badge variant="secondary" className="bg-purple-500/20 text-purple-300 border-purple-500/30">
+                  <Badge variant="default" className="bg-purple-500/20 text-purple-300 border-purple-500/30">
                     One-Shot Session
                   </Badge>
                 )}
@@ -339,16 +341,16 @@ export default function SessionDetailPage() {
               <CardContent>
                 <div className="flex items-center space-x-3">
                   <Avatar
-                    src={session.dm.avatar}
-                    alt={`${session.dm.firstName} ${session.dm.lastName}`}
-                    firstName={session.dm.firstName}
-                    lastName={session.dm.lastName}
+                    src={typeof session.dm === 'string' ? undefined : (session.dm.avatar || undefined)}
+                    alt={`${typeof session.dm === 'string' ? 'DM' : `${session.dm.firstName} ${session.dm.lastName}`}`}
+                    firstName={typeof session.dm === 'string' ? '' : session.dm.firstName}
+                    lastName={typeof session.dm === 'string' ? '' : session.dm.lastName}
                     size="lg"
                     className="w-12 h-12"
                   />
                   <div>
                     <p className="text-white font-medium">
-                      {session.dm.firstName} {session.dm.lastName}
+                      {typeof session.dm === 'string' ? session.dm : `${session.dm.firstName} ${session.dm.lastName}`}
                     </p>
                     <p className="text-sm text-gray-300">Game Master</p>
                   </div>
@@ -367,17 +369,17 @@ export default function SessionDetailPage() {
                 {session.players.length > 0 ? (
                   <div className="space-y-3">
                     {session.players.map(player => (
-                      <div key={player._id} className="flex items-center space-x-3">
+                      <div key={typeof player === 'string' ? player : player._id} className="flex items-center space-x-3">
                         <Avatar
-                          src={player.avatar}
-                          alt={`${player.firstName} ${player.lastName}`}
-                          firstName={player.firstName}
-                          lastName={player.lastName}
+                          src={typeof player === 'string' ? undefined : (player.avatar || undefined)}
+                          alt={`${typeof player === 'string' ? 'Player' : `${player.firstName} ${player.lastName}`}`}
+                          firstName={typeof player === 'string' ? '' : player.firstName}
+                          lastName={typeof player === 'string' ? '' : player.lastName}
                           size="sm"
                           className="w-8 h-8"
                         />
                         <span className="text-white text-sm">
-                          {player.firstName} {player.lastName}
+                          {typeof player === 'string' ? player : `${player.firstName} ${player.lastName}`}
                         </span>
                       </div>
                     ))}
@@ -397,7 +399,7 @@ export default function SessionDetailPage() {
 
       {/* Join Session Modal */}
       <JoinSessionModal
-        session={session}
+        session={session as any}
         isOpen={joinModalOpen}
         onClose={handleCloseJoinModal}
         onConfirm={handleConfirmJoin}

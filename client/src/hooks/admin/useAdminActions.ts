@@ -148,7 +148,7 @@ export const useAdminActions = () => {
   };
 
   // TODO: Implémenter exportSession quand l'API sera disponible
-  const exportSession = async (sessionId: string) => {
+  const exportSession = async (_sessionId: string) => {
     console.log('exportSession not implemented yet');
     addSuccess('Export des sessions pas encore implémenté');
   };

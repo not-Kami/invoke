@@ -10,8 +10,7 @@ import {
   LogIn, 
   UserPlus,
   Shield,
-  LayoutDashboard,
-  MessageSquare
+  LayoutDashboard
 } from 'lucide-react';
 import InvokeLogo from '../../assets/invoke-logo.svg';
 

@@ -6,7 +6,7 @@ import {
   BookOpen, 
   Shield, 
   Heart,
-  Star,
+
   ArrowRight,
   Play
 } from 'lucide-react';
