@@ -8,6 +8,7 @@ import UsersTab from '../../components/admin/tabs/UsersTab';
 import SessionsTab from '../../components/admin/tabs/SessionsTab';
 import CampaignsTab from '../../components/admin/tabs/CampaignsTab';
 import GamesTab from '../../components/admin/tabs/GamesTab';
+import ConversationsTab from '../../components/admin/tabs/ConversationsTab';
 
 
 // Import des modals
@@ -31,7 +32,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 
-type TabType = 'users' | 'sessions' | 'campaigns' | 'games';
+type TabType = 'users' | 'sessions' | 'campaigns' | 'games' | 'conversations';
 
 const AdminPage: React.FC = () => {
   const { canViewAdminPanel } = usePermissions();
@@ -184,7 +185,8 @@ const AdminPage: React.FC = () => {
     { id: 'users' as TabType, label: 'Utilisateurs', icon: Users },
     { id: 'sessions' as TabType, label: 'Sessions', icon: Calendar },
     { id: 'campaigns' as TabType, label: 'Campagnes', icon: BookOpen },
-    { id: 'games' as TabType, label: 'Jeux', icon: Gamepad2 }
+    { id: 'games' as TabType, label: 'Jeux', icon: Gamepad2 },
+    { id: 'conversations' as TabType, label: 'Conversations', icon: MessageSquare }
   ];
 
   return (
@@ -266,6 +268,14 @@ const AdminPage: React.FC = () => {
             onDeleteGame={handleDeleteGame}
             onToggleFeatured={handleToggleFeatured}
             onOpenGameModal={handleOpenGameModal}
+          />
+        )}
+        
+        {activeTab === 'conversations' && (
+          <ConversationsTab
+            conversations={conversations}
+            loading={loading}
+            onOpenReplyModal={handleOpenReplyModal}
           />
         )}
         
