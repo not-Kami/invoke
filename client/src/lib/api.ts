@@ -119,8 +119,6 @@ async function apiCall<T>(
       ...options.headers,
     };
 
-    console.log('API Debug - Making request to:', `${API_BASE_URL}${endpoint}`);
-
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       headers,

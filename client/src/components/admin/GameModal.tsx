@@ -163,7 +163,6 @@ const GameModal: React.FC<GameModalProps> = ({
 
     // Protection contre les soumissions multiples
     if (isSubmitting) {
-      console.log('🚫 Soumission déjà en cours...');
       return;
     }
     

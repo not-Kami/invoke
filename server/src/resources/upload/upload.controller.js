@@ -5,18 +5,27 @@ import { deleteFile, getFilePath } from '../../middlewares/upload.middleware.js'
 // Upload d'avatar utilisateur
 export const uploadUserAvatar = async (req, res) => {
     try {
-        if (!req.file) {
-            return res.status(400).json({
-                success: false,
-                message: 'Aucun fichier fourni'
-            });
-        }
-
+        // 🔒 VÉRIFICATION DES PERMISSIONS
         const userId = req.params.id || req.body.userId;
         if (!userId) {
             return res.status(400).json({
                 success: false,
                 message: 'ID utilisateur requis'
+            });
+        }
+
+        // Seul l'utilisateur lui-même ou un admin peut modifier l'avatar
+        if (req.user._id.toString() !== userId && req.user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Non autorisé à modifier cet avatar'
+            });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'Aucun fichier fourni'
             });
         }
 
@@ -57,18 +66,23 @@ export const uploadUserAvatar = async (req, res) => {
 // Upload de bannière de session
 export const uploadSessionBanner = async (req, res) => {
     try {
-        if (!req.file) {
-            return res.status(400).json({
-                success: false,
-                message: 'Aucun fichier fourni'
-            });
-        }
-
+        // 🔒 VÉRIFICATION DES PERMISSIONS
         const sessionId = req.params.id || req.body.sessionId;
         if (!sessionId) {
             return res.status(400).json({
                 success: false,
                 message: 'ID session requis'
+            });
+        }
+
+        // TODO: Vérifier que l'utilisateur est propriétaire de la session ou admin
+        // Pour l'instant, on accepte tous les utilisateurs connectés
+        // À implémenter : vérification de propriété de la session
+
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'Aucun fichier fourni'
             });
         }
 

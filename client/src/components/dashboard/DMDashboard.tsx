@@ -32,17 +32,8 @@ export default function DMDashboard({
   onAddMasteredGame,
   onRemoveMasteredGame
 }: DMDashboardProps) {
-  // Debug: Log des données reçues
-  console.log('🔍 DMDashboard Debug Info:');
-  console.log('📊 sessions reçues:', sessions);
-  console.log('👤 userId:', userId);
-  console.log('⏳ loading:', loading);
-  console.log('🎮 masteredGames:', masteredGames);
-  
   // Filtrer les sessions de l'utilisateur (en tant que DM)
   const mySessions = sessions.filter(session => session.dm?._id === userId).slice(0, 5);
-  
-  console.log('✅ Sessions filtrées (mySessions):', mySessions);
 
   // Données mockées pour les fonctionnalités à venir
   const dmSettings = [

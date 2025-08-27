@@ -36,13 +36,6 @@ export default function PlayerDashboard({
   onAddFavoriteGame,
   onRemoveFavoriteGame
 }: PlayerDashboardProps) {
-  // Debug: Log des données reçues
-  console.log('🔍 PlayerDashboard Debug Info:');
-  console.log('📊 upcomingSessions reçues:', upcomingSessions);
-  console.log('⏳ loading:', loading);
-  console.log('👑 isAdmin:', isAdmin);
-  console.log('🎲 isDM:', isDM);
-  console.log('❤️ favoriteGames:', favoriteGames);
   // Données mockées pour les fonctionnalités à venir
   const myCharacters = [
     {

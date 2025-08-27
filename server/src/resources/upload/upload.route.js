@@ -15,8 +15,12 @@ import {
     getImageInfo,
     listImages
 } from './upload.controller.js';
+import { protect } from '../../middlewares/auth.middleware.js';
 
 const router = express.Router();
+
+// 🔒 PROTECTION GLOBALE - Toutes les routes d'upload nécessitent une authentification
+router.use(protect);
 
 // Routes pour les avatars utilisateur
 router.post('/user/:id/avatar', userAvatarUpload, uploadUserAvatar);

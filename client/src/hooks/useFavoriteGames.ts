@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { publicAPI, usersApi } from '../lib/api';
+import { usersApi } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 
 export function useFavoriteGames() {
@@ -20,21 +20,18 @@ export function useFavoriteGames() {
         setLoading(true);
         setError(null);
         
-        console.log('🔄 Fetching favorite games for user:', user._id);
-        
         // Utiliser la nouvelle route RESTful
         const response = await usersApi.getFavorites(user._id);
         
         if (response.success && response.data) {
-          console.log('✅ Favorite games fetched:', response.data);
           setFavoriteGames(response.data);
         } else {
-          console.error('❌ Failed to fetch favorite games:', response.error);
+          console.error('Failed to fetch favorite games:', response.error);
           setError(response.error || 'Failed to fetch favorite games');
           setFavoriteGames([]);
         }
       } catch (err) {
-        console.error('❌ Error fetching favorite games:', err);
+        console.error('Error fetching favorite games:', err);
         setError('Failed to fetch favorite games');
         setFavoriteGames([]);
       } finally {
@@ -49,8 +46,6 @@ export function useFavoriteGames() {
     if (!user) return;
     
     try {
-      console.log('🔄 Adding favorite game:', game.name, 'for user:', user._id);
-      
       // Utiliser la nouvelle route RESTful
       const response = await usersApi.addFavorite(user._id, game._id);
       
@@ -58,11 +53,12 @@ export function useFavoriteGames() {
         throw new Error(response.error || 'Failed to save favorite game');
       }
       
-      // Mettre à jour la liste locale avec la réponse de l'API
-      setFavoriteGames(response.data || []);
-      console.log('✅ Favorite game added and saved to backend:', game.name);
+      // Mettre à jour la liste locale
+      if (response.data && Array.isArray(response.data)) {
+        setFavoriteGames(response.data);
+      }
     } catch (error) {
-      console.error('❌ Error adding favorite game:', error);
+      console.error('Error adding favorite game:', error);
       throw error;
     }
   };
@@ -71,8 +67,6 @@ export function useFavoriteGames() {
     if (!user) return;
     
     try {
-      console.log('🔄 Removing favorite game:', gameId, 'for user:', user._id);
-      
       // Utiliser la nouvelle route RESTful
       const response = await usersApi.removeFavorite(user._id, gameId);
       
@@ -80,11 +74,12 @@ export function useFavoriteGames() {
         throw new Error(response.error || 'Failed to remove favorite game');
       }
       
-      // Mettre à jour la liste locale avec la réponse de l'API
-      setFavoriteGames(response.data || []);
-      console.log('✅ Favorite game removed and saved to backend:', gameId);
+      // Mettre à jour la liste locale
+      if (response.data && Array.isArray(response.data)) {
+        setFavoriteGames(response.data);
+      }
     } catch (error) {
-      console.error('❌ Error removing favorite game:', error);
+      console.error('Error removing favorite game:', error);
       throw error;
     }
   };

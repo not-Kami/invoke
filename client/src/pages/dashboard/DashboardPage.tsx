@@ -80,14 +80,9 @@ export default function DashboardPage() {
   // Fonction pour arrêter d'être DM
   const handleStopBeingDM = async () => {
     try {
-      console.log('🔄 Starting handleStopBeingDM...');
-      console.log('👤 Current user:', user);
-      console.log('🎯 Updating isDM to false...');
-      
       setDmActionLoading(true);
       await updateUser({ isDM: false });
       
-      console.log('✅ updateUser completed successfully');
       setShowStopDMConfirmation(false);
       setNotification({
         type: 'success',
@@ -96,7 +91,7 @@ export default function DashboardPage() {
       // Basculer automatiquement vers le mode joueur
       setViewMode('player');
     } catch (error) {
-      console.error('❌ Error stopping DM status:', error);
+      console.error('Error stopping DM status:', error);
       setNotification({
         type: 'error',
         message: 'Erreur lors du changement de statut. Veuillez réessayer.'
@@ -114,7 +109,6 @@ export default function DashboardPage() {
     // Si c'est le premier chargement et que l'utilisateur peut être DM, proposer le mode DM par défaut
     if (canAccessDMView && viewMode === 'player') {
       // Mais ne pas forcer automatiquement, laisser l'utilisateur choisir
-      console.log('User can access DM view, but keeping current viewMode:', viewMode);
     }
   }, [canAccessDMView]); // Retirer viewMode des dépendances pour éviter les changements automatiques
 

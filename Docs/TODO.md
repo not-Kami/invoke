@@ -6,6 +6,16 @@ Ce fichier liste toutes les tâches à accomplir, organisées par priorité, ses
 
 ## 🚀 **PROCHAINE PRIORITÉ IMMÉDIATE**
 
+### 🔒 **SÉCURITÉ CRITIQUE - Routes d'Upload (URGENT)**
+* [ ] **Sécuriser les routes d'upload (PRIORITÉ MAXIMALE)**
+  * [ ] Ajouter middleware `protect` sur toutes les routes `/upload/*`
+  * [ ] Implémenter vérification des permissions (propriétaire ou admin)
+  * [ ] Tester que les routes ne sont plus accessibles sans authentification
+  * [ ] Vérifier que les uploads d'avatar fonctionnent toujours côté profil
+  * [ ] **RÉFACTORISATION** : Retirer l'upload d'avatar de SignupPage
+  * [ ] **ONBOARDING** : Créer une page d'onboarding pour l'upload d'avatar après connexion
+  * [ ] **SÉCURITÉ** : Empêcher l'upload d'images par des utilisateurs non autorisés
+
 ### Onboarding & Création de Compte
 * [ ] **Implémenter l'onboarding pour la création de compte**
   * [ ] Formulaire de création avec validation (react-hook-form + Joi)

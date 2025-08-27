@@ -19,7 +19,6 @@ export function useHomePageData() {
         if (response.ok) {
           const data = await response.json();
           const featured = data.data.filter((game: Game) => game.featured);
-          console.log('⭐ Jeux mis en avant:', featured);
           setFeaturedGames(featured);
         }
       } catch (error) {
@@ -40,7 +39,6 @@ export function useHomePageData() {
         const response = await fetch('/api/v1/sessions?featured=true&limit=6');
         if (response.ok) {
           const data = await response.json();
-          console.log('⭐ Sessions mises en avant:', data.data);
           setFeaturedSessions(data.data);
         }
       } catch (error) {
