@@ -10,7 +10,11 @@ export function useFavoriteGames() {
 
   useEffect(() => {
     const fetchFavoriteGames = async () => {
+      console.log('🔐 useFavoriteGames - User state:', user);
+      console.log('🔐 useFavoriteGames - User ID:', user?._id);
+      
       if (!user) {
+        console.log('🔐 useFavoriteGames - No user, skipping fetch');
         setFavoriteGames([]);
         setLoading(false);
         return;

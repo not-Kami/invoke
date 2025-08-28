@@ -63,13 +63,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('Login Debug - Response data:', response.data);
       const userData = response.data as any;
       
-      if (!userData) {
+      if (!userData || !userData.user) {
         throw new Error('No user data received from server');
       }
       
       setToken('cookie'); // Le token est maintenant dans un cookie HTTP-only
-      setUser(userData);
-      console.log('Login Debug - User authenticated via cookie');
+      setUser(userData.user); // ← Correction : extraire userData.user
+      console.log('Login Debug - User authenticated via cookie:', userData.user);
     } catch (error: any) {
       throw new Error(error.message || 'Login failed');
     }
@@ -90,8 +90,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       const userData = response.data as any;
+      if (!userData || !userData.user) {
+        throw new Error('No user data received from server');
+      }
       setToken('cookie'); // Le token est maintenant dans un cookie HTTP-only
-      setUser(userData);
+      setUser(userData.user); // ← Correction : extraire userData.user
     } catch (error: any) {
       throw new Error(error.message || 'Signup failed');
     }
