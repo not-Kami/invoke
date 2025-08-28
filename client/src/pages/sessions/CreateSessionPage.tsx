@@ -110,17 +110,21 @@ export default function CreateSessionPage() {
     // Charger les joueurs disponibles depuis l'API
     const fetchPlayers = async () => {
       try {
+        console.log('🔐 CreateSessionPage - Fetching users, user role:', user?.role);
         const response = await adminAPI.getUsers();
+        console.log('🔐 CreateSessionPage - getUsers response:', response);
+        
         if (response.success && response.data) {
           // Filtrer pour ne garder que les utilisateurs (pas les admins)
           const regularUsers = response.data.filter((user: User) => user.role === 'user');
           setAvailablePlayers(regularUsers);
           setFilteredPlayers(regularUsers);
+          console.log('🔐 CreateSessionPage - Users loaded:', regularUsers.length);
         } else {
-          console.error('Failed to fetch players:', response.message);
+          console.error('🔐 CreateSessionPage - Failed to fetch users:', response.error);
         }
       } catch (error) {
-        console.error('Error fetching players:', error);
+        console.error('🔐 CreateSessionPage - Error fetching players:', error);
       }
     };
 

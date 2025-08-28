@@ -70,6 +70,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setToken('cookie'); // Le token est maintenant dans un cookie HTTP-only
       setUser(userData.user); // ← Correction : extraire userData.user
       console.log('Login Debug - User authenticated via cookie:', userData.user);
+      console.log('🔐 Login Debug - User role:', userData.user.role);
+      console.log('🔐 Login Debug - User isDM:', userData.user.isDM);
+      
+      // Vérifier si le cookie est bien reçu
+      console.log('🍪 Login Debug - Document cookies:', document.cookie);
+      console.log('🍪 Login Debug - Checking for token cookie...');
+      
+      // Attendre un peu et vérifier à nouveau
+      setTimeout(() => {
+        console.log('🍪 Login Debug - Cookies after timeout:', document.cookie);
+      }, 1000);
     } catch (error: any) {
       throw new Error(error.message || 'Login failed');
     }

@@ -54,8 +54,8 @@ export const signup = async (req, res) => {
         // Définir le cookie HTTP-only
         res.cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // HTTPS en production
-            sameSite: 'strict',
+            secure: false, // Temporairement désactivé pour le staging
+            sameSite: 'lax', // Plus permissif pour le staging
             maxAge: 30 * 24 * 60 * 60 * 1000 // 30 jours
         });
 
@@ -126,8 +126,8 @@ export const login = async (req, res) => {
         // Définir le cookie HTTP-only
         res.cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // HTTPS en production
-            sameSite: 'strict',
+            secure: false, // Temporairement désactivé pour le staging
+            sameSite: 'lax', // Plus permissif pour le staging
             maxAge: 30 * 24 * 60 * 60 * 1000 // 30 jours
         });
 
@@ -243,8 +243,8 @@ export const logout = async (req, res) => {
         // Supprimer le cookie
         res.cookie('token', '', {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: false, // Temporairement désactivé pour le staging
+            sameSite: 'lax', // Plus permissif pour le staging
             expires: new Date(0)
         });
 

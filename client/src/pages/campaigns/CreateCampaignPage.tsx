@@ -38,9 +38,8 @@ export default function CreateCampaignPage() {
     const fetchGames = async () => {
       try {
         const response = await publicAPI.getGames();
-        if (response.success) {
-          const data = response;
-          setAvailableGames(data.data || []);
+        if (response.success && response.data) {
+          setAvailableGames(response.data);
         }
       } catch (error) {
         console.error('Error fetching games:', error);
@@ -51,13 +50,19 @@ export default function CreateCampaignPage() {
     // Charger les joueurs disponibles depuis l'API
     const fetchPlayers = async () => {
       try {
+        console.log('🔐 CreateCampaignPage - Fetching users, user role:', user?.role);
         const response = await adminAPI.getUsers();
-        if (response.success) {
-          const data = response;
-          setAvailablePlayers(data.data || []);
+        console.log('🔐 CreateCampaignPage - getUsers response:', response);
+        
+        if (response.success && response.data) {
+          setAvailablePlayers(response.data);
+          console.log('🔐 CreateCampaignPage - Users loaded:', response.data.length);
+        } else {
+          console.error('🔐 CreateCampaignPage - Failed to fetch users:', response.error);
+          setAvailablePlayers([]);
         }
       } catch (error) {
-        console.error('Error fetching players:', error);
+        console.error('🔐 CreateCampaignPage - Error fetching players:', error);
         setAvailablePlayers([]);
       }
     };
