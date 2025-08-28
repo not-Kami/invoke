@@ -6,7 +6,7 @@ import Button from '../../components/ui/Button';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import Input from '../../components/ui/Input';
 import { Plus, X, AlertCircle, Calendar } from 'lucide-react';
-import { api } from '../../lib/api';
+import { publicAPI, adminAPI } from '../../lib/api';
 
 export default function CreateCampaignPage() {
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ export default function CreateCampaignPage() {
     // Charger les jeux disponibles depuis l'API
     const fetchGames = async () => {
       try {
-        const response = await api.get('/games');
+        const response = await publicAPI.getGames();
         if (response.success) {
           const data = response;
           setAvailableGames(data.data || []);
@@ -51,7 +51,7 @@ export default function CreateCampaignPage() {
     // Charger les joueurs disponibles depuis l'API
     const fetchPlayers = async () => {
       try {
-        const response = await api.get('/users');
+        const response = await adminAPI.getUsers();
         if (response.success) {
           const data = response;
           setAvailablePlayers(data.data || []);

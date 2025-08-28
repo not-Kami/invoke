@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Game, Session } from '../../../types';
-import { api } from '../../../lib/api';
+import { publicAPI } from '../../../lib/api';
 
 export function useHomePageData() {
   // État pour les jeux mis en avant
@@ -16,10 +16,9 @@ export function useHomePageData() {
     const fetchFeaturedGames = async () => {
       try {
         setGamesLoading(true);
-        const response = await api.get('/games');
-        if (response.success) {
-          const data = response;
-          const featured = data.data.filter((game: Game) => game.featured);
+        const response = await publicAPI.getGames();
+        if (response.success && response.data) {
+          const featured = response.data.filter((game: Game) => game.featured);
           console.log('⭐ Jeux mis en avant:', featured);
           setFeaturedGames(featured);
         }
@@ -38,11 +37,10 @@ export function useHomePageData() {
     const fetchFeaturedSessions = async () => {
       try {
         setSessionsLoading(true);
-        const response = await api.get('/sessions?featured=true&limit=6');
-        if (response.success) {
-          const data = response;
-          console.log('⭐ Sessions mises en avant:', data.data);
-          setFeaturedSessions(data.data);
+        const response = await publicAPI.getFeaturedSessions();
+        if (response.success && response.data) {
+          console.log('⭐ Sessions mises en avant:', response.data);
+          setFeaturedSessions(response.data);
         }
       } catch (error) {
         console.error('Erreur chargement sessions:', error);
