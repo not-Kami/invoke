@@ -6,14 +6,21 @@ const allowedOrigins = (env.FRONTEND_URLS || '')
   .map(url => url.trim().replace(/\/$/, '')) // retire slash final
   .filter(Boolean);
 
+// Si aucune URL n'est configurée, autoriser tous les domaines (pour le développement)
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
+    // Si aucune origine ou si FRONTEND_URLS n'est pas configuré, autoriser
+    if (!origin || allowedOrigins.length === 0) {
+      return callback(null, true);
+    }
+    
     // On retire le slash final de l'origin pour la comparaison
     const normalizedOrigin = origin.replace(/\/$/, '');
     if (allowedOrigins.includes(normalizedOrigin)) {
       callback(null, true);
     } else {
+      console.log(`CORS blocked origin: ${origin}`);
+      console.log(`Allowed origins: ${allowedOrigins.join(', ')}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
