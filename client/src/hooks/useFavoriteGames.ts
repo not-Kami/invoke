@@ -21,6 +21,7 @@ export function useFavoriteGames() {
         setError(null);
         
         console.log('🔄 Fetching favorite games for user:', user._id);
+        console.log('🔐 User object:', user);
         
         // Utiliser la nouvelle route RESTful
         const response = await usersApi.getFavorites(user._id);
@@ -30,8 +31,14 @@ export function useFavoriteGames() {
           setFavoriteGames(Array.isArray(response.data) ? response.data : [response.data]);
         } else {
           console.error('❌ Failed to fetch favorite games:', response.error);
-          setError(response.error || 'Failed to fetch favorite games');
-          setFavoriteGames([]);
+          if (response.error === 'Not authorized to access this route') {
+            console.log('🔐 User not authenticated, clearing favorites');
+            setFavoriteGames([]);
+            setError('Please log in to view your favorite games');
+          } else {
+            setError(response.error || 'Failed to fetch favorite games');
+            setFavoriteGames([]);
+          }
         }
       } catch (err) {
         console.error('❌ Error fetching favorite games:', err);

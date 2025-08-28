@@ -29,22 +29,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Vérifier si l'utilisateur est connecté via le cookie
     console.log('AuthContext Debug - Checking authentication via cookie');
     
-          authAPI.getCurrentUser().then((response) => {
-        console.log('AuthContext Debug - getCurrentUser response:', response);
-        console.log('AuthContext Debug - response.data:', response.data);
-        console.log('AuthContext Debug - response.data.user:', response.data?.user);
-        
-        if (response.success && response.data && response.data.user) {
-          setToken('cookie');
-          setUser(response.data.user);
-          console.log('AuthContext Debug - User authenticated via cookie:', response.data.user);
-        } else {
-          console.log('AuthContext Debug - No valid session found');
-          setToken(null);
-          setUser(null);
-        }
-        setLoading(false);
-      }).catch((error) => {
+    authAPI.getCurrentUser().then((response) => {
+      console.log('AuthContext Debug - getCurrentUser response:', response);
+      console.log('AuthContext Debug - response.data:', response.data);
+      console.log('AuthContext Debug - response.data.user:', response.data?.user);
+      
+      if (response.success && response.data && response.data.user) {
+        setToken('cookie');
+        setUser(response.data.user);
+        console.log('AuthContext Debug - User authenticated via cookie:', response.data.user);
+      } else {
+        console.log('AuthContext Debug - No valid session found');
+        setToken(null);
+        setUser(null);
+      }
+      setLoading(false);
+    }).catch((error) => {
       console.log('AuthContext Debug - getCurrentUser error:', error);
       setToken(null);
       setUser(null);
