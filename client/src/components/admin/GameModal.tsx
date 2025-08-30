@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Gamepad2, Save, Plus, Star } from 'lucide-react';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
-import { normalizeGameName } from '../../utils/gameUtils';
+
 import { Game } from '../../types';
 import { getGameImageUrl } from '../../lib/api';
 

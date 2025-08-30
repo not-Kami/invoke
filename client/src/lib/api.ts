@@ -450,7 +450,7 @@ export const publicAPI = {
 // ===== UTILITAIRES =====
 
 // Fonction pour calculer l'URL d'une image de jeu
-export const getGameImageUrl = (gameId: string, imageType: 'logo' | 'portrait' | 'banner', filename: string): string => {
+export const getGameImageUrl = (gameId: string, _imageType: 'logo' | 'portrait' | 'banner', filename: string): string => {
   const baseUrl = import.meta.env.DEV ? 'http://localhost:3000' : (import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || 'https://dev-api-invoke.onrender.com');
   return `${baseUrl}/uploads/game/${gameId}/${filename}`;
 };
