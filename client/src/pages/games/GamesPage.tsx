@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { Game } from '../../lib/api';
 import GameFilters from '../../components/games/GameFilters';
 import { Loader2, AlertCircle } from 'lucide-react';
-import { publicAPI } from '../../lib/api';
+import { publicAPI, getGameImageUrl } from '../../lib/api';
 import { Card } from '../../components/ui/Card';
 
 // Composant GameCard simple pour la page games
@@ -11,12 +11,16 @@ function SimpleGameCard({ game, onClick, className = "" }: {
   onClick: (game: Game) => void; 
   className?: string;
 }) {
+  // Calculer les URLs des images dynamiquement
+  const portraitUrl = game.images?.portrait ? getGameImageUrl(game._id, 'portrait', game.images.portrait) : null;
+  const logoUrl = game.images?.logo ? getGameImageUrl(game._id, 'logo', game.images.logo) : null;
+
   return (
     <Card 
       className={`relative bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 transition-all duration-300 overflow-hidden group cursor-pointer ${className}`}
       onClick={() => onClick(game)}
     >
-      {/* Image de fond */}
+      {/* Image de fond - Portrait du jeu */}
       <div className="absolute inset-0 w-full h-full">
         {/* Fallback vers le gradient si pas d'image */}
         <div className="w-full h-full bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center">
@@ -25,18 +29,35 @@ function SimpleGameCard({ game, onClick, className = "" }: {
           </div>
         </div>
         
-        {/* Image du jeu si disponible */}
-        {game.images?.logo ? (
+        {/* Image portrait du jeu si disponible */}
+        {portraitUrl && (
           <img 
-            src={game.images.logo} 
-            alt={`Image ${game.name}`}
+            src={portraitUrl}
+            alt={`Portrait ${game.name}`}
             className="absolute inset-0 w-full h-full object-cover"
+            onLoad={() => console.log('✅ Image portrait chargée pour', game.name, ':', portraitUrl)}
+            onError={(e) => console.error('❌ Erreur chargement image pour', game.name, ':', e)}
           />
-        ) : null}
+        )}
         
         {/* Gradient overlay transparent -> opaque de haut en bas */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
       </div>
+
+      {/* Logo du jeu en premier plan (haut de la carte) */}
+      {logoUrl && (
+        <div className="absolute top-4 left-4 z-20">
+          <div className="w-16 h-16 rounded-lg overflow-hidden">
+            <img 
+              src={logoUrl}
+              alt={`Logo ${game.name}`}
+              className="w-full h-full object-contain"
+              onLoad={() => console.log('✅ Logo chargé pour', game.name, ':', logoUrl)}
+              onError={(e) => console.error('❌ Erreur chargement logo pour', game.name, ':', e)}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Contenu en bas de la carte */}
       <div className="absolute bottom-0 left-0 right-0 p-4 z-10">

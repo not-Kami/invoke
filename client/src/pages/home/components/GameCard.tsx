@@ -2,6 +2,7 @@
 import { Heart } from 'lucide-react';
 import { Card } from '../../../components/ui/Card';
 import { Game } from '../../../types';
+import { getGameImageUrl } from '../../../lib/api';
 
 interface GameCardProps {
   game: Game;
@@ -20,6 +21,13 @@ export default function GameCard({
   showFavoriteButton = true,
   className = ""
 }: GameCardProps) {
+  // Debug: Log re-renders
+  console.log(`🔄 GameCard re-render pour ${game.name}:`, {
+    gameId: game._id,
+    images: game.images,
+    timestamp: new Date().toISOString()
+  });
+
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -33,6 +41,10 @@ export default function GameCard({
       onClick(game);
     }
   };
+
+  // Calculer les URLs des images dynamiquement
+  const portraitUrl = game.images?.portrait ? getGameImageUrl(game._id, 'portrait', game.images.portrait) : null;
+  const logoUrl = game.images?.logo ? getGameImageUrl(game._id, 'logo', game.images.logo) : null;
 
   return (
     <Card 
@@ -48,26 +60,57 @@ export default function GameCard({
           </div>
         </div>
         
-        {/* Image portrait du jeu si disponible */}
-        {game.images?.portrait ? (
-          <img 
-            src={game.images.portrait} 
-            alt={`Portrait ${game.name}`}
-            className="absolute inset-0 w-full h-full object-cover"
-            onLoad={() => console.log('✅ Image portrait chargée pour', game.name, ':', game.images.portrait)}
-            onError={(e) => console.error('❌ Erreur chargement image pour', game.name, ':', e)}
-          />
-        ) : null}
+                         {/* Image portrait du jeu si disponible */}
+                 {portraitUrl && (
+                   <img 
+                     src={portraitUrl}
+                     alt={`Portrait ${game.name}`}
+                     className="absolute inset-0 w-full h-full object-cover"
+                     onLoad={() => console.log('✅ Image portrait chargée pour', game.name, ':', portraitUrl)}
+                     onError={(e) => {
+                       console.error('❌ Erreur chargement image pour', game.name, ':', e);
+                       console.error('🔍 Détails erreur portrait:', {
+                         gameId: game._id,
+                         portraitUrl,
+                         gameImages: game.images,
+                         error: e
+                       });
+                     }}
+                   />
+                 )}
         
         {/* Gradient overlay transparent -> opaque de haut en bas */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
       </div>
 
+             {/* Logo du jeu en premier plan (haut de la carte) */}
+       {logoUrl && (
+         <div className="absolute top-4 left-4 z-20">
+           <div className="w-16 h-16 rounded-lg overflow-hidden">
+             <img 
+               src={logoUrl}
+               alt={`Logo ${game.name}`}
+               className="w-full h-full object-contain"
+               onLoad={() => console.log('✅ Logo chargé pour', game.name, ':', logoUrl)}
+               onError={(e) => {
+                 console.error('❌ Erreur chargement logo pour', game.name, ':', e);
+                 console.error('🔍 Détails erreur logo:', {
+                   gameId: game._id,
+                   logoUrl,
+                   gameImages: game.images,
+                   error: e
+                 });
+               }}
+             />
+           </div>
+         </div>
+       )}
+
       {/* Bouton favori en haut à droite */}
       {showFavoriteButton && onToggleFavorite && (
         <button
           onClick={handleFavoriteClick}
-          className="absolute top-3 right-3 z-10 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-200"
+          className="absolute top-3 right-3 z-20 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-200"
         >
           <Heart 
             className={`h-4 w-4 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-white'}`} 

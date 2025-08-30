@@ -4,7 +4,7 @@ import Badge from '../../ui/Badge';
 import FeaturedToggle from '../FeaturedToggle';
 import Button from '../../ui/Button';
 import { Game } from '../../../types';
-import { Plus } from 'lucide-react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
 
 interface GamesTabProps {
   games: Game[];
@@ -16,6 +16,8 @@ interface GamesTabProps {
 
 const GamesTab: React.FC<GamesTabProps> = ({
   games,
+  loading,
+  onDeleteGame,
   onToggleFeatured,
   onOpenGameModal
 }) => {
@@ -53,6 +55,16 @@ const GamesTab: React.FC<GamesTabProps> = ({
     },
   ];
 
+  const handleEditGame = (game: Game) => {
+    onOpenGameModal(game);
+  };
+
+  const handleDeleteGame = (game: Game) => {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer le jeu "${game.name}" ?`)) {
+      onDeleteGame(game._id);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -70,6 +82,9 @@ const GamesTab: React.FC<GamesTabProps> = ({
       <DataTable
         columns={columns}
         data={games}
+        showEditButton={true}
+        onEdit={handleEditGame}
+        onDelete={handleDeleteGame}
       />
     </div>
   );

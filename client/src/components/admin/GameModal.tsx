@@ -4,6 +4,7 @@ import Button from '../ui/Button';
 import Badge from '../ui/Badge';
 import { normalizeGameName } from '../../utils/gameUtils';
 import { Game } from '../../types';
+import { getGameImageUrl } from '../../lib/api';
 
 // Type pour le formulaire (sans les propriétés requises par la base de données)
 type GameForm = Omit<Game, '_id' | 'createdAt' | 'updatedAt'> & {
@@ -72,13 +73,13 @@ const GameModal: React.FC<GameModalProps> = ({
       if (game.images) {
         const urls: any = {};
         if (typeof game.images.logo === 'string' && game.images.logo) {
-          urls.logo = game.images.logo;
+          urls.logo = getGameImageUrl(game._id!, 'logo', game.images.logo);
         }
         if (typeof game.images.portrait === 'string' && game.images.portrait) {
-          urls.portrait = game.images.portrait;
+          urls.portrait = getGameImageUrl(game._id!, 'portrait', game.images.portrait);
         }
         if (typeof game.images.banner === 'string' && game.images.banner) {
-          urls.banner = game.images.banner;
+          urls.banner = getGameImageUrl(game._id!, 'banner', game.images.banner);
         }
         setPreviewUrls(urls);
       }
@@ -196,49 +197,54 @@ const GameModal: React.FC<GameModalProps> = ({
           hasSelectedFiles: Object.keys(selectedFiles).length > 0
         });
         
-        // Si on a des fichiers sélectionnés, les uploader après création
+        // Si on a des fichiers sélectionnés, les uploader après création/modification
         if (Object.keys(selectedFiles).length > 0) {
-          // DÉTECTER si c'est un jeu existant ou nouveau
-          let gameIdentifier;
+          // Déterminer l'ID du jeu à utiliser pour l'upload
+          let gameIdForUpload;
+          let canUpload = false;
           
-          if (gameDataToSend._id) {
-            // JEU EXISTANT: Utiliser l'ID pour éviter la duplication
-            gameIdentifier = gameDataToSend._id;
-            console.log('🆔 Upload pour jeu EXISTANT avec ID:', gameIdentifier);
+          if (isEditing && game?._id) {
+            // ÉDITION : Utiliser l'ID du jeu existant
+            gameIdForUpload = game._id;
+            canUpload = true;
+            console.log('🆔 Upload pour jeu EXISTANT (édition) avec ID:', gameIdForUpload);
+          } else if (game?._id) {
+            // CRÉATION : Utiliser l'ID du jeu existant (si disponible)
+            gameIdForUpload = game._id;
+            canUpload = true;
+            console.log('🆕 Upload pour NOUVEAU jeu avec ID existant:', gameIdForUpload);
           } else {
-            // NOUVEAU JEU: Utiliser le nom formaté
-            gameIdentifier = normalizeGameName(gameDataToSend.name || '');
-            console.log('📝 Upload pour NOUVEAU jeu avec nom:', gameIdentifier);
+            console.log('❌ Impossible d\'uploader des images : aucun ID de jeu disponible');
+            console.log('💡 Les images ne seront pas uploadées');
           }
           
-          console.log('🎯 Identifiant final pour upload:', gameIdentifier);
-          
-          for (const [imageType, file] of Object.entries(selectedFiles)) {
-            if (file) {
-              try {
-                const formData = new FormData();
-                formData.append('image', file);
-                formData.append('imageType', imageType);
-                
-                              // Utiliser la route appropriée selon le type d'identifiant
-              const uploadUrl = gameDataToSend._id 
-                ? `/api/v1/upload/game/id/${gameIdentifier}/${imageType}`  // Route avec ID
-                : `/api/v1/upload/game/${gameIdentifier}/${imageType}`;    // Route avec nom
-              
-              console.log('📤 Upload URL:', uploadUrl);
-                
-                const response = await fetch(uploadUrl, {
-                  method: 'POST',
-                  body: formData,
-                });
-                
-                if (!response.ok) {
-                  console.error(`❌ Erreur upload ${imageType}:`, await response.text());
-                } else {
-                  console.log(`✅ Upload ${imageType} réussi`);
+          // Upload des images si possible
+          if (canUpload && gameIdForUpload) {
+            for (const [imageType, file] of Object.entries(selectedFiles)) {
+              if (file) {
+                try {
+                  const formData = new FormData();
+                  formData.append('image', file);
+                  
+                  // Route d'upload avec paramètres d'URL
+                  const uploadUrl = `/api/v1/upload/game/${gameIdForUpload}/${imageType}`;
+                  
+                  console.log('📤 Upload URL:', uploadUrl);
+                  console.log('📁 Paramètres:', { gameId: gameIdForUpload, imageType });
+                    
+                  const response = await fetch(uploadUrl, {
+                    method: 'POST',
+                    body: formData,
+                  });
+                  
+                  if (!response.ok) {
+                    console.error(`❌ Erreur upload ${imageType}:`, await response.text());
+                  } else {
+                    console.log(`✅ Upload ${imageType} réussi`);
+                  }
+                } catch (error) {
+                  console.error(`❌ Erreur upload ${imageType}:`, error);
                 }
-              } catch (error) {
-                console.error(`❌ Erreur upload ${imageType}:`, error);
               }
             }
           }
