@@ -261,13 +261,12 @@ const AdminPage: React.FC = () => {
         )}
         
         {activeTab === 'games' && (
-          <GamesTab
-            games={games}
-            loading={loading}
-            onDeleteGame={handleDeleteGame}
-            onToggleFeatured={handleToggleFeatured}
-            onOpenGameModal={handleOpenGameModal}
-          />
+                      <GamesTab
+              games={games}
+              onDeleteGame={handleDeleteGame}
+              onToggleFeatured={handleToggleFeatured}
+              onOpenGameModal={handleOpenGameModal}
+            />
         )}
         
         {activeTab === 'conversations' && (

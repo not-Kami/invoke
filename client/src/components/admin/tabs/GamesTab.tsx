@@ -4,11 +4,10 @@ import Badge from '../../ui/Badge';
 import FeaturedToggle from '../FeaturedToggle';
 import Button from '../../ui/Button';
 import { Game } from '../../../types';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 interface GamesTabProps {
   games: Game[];
-  loading: boolean;
   onDeleteGame: (gameId: string) => void;
   onToggleFeatured: (type: string, id: string, featured: boolean) => void;
   onOpenGameModal: (game?: Game) => void;
@@ -16,7 +15,6 @@ interface GamesTabProps {
 
 const GamesTab: React.FC<GamesTabProps> = ({
   games,
-  loading,
   onDeleteGame,
   onToggleFeatured,
   onOpenGameModal
