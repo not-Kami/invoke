@@ -101,47 +101,41 @@ const campaignBannerStorage = multer.diskStorage({
     }
 });
 
-// Configuration du stockage pour les images de jeu
+// Configuration du stockage pour les images de jeu (simplifié)
 const gameImageStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        // Gérer à la fois gameName et gameId
-        const gameName = req.params.gameName || req.params.gameId || req.body.gameName || req.body.gameId;
-        const imageType = req.params.imageType || req.body.imageType || 'logo'; // logo, banner, portrait
+        // Utiliser les paramètres d'URL car req.body n'est pas disponible dans destination
+        const gameId = req.params.gameId;
+        const imageType = req.params.imageType || 'logo'; // logo, banner, portrait
         
-        if (!gameName) {
-            return cb(new Error('Game name or ID is required'), null);
+        if (!gameId) {
+            return cb(new Error('Game ID is required'), null);
         }
         
-        // Déterminer si c'est un ID (24 caractères hex) ou un nom
-        const isGameId = /^[0-9a-fA-F]{24}$/.test(gameName);
-        const folderName = isGameId ? `id_${gameName}` : gameName;
+        // Vérifier que c'est bien un ID MongoDB valide (24 caractères hex)
+        if (!/^[0-9a-fA-F]{24}$/.test(gameId)) {
+            return cb(new Error('Invalid game ID format'), null);
+        }
         
-        console.log('🔍 Type d\'identifiant:', {
-            gameName,
-            isGameId,
+        // Créer le dossier avec l'ID du jeu
+        const folderName = gameId;
+        
+        console.log('🔍 Upload image de jeu:', {
+            gameId,
+            imageType,
             folderName
         });
         
-        // Essayer plusieurs chemins possibles
-        const possiblePaths = [
-            path.join(__dirname, '../../uploads/game', folderName),
-            path.join(process.cwd(), 'uploads/game', folderName),
-            path.join(process.cwd(), 'server/uploads/game', folderName),
-            `uploads/game/${folderName}`
-        ];
+        // Chemin d'upload standardisé
+        const uploadPath = path.join(process.cwd(), 'uploads/game', folderName);
         
-        console.log('🔍 Chemins possibles:');
-        possiblePaths.forEach((p, i) => console.log(`${i}: ${p}`));
-        
-        // Utiliser le premier chemin qui fonctionne
-        const uploadPath = possiblePaths[0];
-        console.log('📁 Chemin choisi:', uploadPath);
+        console.log('📁 Chemin d\'upload:', uploadPath);
         
         ensureDirectoryExists(uploadPath);
         cb(null, uploadPath);
     },
     filename: (req, file, cb) => {
-        const imageType = req.params.imageType || req.body.imageType || 'logo';
+        const imageType = req.params.imageType || 'logo';
         const extension = path.extname(file.originalname);
         const filename = `${imageType}${extension}`;
         cb(null, filename);
@@ -224,6 +218,7 @@ export const campaignBannerUpload = multer({
     }
 }).single('banner');
 
+// Middleware d'upload pour les images de jeu (simplifié)
 export const gameImageUpload = multer({
     storage: gameImageStorage,
     fileFilter: (req, file, cb) => {
