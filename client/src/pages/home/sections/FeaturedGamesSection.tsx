@@ -136,15 +136,15 @@ export default function FeaturedGamesSection({
           <div className="text-center mb-12">
             <div className="flex items-center justify-center space-x-2 mb-4">
               <Sparkles className="h-6 w-6 text-purple-400" />
-              <h2 className="font-display text-3xl font-bold text-white">Jeux Mis en Avant</h2>
+              <h2 className="font-display text-3xl font-bold text-white">Featured Games</h2>
             </div>
-            <p className="text-gray-300 text-lg">Découvrez notre sélection de jeux recommandés</p>
+            <p className="text-gray-300 text-lg">Discover our selection of recommended games</p>
           </div>
           
           <div className="flex items-center justify-center py-12">
             <div className="flex items-center space-x-3 text-slate-400">
               <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-              <span>Chargement des jeux...</span>
+              <span>Loading games...</span>
             </div>
           </div>
         </div>
@@ -159,17 +159,17 @@ export default function FeaturedGamesSection({
           <div className="text-center mb-12">
             <div className="flex items-center justify-center space-x-2 mb-4">
               <Sparkles className="h-6 w-6 text-purple-400" />
-              <h2 className="font-display text-3xl font-bold text-white">Jeux Mis en Avant</h2>
+              <h2 className="font-display text-3xl font-bold text-white">Featured Games</h2>
             </div>
-            <p className="text-gray-300 text-lg">Découvrez notre sélection de jeux recommandés</p>
+            <p className="text-gray-300 text-lg">Discover our selection of recommended games</p>
           </div>
           
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <Gamepad2 className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">Aucun jeu mis en avant</h3>
-            <p className="text-slate-400">Les administrateurs peuvent mettre en avant des jeux depuis le panneau d'administration.</p>
+            <h3 className="text-xl font-semibold text-white mb-2">No featured games</h3>
+            <p className="text-slate-400">Administrators can feature games from the admin panel.</p>
           </div>
         </div>
       </section>
@@ -182,14 +182,14 @@ export default function FeaturedGamesSection({
         <div className="text-center mb-12">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <Sparkles className="h-6 w-6 text-purple-400" />
-            <h2 className="font-display text-3xl font-bold text-white">Jeux Mis en Avant</h2>
+            <h2 className="font-display text-3xl font-bold text-white">Featured Games</h2>
           </div>
-          <p className="text-gray-300 text-lg">Découvrez notre sélection de jeux recommandés</p>
+          <p className="text-gray-300 text-lg">Discover our selection of recommended games</p>
         </div>
         
-        {/* Slider des jeux mis en avant */}
+        {/* Featured games slider */}
         <div className="relative group w-full">
-          {/* Boutons de navigation */}
+          {/* Navigation buttons */}
           <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <button
               onClick={prevGame}
@@ -207,7 +207,7 @@ export default function FeaturedGamesSection({
             </button>
           </div>
 
-          {/* Container du slider */}
+          {/* Slider container */}
           <div 
             ref={containerRef}
             className="overflow-hidden"
@@ -241,7 +241,7 @@ export default function FeaturedGamesSection({
             </div>
           </div>
 
-          {/* Indicateurs de navigation */}
+          {/* Navigation indicators */}
           <div className="flex justify-center mt-8 space-x-2">
             {featuredGames.map((_, index) => (
               <button
@@ -257,11 +257,11 @@ export default function FeaturedGamesSection({
           </div>
         </div>
 
-        {/* Bouton Voir tous les jeux */}
+        {/* View all games button */}
         <div className="text-center mt-8">
           <Link to="/games">
             <button className="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors duration-200">
-              Voir tous les jeux
+              View all games
               <ArrowRight className="h-4 w-4 ml-2" />
             </button>
           </Link>

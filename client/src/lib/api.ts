@@ -1,9 +1,7 @@
 // Types pour les réponses API
 
-// En développement local, utiliser le serveur local
-const API_BASE_URL = import.meta.env.DEV 
-  ? 'http://localhost:3000/api/v1' 
-  : (import.meta.env.VITE_API_BASE_URL || 'https://dev-api-invoke.onrender.com/api/v1');
+// Utiliser la variable d'environnement ou fallback
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
 
 // Types pour les réponses API
 interface ApiResponse<T> {
@@ -122,6 +120,12 @@ async function apiCall<T>(
       'Content-Type': 'application/json',
       ...options.headers,
     };
+
+    // Ajouter le token d'authentification s'il existe
+    const authToken = localStorage.getItem('authToken');
+    if (authToken) {
+      (headers as any)['Authorization'] = `Bearer ${authToken}`;
+    }
 
     console.log('API Debug - Making request to:', `${API_BASE_URL}${endpoint}`);
 

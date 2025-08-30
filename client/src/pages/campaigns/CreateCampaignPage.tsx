@@ -34,7 +34,7 @@ export default function CreateCampaignPage() {
   const [availablePlayers, setAvailablePlayers] = useState<User[]>([]);
 
   useEffect(() => {
-    // Charger les jeux disponibles depuis l'API
+    // Load available games from API
     const fetchGames = async () => {
       try {
         const response = await publicAPI.getGames();

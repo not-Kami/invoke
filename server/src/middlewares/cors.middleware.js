@@ -18,6 +18,12 @@ const corsOptions = {
       return callback(null, true);
     }
     
+    // En staging, autoriser spécifiquement le frontend Render
+    if (env.NODE_ENV === 'staging' || origin === 'https://dev-invoke.onrender.com') {
+      console.log(`🌐 CORS Debug - Staging mode: allowing Render frontend origin`);
+      return callback(null, true);
+    }
+    
     // Si aucune origine ou si FRONTEND_URLS n'est pas configuré, autoriser
     if (!origin || allowedOrigins.length === 0) {
       console.log(`🌐 CORS Debug - Allowing request (no origin or no FRONTEND_URLS configured)`);

@@ -39,31 +39,31 @@ const GameFilters: React.FC<GameFiltersProps> = ({
 
   return (
     <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6">
-      {/* Header avec nombre de résultats */}
+      {/* Header with results count */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-2">
           <Filter className="h-5 w-5 text-gray-400" />
-          <span className="text-sm font-medium text-gray-300">Filtres</span>
+          <span className="text-sm font-medium text-gray-300">Filters</span>
         </div>
         <div className="text-sm text-gray-400">
-          {totalResults} jeu{totalResults > 1 ? 'x' : ''} trouvé{totalResults > 1 ? 's' : ''}
+          {totalResults} game{totalResults > 1 ? 's' : ''} found
         </div>
       </div>
 
-      {/* Barre de recherche */}
+      {/* Search bar */}
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
         <Input
-          placeholder="Rechercher par nom, description..."
+          placeholder="Search by name, description..."
           value={filters.searchTerm}
           onChange={(e) => handleFilterChange('searchTerm', e.target.value)}
           className="pl-10"
         />
       </div>
 
-      {/* Filtres principaux */}
+      {/* Main filters */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        {/* Filtre par genre */}
+        {/* Genre filter */}
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
             Genre
@@ -73,24 +73,24 @@ const GameFilters: React.FC<GameFiltersProps> = ({
             onChange={(e) => handleFilterChange('genre', e.target.value)}
             className="block w-full rounded-lg border border-gray-600 bg-gray-800 text-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
           >
-            <option value="all">Tous les genres</option>
+            <option value="all">All genres</option>
             {availableGenres.map(genre => (
               <option key={genre} value={genre}>{genre}</option>
             ))}
           </select>
         </div>
 
-        {/* Filtre par système */}
+        {/* System filter */}
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            Système
+            System
           </label>
           <select
             value={filters.system}
             onChange={(e) => handleFilterChange('system', e.target.value)}
             className="block w-full rounded-lg border border-gray-600 bg-gray-800 text-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
           >
-            <option value="all">Tous les systèmes</option>
+            <option value="all">All systems</option>
             {availableSystems.map(system => (
               <option key={system} value={system}>{system}</option>
             ))}
@@ -98,20 +98,20 @@ const GameFilters: React.FC<GameFiltersProps> = ({
         </div>
       </div>
 
-      {/* Bouton de réinitialisation */}
-      {hasActiveFilters && (
-        <div className="flex justify-end">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onClearFilters}
-            className="flex items-center space-x-2"
-          >
-            <X className="h-4 w-4" />
-            <span>Réinitialiser les filtres</span>
-          </Button>
-        </div>
-      )}
+              {/* Reset button */}
+        {hasActiveFilters && (
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onClearFilters}
+              className="flex items-center space-x-2"
+            >
+              <X className="h-4 w-4" />
+              <span>Reset filters</span>
+            </Button>
+          </div>
+        )}
     </div>
   );
 };

@@ -184,7 +184,7 @@ const AdminPage: React.FC = () => {
     { id: 'users' as TabType, label: 'Utilisateurs', icon: Users },
     { id: 'sessions' as TabType, label: 'Sessions', icon: Calendar },
     { id: 'campaigns' as TabType, label: 'Campagnes', icon: BookOpen },
-    { id: 'games' as TabType, label: 'Jeux', icon: Gamepad2 },
+            { id: 'games' as TabType, label: 'Games', icon: Gamepad2 },
     { id: 'conversations' as TabType, label: 'Conversations', icon: MessageSquare }
   ];
 
@@ -202,7 +202,7 @@ const AdminPage: React.FC = () => {
             Panel d'Administration
           </h1>
           <p className="text-slate-400 text-lg">
-            Gérez votre plateforme de jeux de rôle
+            Manage your role-playing game platform
           </p>
         </div>
       </div>
@@ -281,7 +281,7 @@ const AdminPage: React.FC = () => {
 
       </div>
 
-      {/* Modal des jeux */}
+              {/* Games modal */}
       {gameModalOpen && (
         <GameModal
           isOpen={gameModalOpen}

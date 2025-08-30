@@ -93,7 +93,7 @@ export default function CreateSessionPage() {
   };
 
   useEffect(() => {
-    // Charger les jeux disponibles depuis l'API
+    // Load available games from API
     const fetchGames = async () => {
       try {
         const response = await adminAPI.getGames();

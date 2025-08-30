@@ -69,7 +69,7 @@ export default function GamesPage() {
     system: 'all'
   });
 
-  // Charger les jeux depuis l'API
+      // Load games from API
   useEffect(() => {
     const loadGames = async () => {
       try {
@@ -81,11 +81,11 @@ export default function GamesPage() {
         if (response.success && response.data) {
           setGames(response.data);
         } else {
-          setError(response.error || 'Erreur lors du chargement des jeux');
+          setError(response.error || 'Error loading games');
         }
       } catch (err) {
-        console.error('Erreur lors du chargement des jeux:', err);
-        setError('Erreur de connexion au serveur');
+        console.error('Error loading games:', err);
+        setError('Server connection error');
       } finally {
         setLoading(false);
       }
@@ -105,7 +105,7 @@ export default function GamesPage() {
     return systems.sort();
   }, [games]);
 
-  // Filtrer les jeux selon les critères
+      // Filter games based on criteria
   const filteredGames = useMemo(() => {
     return games.filter(game => {
       const matchesSearch = game.name.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
@@ -130,8 +130,8 @@ export default function GamesPage() {
   };
 
   const handleGameClick = (game: Game) => {
-    // TODO: Navigation vers la page de détail du jeu
-    console.log('Jeu sélectionné:', game.name);
+    // TODO: Navigate to game detail page
+    console.log('Selected game:', game.name);
   };
 
   if (loading) {
@@ -139,7 +139,7 @@ export default function GamesPage() {
       <div className="min-h-screen py-12 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 text-primary-500 animate-spin mx-auto mb-4" />
-          <p className="text-gray-300">Chargement des jeux...</p>
+          <p className="text-gray-300">Loading games...</p>
         </div>
       </div>
     );
@@ -150,13 +150,13 @@ export default function GamesPage() {
       <div className="min-h-screen py-12 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-white mb-2">Erreur de chargement</h2>
+          <h2 className="text-xl font-semibold text-white mb-2">Loading error</h2>
           <p className="text-gray-300 mb-4">{error}</p>
           <button 
             onClick={() => window.location.reload()} 
             className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
           >
-            Réessayer
+            Try again
           </button>
         </div>
       </div>
@@ -168,8 +168,8 @@ export default function GamesPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Bibliothèque de Jeux</h1>
-          <p className="text-gray-300">Découvrez notre collection de jeux de rôle sur table</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Games Library</h1>
+          <p className="text-gray-300">Discover our collection of tabletop role-playing games</p>
         </div>
 
         {/* Filtres */}
@@ -182,12 +182,12 @@ export default function GamesPage() {
           totalResults={filteredGames.length}
         />
 
-        {/* Grille des jeux */}
+        {/* Games grid */}
         <div className="mt-8">
           {filteredGames.length === 0 ? (
             <div className="text-center py-12">
-              <div className="text-gray-400 text-lg mb-2">Aucun jeu trouvé</div>
-              <p className="text-gray-500">Essayez de modifier vos filtres de recherche</p>
+              <div className="text-gray-400 text-lg mb-2">No games found</div>
+              <p className="text-gray-500">Try modifying your search filters</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

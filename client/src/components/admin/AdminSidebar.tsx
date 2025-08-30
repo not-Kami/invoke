@@ -19,7 +19,7 @@ const AdminSidebar: React.FC = () => {
     { path: '/admin', icon: LayoutDashboard, label: 'Dashboard', required: 'admin' },
     { path: '/admin/users', icon: Users, label: 'Utilisateurs', required: 'admin' },
     { path: '/admin/sessions', icon: Calendar, label: 'Sessions', required: 'admin' },
-    { path: '/admin/games', icon: Gamepad2, label: 'Jeux', required: 'admin' },
+            { path: '/admin/games', icon: Gamepad2, label: 'Games', required: 'admin' },
     { path: '/admin/campaigns', icon: BookOpen, label: 'Campagnes', required: 'admin' },
     { path: '/admin/settings', icon: Settings, label: 'Paramètres', required: 'admin' },
   ];

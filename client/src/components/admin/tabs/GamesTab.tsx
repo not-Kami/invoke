@@ -56,7 +56,7 @@ const GamesTab: React.FC<GamesTabProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-cinzel font-semibold text-white">Gestion des jeux</h3>
+        <h3 className="text-lg font-cinzel font-semibold text-white">Games Management</h3>
         <Button 
           onClick={() => onOpenGameModal()} 
           variant="primary"

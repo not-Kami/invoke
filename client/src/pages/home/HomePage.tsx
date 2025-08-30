@@ -38,7 +38,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <HeroSection />
 
-      {/* Section Jeux Mis en Avant */}
+              {/* Featured Games Section */}
       <FeaturedGamesSection
         featuredGames={featuredGames}
         loading={gamesLoading}
@@ -46,7 +46,7 @@ export default function HomePage() {
         isFavorite={isFavorite}
       />
 
-      {/* Sessions Mises en Avant */}
+              {/* Featured Sessions Section */}
       <FeaturedSessionsSection
         featuredSessions={featuredSessions}
         loading={sessionsLoading}

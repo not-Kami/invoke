@@ -1,6 +1,7 @@
 import User from '../user/user.model.js';
 import { generateToken, hashPassword, comparePassword } from '../../middlewares/auth.middleware.js';
 import logger from '../../config/logger.config.js';
+import env from '../../config/dotenv.config.js';
 
 // @desc    Register user
 // @route   POST /api/v1/auth/signup
@@ -54,9 +55,10 @@ export const signup = async (req, res) => {
         // Définir le cookie HTTP-only
         res.cookie('token', token, {
             httpOnly: true,
-            secure: false, // Temporairement désactivé pour le staging
-            sameSite: 'lax', // Plus permissif pour le staging
-            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 jours
+            secure: env.NODE_ENV !== 'development', // HTTPS requis sauf en dev
+            sameSite: env.NODE_ENV === 'development' ? 'lax' : 'strict', // Strict en staging/prod pour la sécurité
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 jours
+            domain: env.COOKIE_DOMAIN || undefined // Domaine configuré ou auto-détection
         });
 
         res.status(201).json({
@@ -126,16 +128,18 @@ export const login = async (req, res) => {
         // Définir le cookie HTTP-only
         res.cookie('token', token, {
             httpOnly: true,
-            secure: false, // Temporairement désactivé pour le staging
-            sameSite: 'lax', // Plus permissif pour le staging
-            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 jours
+            secure: env.NODE_ENV !== 'development', // HTTPS requis sauf en dev
+            sameSite: env.NODE_ENV === 'development' ? 'lax' : 'strict', // Strict en staging/prod pour la sécurité
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 jours
+            domain: env.COOKIE_DOMAIN || undefined // Domaine configuré ou auto-détection
         });
 
         res.status(200).json({
             success: true,
             message: 'Login successful',
             data: {
-                user: userResponse
+                user: userResponse,
+                token: token // ← Retourner le token dans la réponse
             }
         });
     } catch (error) {
@@ -243,9 +247,10 @@ export const logout = async (req, res) => {
         // Supprimer le cookie
         res.cookie('token', '', {
             httpOnly: true,
-            secure: false, // Temporairement désactivé pour le staging
-            sameSite: 'lax', // Plus permissif pour le staging
-            expires: new Date(0)
+            secure: env.NODE_ENV !== 'development', // HTTPS requis sauf en dev
+            sameSite: env.NODE_ENV === 'development' ? 'lax' : 'strict', // Cross-origin en staging/prod
+            expires: new Date(0),
+            domain: env.COOKIE_DOMAIN || undefined // Domaine configuré ou auto-détection
         });
 
         res.status(200).json({
