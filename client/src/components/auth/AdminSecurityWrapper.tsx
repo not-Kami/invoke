@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { useAdminAuth } from '../../hooks/useAdminAuth';
 import { Shield, AlertTriangle, Loader2 } from 'lucide-react';
 

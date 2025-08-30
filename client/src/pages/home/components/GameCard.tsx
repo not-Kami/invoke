@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Heart } from 'lucide-react';
 import { Card } from '../../../components/ui/Card';
 import { Game } from '../../../types';

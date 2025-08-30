@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Gamepad2, Tag } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '../ui/Card';
 import Badge from '../ui/Badge';

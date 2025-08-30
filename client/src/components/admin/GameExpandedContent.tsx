@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Gamepad2, Calendar, Star, Users, BookOpen, Tag, Info } from 'lucide-react';
 import Badge from '../ui/Badge';
 

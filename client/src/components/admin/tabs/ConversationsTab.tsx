@@ -1,4 +1,4 @@
-import React from 'react';
+
 import DataTable from '../DataTable';
 import Badge from '../../ui/Badge';
 import { Conversation } from '../../../lib/api';

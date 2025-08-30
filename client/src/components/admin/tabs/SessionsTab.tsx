@@ -1,4 +1,4 @@
-import React from 'react';
+
 import ExpandableDataTable from '../ExpandableDataTable';
 import SessionExpandedContent from '../SessionExpandedContent';
 import Badge from '../../ui/Badge';

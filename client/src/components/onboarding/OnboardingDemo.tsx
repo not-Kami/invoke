@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { useOnboarding } from '../../hooks/useOnboarding';
 import { useUserPreferences } from '../../hooks/useUserPreferences';
 import OnboardingModal from './OnboardingModal';

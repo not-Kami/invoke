@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 interface SimpleImageUploadProps {
   onImageChange: (imageData: string | null) => void;

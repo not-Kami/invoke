@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Navigate, useLocation } from 'react-router-dom';
 import { usePermissions } from '../../hooks/usePermissions';
 import { Shield, AlertTriangle, Loader2 } from 'lucide-react';
