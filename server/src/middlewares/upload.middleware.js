@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import logger from '../config/logger.config.js';
+import { uploadToCloudinary, generatePublicId } from '../config/cloudinary.config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -232,6 +233,126 @@ export const gameImageUpload = multer({
         fileSize: MAX_FILE_SIZE
     }
 }).single('image');
+
+// ===== MIDDLEWARES CLOUDINARY =====
+
+// Configuration multer pour Cloudinary (stockage en mémoire)
+const cloudinaryStorage = multer.memoryStorage();
+
+// Middleware d'upload d'avatar utilisateur avec Cloudinary
+export const userAvatarUploadCloudinary = multer({
+    storage: cloudinaryStorage,
+    fileFilter: (req, file, cb) => {
+        if (ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error(`Type de fichier non autorisé. Types acceptés: ${ALLOWED_IMAGE_TYPES.map(type => type.split('/')[1]).join(', ')}`), false);
+        }
+    },
+    limits: {
+        fileSize: MAX_FILE_SIZE
+    }
+}).single('avatar');
+
+// Middleware d'upload de bannière de session avec Cloudinary
+export const sessionBannerUploadCloudinary = multer({
+    storage: cloudinaryStorage,
+    fileFilter: (req, file, cb) => {
+        if (ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error(`Type de fichier non autorisé. Types acceptés: ${ALLOWED_IMAGE_TYPES.map(type => type.split('/')[1]).join(', ')}`), false);
+        }
+    },
+    limits: {
+        fileSize: MAX_FILE_SIZE
+    }
+}).single('banner');
+
+// Middleware d'upload de bannière de campagne avec Cloudinary
+export const campaignBannerUploadCloudinary = multer({
+    storage: cloudinaryStorage,
+    fileFilter: (req, file, cb) => {
+        if (ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error(`Type de fichier non autorisé. Types acceptés: ${ALLOWED_IMAGE_TYPES.map(type => type.split('/')[1]).join(', ')}`), false);
+        }
+    },
+    limits: {
+        fileSize: MAX_FILE_SIZE
+    }
+}).single('banner');
+
+// Middleware d'upload d'image de jeu avec Cloudinary
+export const gameImageUploadCloudinary = multer({
+    storage: cloudinaryStorage,
+    fileFilter: (req, file, cb) => {
+        if (ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error(`Type de fichier non autorisé. Types acceptés: ${ALLOWED_IMAGE_TYPES.map(type => type.split('/')[1]).join(', ')}`), false);
+        }
+    },
+    limits: {
+        fileSize: MAX_FILE_SIZE
+    }
+}).single('image');
+
+// Fonction utilitaire pour uploader vers Cloudinary
+export const uploadToCloudinaryMiddleware = async (req, res, next) => {
+    try {
+        if (!req.file) {
+            return next();
+        }
+
+        // Extraire les paramètres selon le type de route
+        let type, id, imageType;
+        
+        if (req.params.gameId) {
+            // Route de jeu : /game/:gameId/:imageType
+            type = 'game';
+            id = req.params.gameId;
+            imageType = req.params.imageType;
+        } else if (req.params.id) {
+            // Autres routes : /:type/:id
+            type = req.params.type || 'user';
+            id = req.params.id;
+            imageType = req.params.imageType;
+        } else {
+            throw new Error('Paramètres de route invalides');
+        }
+        
+        const publicId = generatePublicId(type, id, imageType);
+        
+        const result = await uploadToCloudinary(req.file, {
+            folder: `invoke/${type}`,
+            public_id: publicId,
+            transformation: {
+                quality: 'auto',
+                fetch_format: 'auto'
+            }
+        });
+
+        // Ajouter les informations Cloudinary à la requête
+        req.cloudinaryResult = {
+            public_id: result.public_id,
+            secure_url: result.secure_url,
+            width: result.width,
+            height: result.height,
+            bytes: result.bytes,
+            format: result.format
+        };
+
+        next();
+    } catch (error) {
+        logger.error('Erreur upload Cloudinary middleware:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Erreur lors de l\'upload de l\'image'
+        });
+    }
+};
 
 // Middleware de gestion des erreurs d'upload (compatible avec l'ancien et le nouveau)
 export const handleUploadError = (err, req, res, next) => {

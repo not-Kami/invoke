@@ -17,7 +17,10 @@ const env = {
     FRONTEND_URLS: process.env.FRONTEND_URLS,
     COOKIE_DOMAIN: process.env.COOKIE_DOMAIN,
     DISABLE_RATE_LIMIT: process.env.DISABLE_RATE_LIMIT === "true",
-    LOG_LEVEL: process.env.LOG_LEVEL || "info"
+    LOG_LEVEL: process.env.LOG_LEVEL || "info",
+    CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
+    CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
+    CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET
 }
 
 console.log('ENV DEBUG - Final config:', {

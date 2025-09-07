@@ -226,8 +226,8 @@ const GameModal: React.FC<GameModalProps> = ({
                   const formData = new FormData();
                   formData.append('image', file);
                   
-                  // Route d'upload avec paramètres d'URL
-                  const uploadUrl = `/api/v1/upload/game/${gameIdForUpload}/${imageType}`;
+                  // Route d'upload Cloudinary avec paramètres d'URL
+                  const uploadUrl = `/api/v1/upload/cloudinary/game/${gameIdForUpload}/${imageType}`;
                   
                   console.log('📤 Upload URL:', uploadUrl);
                   console.log('📁 Paramètres:', { gameId: gameIdForUpload, imageType });
