@@ -4,6 +4,11 @@ import {
     sessionBannerUpload, 
     campaignBannerUpload, 
     gameImageUpload,
+    userAvatarUploadCloudinary,
+    sessionBannerUploadCloudinary,
+    campaignBannerUploadCloudinary,
+    gameImageUploadCloudinary,
+    uploadToCloudinaryMiddleware,
     handleUploadError 
 } from '../../middlewares/upload.middleware.js';
 import {
@@ -11,7 +16,12 @@ import {
     uploadSessionBanner,
     uploadCampaignBanner,
     uploadGameImage,
+    uploadUserAvatarCloudinary,
+    uploadSessionBannerCloudinary,
+    uploadCampaignBannerCloudinary,
+    uploadGameImageCloudinary,
     deleteImage,
+    deleteImageCloudinary,
     getImageInfo,
     listImages
 } from './upload.controller.js';
@@ -40,6 +50,28 @@ router.post('/game/image', gameImageUpload, uploadGameImage);
 router.get('/list/:type', listImages);
 router.get('/:type/:id/:imageType?', getImageInfo);
 router.delete('/:type/:id/:imageType?', deleteImage);
+
+// ===== ROUTES CLOUDINARY =====
+
+// Routes Cloudinary pour les avatars utilisateur
+router.post('/cloudinary/user/:id/avatar', userAvatarUploadCloudinary, uploadToCloudinaryMiddleware, uploadUserAvatarCloudinary);
+router.post('/cloudinary/user/avatar', userAvatarUploadCloudinary, uploadToCloudinaryMiddleware, uploadUserAvatarCloudinary);
+
+// Routes Cloudinary pour les bannières de session
+router.post('/cloudinary/session/:id/banner', sessionBannerUploadCloudinary, uploadToCloudinaryMiddleware, uploadSessionBannerCloudinary);
+router.post('/cloudinary/session/banner', sessionBannerUploadCloudinary, uploadToCloudinaryMiddleware, uploadSessionBannerCloudinary);
+
+// Routes Cloudinary pour les bannières de campagne
+router.post('/cloudinary/campaign/:id/banner', campaignBannerUploadCloudinary, uploadToCloudinaryMiddleware, uploadCampaignBannerCloudinary);
+router.post('/cloudinary/campaign/banner', campaignBannerUploadCloudinary, uploadToCloudinaryMiddleware, uploadCampaignBannerCloudinary);
+
+// Routes Cloudinary pour les images de jeu
+router.post('/cloudinary/game/:gameId/:imageType', gameImageUploadCloudinary, uploadToCloudinaryMiddleware, uploadGameImageCloudinary);
+router.post('/cloudinary/game/name/:gameName/:imageType', gameImageUploadCloudinary, uploadToCloudinaryMiddleware, uploadGameImageCloudinary);
+router.post('/cloudinary/game/image', gameImageUploadCloudinary, uploadToCloudinaryMiddleware, uploadGameImageCloudinary);
+
+// Route pour supprimer une image Cloudinary
+router.delete('/cloudinary/:publicId', deleteImageCloudinary);
 
 // Middleware de gestion des erreurs d'upload
 router.use(handleUploadError);

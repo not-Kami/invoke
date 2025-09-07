@@ -17,16 +17,19 @@
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
+    "cloudinary": "^2.7.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.18.2",
     "express-rate-limit": "^7.5.1",
+    "form-data": "^4.0.4",
     "helmet": "^8.1.0",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.14.0",
     "multer": "^2.0.1",
+    "node-fetch": "^3.3.2",
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0"
   }

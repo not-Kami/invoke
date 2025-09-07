@@ -451,12 +451,24 @@ export const publicAPI = {
 
 // Fonction pour calculer l'URL d'une image de jeu
 export const getGameImageUrl = (gameId: string, _imageType: 'logo' | 'portrait' | 'banner', filename: string): string => {
+  // Si c'est déjà une URL complète (Cloudinary), la retourner directement
+  if (filename.startsWith('http://') || filename.startsWith('https://')) {
+    return filename;
+  }
+  
+  // Sinon, construire l'URL locale (ancien système)
   const baseUrl = import.meta.env.DEV ? 'http://localhost:3000' : (import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || 'https://dev-api-invoke.onrender.com');
   return `${baseUrl}/uploads/game/${gameId}/${filename}`;
 };
 
 // Fonction pour calculer l'URL d'un avatar utilisateur
 export const getUserAvatarUrl = (userId: string, filename: string): string => {
+  // Si c'est déjà une URL complète (Cloudinary), la retourner directement
+  if (filename.startsWith('http://') || filename.startsWith('https://')) {
+    return filename;
+  }
+  
+  // Sinon, construire l'URL locale (ancien système)
   const baseUrl = import.meta.env.DEV ? 'http://localhost:3000' : (import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || 'https://dev-api-invoke.onrender.com');
   return `${baseUrl}/uploads/user/${userId}/${filename}`;
 };
