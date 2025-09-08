@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Gamepad2, Star, Upload, Check } from 'lucide-react';
+import { X, Gamepad2, Star, Check } from 'lucide-react';
 import { Game } from '../../types';
-import { getGameImageUrl } from '../../lib/api';
 
 interface GameForm extends Omit<Game, '_id' | 'createdAt' | 'updatedAt'> {
   _id?: string;

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { adminAPI } from '../../lib/api';
 import Button from '../../components/ui/Button';
-import { Card, CardContent, CardHeader } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Avatar from '../../components/ui/Avatar';
 import Input from '../../components/ui/Input';
@@ -148,10 +148,6 @@ export default function SessionsPage() {
     return !session.players.includes(user._id);
   };
 
-  const handleSessionClick = (session: any) => {
-    // Navigation vers la page de détail de la session
-    window.location.href = `/sessions/${session._id}`;
-  };
 
   if (loading) {
     return (

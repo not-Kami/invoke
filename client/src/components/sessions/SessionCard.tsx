@@ -1,11 +1,9 @@
-import React from 'react';
-import { Card, CardContent, CardHeader } from '../ui/Card';
+import { Card, CardContent } from '../ui/Card';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';
 import Avatar from '../ui/Avatar';
 import { Calendar, Users, UserPlus } from 'lucide-react';
 import { Session } from '../../types';
-import { Link } from 'react-router-dom';
 import { formatDateShort } from '../../lib/utils';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -100,14 +98,14 @@ export default function SessionCard({
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
             <Avatar
-              firstName={session.dm?.firstName || 'Unknown'}
-              lastName={session.dm?.lastName || 'DM'}
-              src={session.dm?.avatar}
+              firstName={typeof session.dm === 'object' ? session.dm?.firstName || 'Unknown' : 'Unknown'}
+              lastName={typeof session.dm === 'object' ? session.dm?.lastName || 'DM' : 'DM'}
+              src={typeof session.dm === 'object' ? session.dm?.avatar || undefined : undefined}
               size="sm"
             />
             <div className="ml-3">
               <p className="text-white font-semibold text-sm">
-                {session.dm?.firstName || 'Unknown'} {session.dm?.lastName || 'DM'}
+                {typeof session.dm === 'object' ? session.dm?.firstName || 'Unknown' : 'Unknown'} {typeof session.dm === 'object' ? session.dm?.lastName || 'DM' : 'DM'}
               </p>
               <p className="text-xs text-gray-300">★ 4.9</p>
             </div>
@@ -126,7 +124,7 @@ export default function SessionCard({
               </div>
             )}
             <span className="text-white font-medium text-sm">
-              {session.game?.name || 'Unknown Game'}
+              {typeof session.game === 'object' ? session.game?.name || 'Unknown Game' : 'Unknown Game'}
             </span>
           </div>
         </div>

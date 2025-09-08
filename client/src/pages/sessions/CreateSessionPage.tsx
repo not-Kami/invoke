@@ -30,7 +30,8 @@ export default function CreateSessionPage() {
     sessionType: 'online' as 'online' | 'offline',
     isOneShot: false,
     gameId: '',
-    maxPlayers: 6
+    maxPlayers: 6,
+    image: null as File | null
   });
 
   const [selectedPlayers, setSelectedPlayers] = useState<User[]>([]);
