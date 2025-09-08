@@ -105,7 +105,7 @@ export default function Navbar() {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="md:hidden ml-auto">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-gray-300 hover:text-white transition-colors"
@@ -142,22 +142,52 @@ export default function Navbar() {
                 </Link>
               ))}
               
-              {!user && (
-                <div className="pt-4 space-y-2">
-                  <Link to="/login">
-                    <Button variant="ghost" className="w-full text-gray-300 hover:text-white">
-                      <LogIn className="h-4 w-4 mr-2" />
-                      Login
+              {/* Mobile User Actions */}
+              <div className="pt-4 space-y-2">
+                {user ? (
+                  <>
+                    {user.role === 'admin' && (
+                      <Link to="/admin" onClick={() => setIsMenuOpen(false)}>
+                        <Button variant="ghost" className="w-full text-gray-300 hover:text-white">
+                          <Shield className="h-4 w-4 mr-2 text-purple-400" />
+                          Admin Panel
+                        </Button>
+                      </Link>
+                    )}
+                    <Link to="/profile" onClick={() => setIsMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full text-gray-300 hover:text-white">
+                        <User className="h-4 w-4 mr-2" />
+                        {user.firstName}
+                      </Button>
+                    </Link>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full text-gray-300 hover:text-white"
+                      onClick={() => {
+                        logout();
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      Logout
                     </Button>
-                  </Link>
-                  <Link to="/signup">
-                    <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0">
-                      <UserPlus className="h-4 w-4 mr-2" />
-                      Sign Up
-                    </Button>
-                  </Link>
-                </div>
-              )}
+                  </>
+                ) : (
+                  <>
+                    <Link to="/login" onClick={() => setIsMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full text-gray-300 hover:text-white">
+                        <LogIn className="h-4 w-4 mr-2" />
+                        Login
+                      </Button>
+                    </Link>
+                    <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
+                      <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0">
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Sign Up
+                      </Button>
+                    </Link>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         )}

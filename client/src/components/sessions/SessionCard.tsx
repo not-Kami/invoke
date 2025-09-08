@@ -112,7 +112,7 @@ export default function SessionCard({
           </div>
           
           <div className="flex items-center">
-            {typeof session.game === 'object' && session.game.images?.logo ? (
+            {typeof session.game === 'object' && session.game && session.game.images?.logo ? (
               <img 
                 src={session.game.images.logo} 
                 alt={`Logo ${session.game.name}`}
@@ -124,7 +124,7 @@ export default function SessionCard({
               </div>
             )}
             <span className="text-white font-medium text-sm">
-              {typeof session.game === 'object' ? session.game?.name || 'Unknown Game' : 'Unknown Game'}
+              {typeof session.game === 'object' && session.game ? session.game.name || 'Unknown Game' : 'Unknown Game'}
             </span>
           </div>
         </div>
