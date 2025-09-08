@@ -127,7 +127,7 @@ async function apiCall<T>(
       (headers as any)['Authorization'] = `Bearer ${authToken}`;
     }
 
-    console.log('API Debug - Making request to:', `${API_BASE_URL}${endpoint}`);
+    // API request to: ${API_BASE_URL}${endpoint}
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,

@@ -218,6 +218,28 @@ export default function CreateSessionPage() {
       
       if (response.success) {
         console.log('Session created successfully:', response.data);
+        
+        // Si une image a été sélectionnée, l'uploader
+        if (formData.image && response.data?._id) {
+          try {
+            const imageFormData = new FormData();
+            imageFormData.append('image', formData.image);
+            
+            const imageResponse = await fetch(`/api/v1/upload/immediate/session/${response.data._id}/banner`, {
+              method: 'POST',
+              body: imageFormData,
+            });
+            
+            if (imageResponse.ok) {
+              console.log('Session image uploaded successfully');
+            } else {
+              console.warn('Failed to upload session image');
+            }
+          } catch (imageError) {
+            console.warn('Error uploading session image:', imageError);
+          }
+        }
+        
         navigate('/sessions');
       } else {
         throw new Error(response.message || 'Failed to create session');

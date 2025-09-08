@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { X, Gamepad2, Save, Plus, Star } from 'lucide-react';
-import Button from '../ui/Button';
-import Badge from '../ui/Badge';
-
+import { X, Gamepad2, Star, Upload, Check } from 'lucide-react';
 import { Game } from '../../types';
 import { getGameImageUrl } from '../../lib/api';
 
-// Type pour le formulaire (sans les propriétés requises par la base de données)
-type GameForm = Omit<Game, '_id' | 'createdAt' | 'updatedAt'> & {
+interface GameForm extends Omit<Game, '_id' | 'createdAt' | 'updatedAt'> {
   _id?: string;
   createdAt?: string;
   updatedAt?: string;
-};
+}
 
 interface GameModalProps {
   isOpen: boolean;
@@ -41,20 +37,21 @@ const GameModal: React.FC<GameModalProps> = ({
     featured: false
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [selectedFiles, setSelectedFiles] = useState<{
-    logo?: File;
-    portrait?: File;
-    banner?: File;
-  }>({});
-  const [previewUrls, setPreviewUrls] = useState<{
-    logo?: string;
-    portrait?: string;
-    banner?: string;
-  }>({});
+  const [uploadingImages, setUploadingImages] = useState<{
+    logo: boolean;
+    portrait: boolean;
+    banner: boolean;
+  }>({
+    logo: false,
+    portrait: false,
+    banner: false
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isEditing = !!game?._id;
   const title = isEditing ? 'Modifier le jeu' : 'Ajouter un nouveau jeu';
 
+  // Initialiser les données du formulaire
   useEffect(() => {
     if (game) {
       setFormData({
@@ -69,20 +66,6 @@ const GameModal: React.FC<GameModalProps> = ({
         },
         featured: game.featured || false
       });
-      // Si c'est un jeu existant avec des images, on les affiche
-      if (game.images) {
-        const urls: any = {};
-        if (typeof game.images.logo === 'string' && game.images.logo) {
-          urls.logo = getGameImageUrl(game._id!, 'logo', game.images.logo);
-        }
-        if (typeof game.images.portrait === 'string' && game.images.portrait) {
-          urls.portrait = getGameImageUrl(game._id!, 'portrait', game.images.portrait);
-        }
-        if (typeof game.images.banner === 'string' && game.images.banner) {
-          urls.banner = getGameImageUrl(game._id!, 'banner', game.images.banner);
-        }
-        setPreviewUrls(urls);
-      }
     } else {
       setFormData({
         name: '',
@@ -97,50 +80,132 @@ const GameModal: React.FC<GameModalProps> = ({
         featured: false
       });
     }
-    setSelectedFiles({});
-    setPreviewUrls({});
     setErrors({});
   }, [game, isOpen]);
 
-  // Nettoyer les URLs temporaires à la fermeture
-  useEffect(() => {
-    return () => {
-      Object.values(previewUrls).forEach(url => {
-        if (url) {
-          URL.revokeObjectURL(url);
-        }
+  // Upload immédiat d'image
+  const handleImageUpload = async (file: File, imageType: 'logo' | 'portrait' | 'banner') => {
+    if (!game?._id) {
+      console.error('❌ Impossible d\'uploader : aucun ID de jeu');
+      return;
+    }
+
+    setUploadingImages(prev => ({ ...prev, [imageType]: true }));
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const response = await fetch(`/api/v1/upload/immediate/game/${game._id}/${imageType}`, {
+        method: 'POST',
+        body: formData,
       });
-    };
-  }, [previewUrls]);
+      
+      if (!response.ok) {
+        const error = await response.text();
+        console.error(`❌ Erreur upload ${imageType}:`, error);
+        throw new Error(`Erreur upload ${imageType}`);
+      }
+      
+      const result = await response.json();
+      
+      // Mettre à jour immédiatement le formulaire avec la nouvelle URL
+      setFormData(prev => ({
+        ...prev,
+        images: {
+          ...prev.images,
+          [imageType]: result.data.secure_url
+        }
+      }));
+      
+    } catch (error) {
+      console.error(`❌ Erreur upload ${imageType}:`, error);
+    } finally {
+      setUploadingImages(prev => ({ ...prev, [imageType]: false }));
+    }
+  };
 
-  const validateForm = (): boolean => {
+  // Gestion de la sélection de fichier
+  const handleFileSelect = (file: File, imageType: 'logo' | 'portrait' | 'banner') => {
+    if (!game?._id) {
+      console.error('❌ Impossible d\'uploader : aucun ID de jeu');
+      return;
+    }
+    
+    // Upload immédiat
+    handleImageUpload(file, imageType);
+  };
+
+  // Suppression d'image
+  const handleRemoveImage = async (imageType: 'logo' | 'portrait' | 'banner') => {
+    if (!game?._id) {
+      console.error('❌ Impossible de supprimer : aucun ID de jeu');
+      return;
+    }
+
+    try {
+      // Extraire le public_id de l'URL Cloudinary
+      const imageUrl = formData.images[imageType];
+      if (imageUrl && imageUrl.includes('cloudinary.com')) {
+        const publicId = extractPublicIdFromUrl(imageUrl);
+        if (publicId) {
+          const response = await fetch(`/api/v1/upload/immediate/${publicId}`, {
+            method: 'DELETE',
+          });
+          
+          if (response.ok) {
+            // Image supprimée avec succès
+          }
+        }
+      }
+      
+      // Mettre à jour le formulaire
+      setFormData(prev => ({
+        ...prev,
+        images: {
+          ...prev.images,
+          [imageType]: ''
+        }
+      }));
+      
+    } catch (error) {
+      console.error(`❌ Erreur suppression ${imageType}:`, error);
+    }
+  };
+
+  // Fonction utilitaire pour extraire le public_id d'une URL Cloudinary
+  const extractPublicIdFromUrl = (url: string): string | null => {
+    try {
+      const match = url.match(/\/upload\/v\d+\/(.+?)(?:\.[^.]+)?$/);
+      return match ? match[1] : null;
+    } catch (error) {
+      console.warn(`Impossible d'extraire le public_id de l'URL: ${url}`);
+      return null;
+    }
+  };
+
+  // Validation du formulaire
+  const validateForm = () => {
     const newErrors: Record<string, string> = {};
-
+    
     if (!formData.name.trim()) {
-      newErrors.name = 'Le nom du jeu est requis';
+      newErrors.name = 'Le nom est requis';
     }
-
     if (!formData.description.trim()) {
-      newErrors.description = 'La description du jeu est requise';
+      newErrors.description = 'La description est requise';
     }
-
     if (!formData.genre.trim()) {
-      newErrors.genre = 'Le genre du jeu est requis';
+      newErrors.genre = 'Le genre est requis';
     }
-
     if (!formData.system.trim()) {
-      newErrors.system = 'Le système de jeu est requis';
+      newErrors.system = 'Le système est requis';
     }
-
-
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-
-
+  // Soumission du formulaire
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -148,113 +213,11 @@ const GameModal: React.FC<GameModalProps> = ({
       return;
     }
 
-    // Protection contre les soumissions multiples
-    if (isSubmitting) {
-      console.log('🚫 Soumission déjà en cours...');
-      return;
-    }
-    
     setIsSubmitting(true);
-
+    
     try {
-      // Préparer les données pour l'envoi (sans les fichiers)
-      const gameDataToSend = { ...formData };
-      
-      // Nettoyer les objets File des données envoyées
-      if (gameDataToSend.images) {
-        Object.keys(gameDataToSend.images).forEach(key => {
-          const imageKey = key as keyof typeof gameDataToSend.images;
-          const imageValue = gameDataToSend.images[imageKey];
-          if (imageValue && typeof imageValue === 'object' && (imageValue as any).constructor?.name === 'File') {
-            delete gameDataToSend.images[imageKey];
-          }
-        });
-      }
-      
-      try {
-        // Détecter si c'est une création ou une modification
-        const isEditing = !!game?._id;
-        
-        // Nettoyer complètement le champ images avant l'envoi
-        const cleanGameData = { ...gameDataToSend };
-        if (cleanGameData.images) {
-          // Supprimer toutes les images (même les chaînes vides)
-          cleanGameData.images = {} as any;
-        }
-        
-        // Si c'est une modification, s'assurer que l'ID est présent
-        if (isEditing && game?._id) {
-          cleanGameData._id = game._id;
-        }
-        
-        const savedGame = await onSave(cleanGameData as Game);
-        
-        console.log('🔍 Debug onSave:', {
-          savedGame,
-          savedGameId: (savedGame as any)?._id,
-          gameDataToSend,
-          gameDataToSendId: gameDataToSend._id,
-          hasSelectedFiles: Object.keys(selectedFiles).length > 0
-        });
-        
-        // Si on a des fichiers sélectionnés, les uploader après création/modification
-        if (Object.keys(selectedFiles).length > 0) {
-          // Déterminer l'ID du jeu à utiliser pour l'upload
-          let gameIdForUpload;
-          let canUpload = false;
-          
-          if (isEditing && game?._id) {
-            // ÉDITION : Utiliser l'ID du jeu existant
-            gameIdForUpload = game._id;
-            canUpload = true;
-            console.log('🆔 Upload pour jeu EXISTANT (édition) avec ID:', gameIdForUpload);
-          } else if (game?._id) {
-            // CRÉATION : Utiliser l'ID du jeu existant (si disponible)
-            gameIdForUpload = game._id;
-            canUpload = true;
-            console.log('🆕 Upload pour NOUVEAU jeu avec ID existant:', gameIdForUpload);
-          } else {
-            console.log('❌ Impossible d\'uploader des images : aucun ID de jeu disponible');
-            console.log('💡 Les images ne seront pas uploadées');
-          }
-          
-          // Upload des images si possible
-          if (canUpload && gameIdForUpload) {
-            for (const [imageType, file] of Object.entries(selectedFiles)) {
-              if (file) {
-                try {
-                  const formData = new FormData();
-                  formData.append('image', file);
-                  
-                  // Route d'upload Cloudinary avec paramètres d'URL
-                  const uploadUrl = `/api/v1/upload/cloudinary/game/${gameIdForUpload}/${imageType}`;
-                  
-                  console.log('📤 Upload URL:', uploadUrl);
-                  console.log('📁 Paramètres:', { gameId: gameIdForUpload, imageType });
-                    
-                  const response = await fetch(uploadUrl, {
-                    method: 'POST',
-                    body: formData,
-                  });
-                  
-                  if (!response.ok) {
-                    console.error(`❌ Erreur upload ${imageType}:`, await response.text());
-                  } else {
-                    console.log(`✅ Upload ${imageType} réussi`);
-                  }
-                } catch (error) {
-                  console.error(`❌ Erreur upload ${imageType}:`, error);
-                }
-              }
-            }
-          }
-        }
-        
-        onClose();
-      } catch (error) {
-        console.error('❌ Erreur lors de la création du jeu:', error);
-        throw error; // Re-lancer l'erreur pour que handleSaveGame puisse la gérer
-      }
+      await onSave(formData as Game);
+      onClose();
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
     } finally {
@@ -262,169 +225,117 @@ const GameModal: React.FC<GameModalProps> = ({
     }
   };
 
+  // Gestion des changements d'input
   const handleInputChange = (field: keyof Game, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
-    // Effacer l'erreur du champ modifié
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
 
-  const handleFileSelect = (file: File, imageType: 'logo' | 'portrait' | 'banner') => {
-    setSelectedFiles(prev => ({ ...prev, [imageType]: file }));
-    
-    // Créer une URL temporaire pour la prévisualisation
-    const url = URL.createObjectURL(file);
-    setPreviewUrls(prev => ({ ...prev, [imageType]: url }));
-    
-    // Mettre à jour le formulaire avec le fichier
-    setFormData(prev => ({ 
-      ...prev, 
-      images: { ...prev.images, [imageType]: file }
-    }));
-    
-    // Effacer l'erreur d'images
-    if (errors.images) {
-      setErrors(prev => ({ ...prev, images: '' }));
-    }
-  };
-
-  const handleRemoveImage = (imageType: 'logo' | 'portrait' | 'banner') => {
-    setSelectedFiles(prev => {
-      const newFiles = { ...prev };
-      delete newFiles[imageType];
-      return newFiles;
-    });
-    
-    setPreviewUrls(prev => {
-      const newUrls = { ...prev };
-      delete newUrls[imageType];
-      return newUrls;
-    });
-    
-    setFormData(prev => ({ 
-      ...prev, 
-      images: { ...prev.images, [imageType]: '' }
-    }));
-  };
-
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-900 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-slate-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        {/* En-tête */}
         <div className="flex items-center justify-between p-6 border-b border-slate-700">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
-              <Gamepad2 className="w-5 h-5 text-white" />
-            </div>
-            <h2 className="text-xl font-cinzel font-semibold text-white">{title}</h2>
-          </div>
+          <h2 className="text-xl font-cinzel font-semibold text-white">
+            {title}
+          </h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-slate-800"
-            disabled={loading}
+            className="text-slate-400 hover:text-white transition-colors"
+            disabled={loading || isSubmitting}
           >
-            <X className="w-5 h-5" />
+            <X className="w-6 h-6" />
           </button>
         </div>
 
-        {/* Form */}
+        {/* Formulaire */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Nom du jeu */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-slate-300 mb-2">
               Nom du jeu *
             </label>
             <input
               type="text"
-              id="name"
               value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
-              className={`w-full px-4 py-3 bg-slate-800 border rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors ${
-                errors.name ? 'border-red-500' : 'border-slate-600 focus:border-purple-500'
-              }`}
-              placeholder="Ex: Donjons & Dragons"
-              disabled={loading}
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder="Nom du jeu"
+              disabled={loading || isSubmitting}
             />
             {errors.name && (
               <p className="mt-1 text-sm text-red-400">{errors.name}</p>
             )}
           </div>
 
-          {/* Description du jeu */}
+          {/* Description */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-slate-300 mb-2">
               Description *
             </label>
             <textarea
-              id="description"
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
               rows={3}
-              className={`w-full px-4 py-3 bg-slate-800 border rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors resize-none ${
-                errors.description ? 'border-red-500' : 'border-slate-600 focus:border-purple-500'
-              }`}
-              placeholder="Description du jeu, de son univers et de ses mécaniques..."
-              disabled={loading}
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder="Description du jeu"
+              disabled={loading || isSubmitting}
             />
             {errors.description && (
               <p className="mt-1 text-sm text-red-400">{errors.description}</p>
             )}
           </div>
 
-          {/* Genre du jeu */}
-          <div>
-            <label htmlFor="genre" className="block text-sm font-medium text-slate-300 mb-2">
-              Genre *
-            </label>
-            <input
-              type="text"
-              id="genre"
-              value={formData.genre}
-              onChange={(e) => handleInputChange('genre', e.target.value)}
-              className={`w-full px-4 py-3 bg-slate-800 border rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors ${
-                errors.genre ? 'border-red-500' : 'border-slate-600 focus:border-purple-500'
-              }`}
-              placeholder="Ex: Fantasy, Science-Fiction, Horreur..."
-              disabled={loading}
-            />
-            {errors.genre && (
-              <p className="mt-1 text-sm text-red-400">{errors.genre}</p>
-            )}
-          </div>
+          {/* Genre et Système */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Genre *
+              </label>
+              <input
+                type="text"
+                value={formData.genre}
+                onChange={(e) => handleInputChange('genre', e.target.value)}
+                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Genre"
+                disabled={loading || isSubmitting}
+              />
+              {errors.genre && (
+                <p className="mt-1 text-sm text-red-400">{errors.genre}</p>
+              )}
+            </div>
 
-          {/* Système de jeu */}
-          <div>
-            <label htmlFor="system" className="block text-sm font-medium text-slate-300 mb-2">
-              Système de jeu *
-            </label>
-            <input
-              type="text"
-              id="system"
-              value={formData.system}
-              onChange={(e) => handleInputChange('system', e.target.value)}
-              className={`w-full px-4 py-3 bg-slate-800 border rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors ${
-                errors.system ? 'border-red-500' : 'border-slate-600 focus:border-purple-500'
-              }`}
-              placeholder="Ex: D&D 5e, Pathfinder 2e"
-              disabled={loading}
-            />
-            {errors.system && (
-              <p className="mt-1 text-sm text-red-400">{errors.system}</p>
-            )}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Système *
+              </label>
+              <input
+                type="text"
+                value={formData.system}
+                onChange={(e) => handleInputChange('system', e.target.value)}
+                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Système"
+                disabled={loading || isSubmitting}
+              />
+              {errors.system && (
+                <p className="mt-1 text-sm text-red-400">{errors.system}</p>
+              )}
+            </div>
           </div>
 
           {/* Images du jeu */}
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              Images du jeu (optionnelles)
+              Images du jeu
             </label>
             
             <div className="space-y-4">
-              {/* Logo du jeu */}
+              {/* Logo */}
               <div>
                 <label className="block text-sm font-medium text-slate-400 mb-2">
                   Logo du jeu
@@ -436,31 +347,33 @@ const GameModal: React.FC<GameModalProps> = ({
                     accept="image/*"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
-                      if (file) {
-                        handleFileSelect(file, 'logo');
-                      }
+                      if (file) handleFileSelect(file, 'logo');
                     }}
                     className="hidden"
-                    disabled={loading}
+                    disabled={loading || isSubmitting || uploadingImages.logo}
                   />
                   
-                  {!previewUrls.logo && (
+                  {!formData.images.logo ? (
                     <label
                       htmlFor="logo-upload"
                       className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer bg-slate-800/30 hover:bg-slate-800/50 hover:border-slate-500 transition-colors"
                     >
                       <div className="flex flex-col items-center justify-center">
-                        <Gamepad2 className="w-6 h-6 mb-1 text-slate-400" />
-                        <p className="text-xs text-slate-400">Logo du jeu</p>
+                        {uploadingImages.logo ? (
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500"></div>
+                        ) : (
+                          <Gamepad2 className="w-6 h-6 mb-1 text-slate-400" />
+                        )}
+                        <p className="text-xs text-slate-400">
+                          {uploadingImages.logo ? 'Upload...' : 'Logo du jeu'}
+                        </p>
                       </div>
                     </label>
-                  )}
-                  
-                  {previewUrls.logo && (
+                  ) : (
                     <div className="relative">
                       <div className="relative w-full h-24 rounded-lg overflow-hidden border border-slate-600">
                         <img
-                          src={previewUrls.logo}
+                          src={formData.images.logo}
                           alt="Logo du jeu"
                           className="w-full h-full object-cover"
                         />
@@ -470,6 +383,7 @@ const GameModal: React.FC<GameModalProps> = ({
                         onClick={() => handleRemoveImage('logo')}
                         className="absolute top-1 right-1 p-1 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                         title="Supprimer le logo"
+                        disabled={loading || isSubmitting}
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -478,7 +392,7 @@ const GameModal: React.FC<GameModalProps> = ({
                 </div>
               </div>
 
-              {/* Portrait du jeu */}
+              {/* Portrait */}
               <div>
                 <label className="block text-sm font-medium text-slate-400 mb-2">
                   Portrait du jeu
@@ -490,31 +404,33 @@ const GameModal: React.FC<GameModalProps> = ({
                     accept="image/*"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
-                      if (file) {
-                        handleFileSelect(file, 'portrait');
-                      }
+                      if (file) handleFileSelect(file, 'portrait');
                     }}
                     className="hidden"
-                    disabled={loading}
+                    disabled={loading || isSubmitting || uploadingImages.portrait}
                   />
                   
-                  {!previewUrls.portrait && (
+                  {!formData.images.portrait ? (
                     <label
                       htmlFor="portrait-upload"
                       className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer bg-slate-800/30 hover:bg-slate-800/50 hover:border-slate-500 transition-colors"
                     >
                       <div className="flex flex-col items-center justify-center">
-                        <Gamepad2 className="w-6 h-6 mb-1 text-slate-400" />
-                        <p className="text-xs text-slate-400">Portrait du jeu</p>
+                        {uploadingImages.portrait ? (
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500"></div>
+                        ) : (
+                          <Gamepad2 className="w-6 h-6 mb-1 text-slate-400" />
+                        )}
+                        <p className="text-xs text-slate-400">
+                          {uploadingImages.portrait ? 'Upload...' : 'Portrait du jeu'}
+                        </p>
                       </div>
                     </label>
-                  )}
-                  
-                  {previewUrls.portrait && (
+                  ) : (
                     <div className="relative">
                       <div className="relative w-full h-24 rounded-lg overflow-hidden border border-slate-600">
                         <img
-                          src={previewUrls.portrait}
+                          src={formData.images.portrait}
                           alt="Portrait du jeu"
                           className="w-full h-full object-cover"
                         />
@@ -524,6 +440,7 @@ const GameModal: React.FC<GameModalProps> = ({
                         onClick={() => handleRemoveImage('portrait')}
                         className="absolute top-1 right-1 p-1 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                         title="Supprimer le portrait"
+                        disabled={loading || isSubmitting}
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -532,7 +449,7 @@ const GameModal: React.FC<GameModalProps> = ({
                 </div>
               </div>
 
-              {/* Bannière du jeu */}
+              {/* Banner */}
               <div>
                 <label className="block text-sm font-medium text-slate-400 mb-2">
                   Bannière du jeu
@@ -544,31 +461,33 @@ const GameModal: React.FC<GameModalProps> = ({
                     accept="image/*"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
-                      if (file) {
-                        handleFileSelect(file, 'banner');
-                      }
+                      if (file) handleFileSelect(file, 'banner');
                     }}
                     className="hidden"
-                    disabled={loading}
+                    disabled={loading || isSubmitting || uploadingImages.banner}
                   />
                   
-                  {!previewUrls.banner && (
+                  {!formData.images.banner ? (
                     <label
                       htmlFor="banner-upload"
                       className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer bg-slate-800/30 hover:bg-slate-800/50 hover:border-slate-500 transition-colors"
                     >
                       <div className="flex flex-col items-center justify-center">
-                        <Gamepad2 className="w-6 h-6 mb-1 text-slate-400" />
-                        <p className="text-xs text-slate-400">Bannière du jeu</p>
+                        {uploadingImages.banner ? (
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500"></div>
+                        ) : (
+                          <Gamepad2 className="w-6 h-6 mb-1 text-slate-400" />
+                        )}
+                        <p className="text-xs text-slate-400">
+                          {uploadingImages.banner ? 'Upload...' : 'Bannière du jeu'}
+                        </p>
                       </div>
                     </label>
-                  )}
-                  
-                  {previewUrls.banner && (
+                  ) : (
                     <div className="relative">
                       <div className="relative w-full h-24 rounded-lg overflow-hidden border border-slate-600">
                         <img
-                          src={previewUrls.banner}
+                          src={formData.images.banner}
                           alt="Bannière du jeu"
                           className="w-full h-full object-cover"
                         />
@@ -578,6 +497,7 @@ const GameModal: React.FC<GameModalProps> = ({
                         onClick={() => handleRemoveImage('banner')}
                         className="absolute top-1 right-1 p-1 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                         title="Supprimer la bannière"
+                        disabled={loading || isSubmitting}
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -586,10 +506,6 @@ const GameModal: React.FC<GameModalProps> = ({
                 </div>
               </div>
             </div>
-            
-            {errors.images && (
-              <p className="mt-1 text-sm text-red-400">{errors.images}</p>
-            )}
           </div>
 
           {/* Mis en avant */}
@@ -599,71 +515,42 @@ const GameModal: React.FC<GameModalProps> = ({
               id="featured"
               checked={formData.featured}
               onChange={(e) => handleInputChange('featured', e.target.checked)}
-              className="w-4 h-4 text-purple-600 bg-slate-800 border-slate-600 rounded focus:ring-purple-500 focus:ring-2"
-              disabled={loading}
+              className="w-4 h-4 text-purple-600 bg-slate-700 border-slate-600 rounded focus:ring-purple-500 focus:ring-2"
+              disabled={loading || isSubmitting}
             />
-            <label htmlFor="featured" className="text-sm font-medium text-slate-300">
-              Mettre en avant
+            <label htmlFor="featured" className="flex items-center space-x-2 text-slate-300">
+              <Star className="w-4 h-4" />
+              <span>Mettre en avant</span>
             </label>
-            {formData.featured && (
-              <Badge variant="success" className="ml-2">
-                <Star className="w-3 h-3 mr-1" />
-                Mis en avant
-              </Badge>
-            )}
           </div>
 
-          {/* Informations supplémentaires (en lecture seule si édition) */}
-          {isEditing && game && (
-            <div className="bg-slate-800/30 rounded-lg p-4 space-y-3">
-              <h4 className="text-sm font-medium text-slate-300">Informations</h4>
-              
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-slate-400">Sessions:</span>
-                  <span className="text-white ml-2">0</span>
-                </div>
-                
-                <div>
-                  <span className="text-slate-400">Créé le:</span>
-                  <span className="text-white ml-2">
-                    {game.createdAt ? new Date(game.createdAt).toLocaleDateString('fr-FR') : 'N/A'}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex space-x-3 pt-4">
-            <Button
+          {/* Boutons */}
+          <div className="flex justify-end space-x-3 pt-4 border-t border-slate-700">
+            <button
               type="button"
-              variant="secondary"
               onClick={onClose}
-              disabled={loading}
-              className="flex-1"
+              className="px-4 py-2 text-slate-300 hover:text-white transition-colors"
+              disabled={loading || isSubmitting}
             >
               Annuler
-            </Button>
-            
-            <Button
+            </button>
+            <button
               type="submit"
-              variant="primary"
-              disabled={loading}
-              className="flex-1"
+              disabled={loading || isSubmitting}
+              className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
             >
-              {loading ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              {isSubmitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                   <span>Sauvegarde...</span>
-                </div>
+                </>
               ) : (
-                <div className="flex items-center space-x-2">
-                  {isEditing ? <Save className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                  <span>{isEditing ? 'Modifier' : 'Ajouter'}</span>
-                </div>
+                <>
+                  <Check className="w-4 h-4" />
+                  <span>Sauvegarder</span>
+                </>
               )}
-            </Button>
+            </button>
           </div>
         </form>
       </div>

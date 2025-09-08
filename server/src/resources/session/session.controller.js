@@ -121,7 +121,7 @@ const sessionController = {
             const skip = (parseInt(page) - 1) * parseInt(limit);
             const sessions = await Session.find(filter)
                 .populate('dm', 'firstName lastName avatar')
-                .populate('game', 'name system genre')
+                .populate('game', 'name system genre images')
                 .populate('players', 'firstName lastName avatar')
                 .sort(sortOption)
                 .skip(skip)
@@ -142,7 +142,7 @@ const sessionController = {
         try {
             const session = await Session.findById(req.params.id)
                 .populate('dm', 'firstName lastName avatar')
-                .populate('game', 'name system genre')
+                .populate('game', 'name system genre images')
                 .populate('players', 'firstName lastName avatar');
                 
             if (!session) {
@@ -228,7 +228,7 @@ const sessionController = {
     getFeaturedSessions: async (req, res) => {
         try {
             const sessions = await Session.find({ featured: true, status: 'open' })
-                .populate('game', 'name system')
+                .populate('game', 'name system images')
                 .populate('dm', 'firstName lastName avatar')
                 .sort({ createdAt: -1 })
                 .limit(6);

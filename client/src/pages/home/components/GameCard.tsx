@@ -21,12 +21,7 @@ export default function GameCard({
   showFavoriteButton = true,
   className = ""
 }: GameCardProps) {
-  // Debug: Log re-renders
-  console.log(`🔄 GameCard re-render pour ${game.name}:`, {
-    gameId: game._id,
-    images: game.images,
-    timestamp: new Date().toISOString()
-  });
+  // GameCard re-render
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -66,15 +61,9 @@ export default function GameCard({
                      src={portraitUrl}
                      alt={`Portrait ${game.name}`}
                      className="absolute inset-0 w-full h-full object-cover"
-                     onLoad={() => console.log('✅ Image portrait chargée pour', game.name, ':', portraitUrl)}
+                     onLoad={() => {}}
                      onError={(e) => {
-                       console.error('❌ Erreur chargement image pour', game.name, ':', e);
-                       console.error('🔍 Détails erreur portrait:', {
-                         gameId: game._id,
-                         portraitUrl,
-                         gameImages: game.images,
-                         error: e
-                       });
+                       console.error('Erreur chargement image pour', game.name, ':', e);
                      }}
                    />
                  )}
@@ -91,15 +80,9 @@ export default function GameCard({
                src={logoUrl}
                alt={`Logo ${game.name}`}
                className="w-full h-full object-contain"
-               onLoad={() => console.log('✅ Logo chargé pour', game.name, ':', logoUrl)}
+               onLoad={() => {}}
                onError={(e) => {
-                 console.error('❌ Erreur chargement logo pour', game.name, ':', e);
-                 console.error('🔍 Détails erreur logo:', {
-                   gameId: game._id,
-                   logoUrl,
-                   gameImages: game.images,
-                   error: e
-                 });
+                 console.error('Erreur chargement logo pour', game.name, ':', e);
                }}
              />
            </div>

@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import logger from '../config/logger.config.js';
-import { uploadToCloudinary, generatePublicId } from '../config/cloudinary.config.js';
+import { uploadToCloudinary, generatePublicId, deleteFromCloudinary } from '../config/cloudinary.config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -189,7 +189,7 @@ export const userAvatarUpload = multer({
     limits: {
         fileSize: MAX_FILE_SIZE
     }
-}).single('avatar');
+}).single('image');
 
 export const sessionBannerUpload = multer({
     storage: sessionBannerStorage,
@@ -299,6 +299,36 @@ export const gameImageUploadCloudinary = multer({
     }
 }).single('image');
 
+// Middleware d'upload d'image de session avec Cloudinary
+export const sessionImageUploadCloudinary = multer({
+    storage: cloudinaryStorage,
+    fileFilter: (req, file, cb) => {
+        if (ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error(`Type de fichier non autorisé. Types acceptés: ${ALLOWED_IMAGE_TYPES.map(type => type.split('/')[1]).join(', ')}`), false);
+        }
+    },
+    limits: {
+        fileSize: MAX_FILE_SIZE
+    }
+}).single('image');
+
+// Middleware d'upload d'image de campagne avec Cloudinary
+export const campaignImageUploadCloudinary = multer({
+    storage: cloudinaryStorage,
+    fileFilter: (req, file, cb) => {
+        if (ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error(`Type de fichier non autorisé. Types acceptés: ${ALLOWED_IMAGE_TYPES.map(type => type.split('/')[1]).join(', ')}`), false);
+        }
+    },
+    limits: {
+        fileSize: MAX_FILE_SIZE
+    }
+}).single('image');
+
 // Fonction utilitaire pour uploader vers Cloudinary
 export const uploadToCloudinaryMiddleware = async (req, res, next) => {
     try {
@@ -314,6 +344,7 @@ export const uploadToCloudinaryMiddleware = async (req, res, next) => {
             type = 'game';
             id = req.params.gameId;
             imageType = req.params.imageType;
+            console.log('🎮 Route de jeu détectée:', { type, id, imageType });
         } else if (req.params.id) {
             // Autres routes : /:type/:id
             type = req.params.type || 'user';
@@ -325,14 +356,22 @@ export const uploadToCloudinaryMiddleware = async (req, res, next) => {
         
         const publicId = generatePublicId(type, id, imageType);
         
+        // Supprimer l'ancienne image si elle existe
+        try {
+            await deleteFromCloudinary(publicId);
+        } catch (error) {
+            // L'image n'existe peut-être pas, ce n'est pas grave
+        }
         const result = await uploadToCloudinary(req.file, {
-            folder: `invoke/${type}`,
+            folder: 'invoke',
             public_id: publicId,
             transformation: {
                 quality: 'auto',
                 fetch_format: 'auto'
             }
         });
+
+        // Upload réussi
 
         // Ajouter les informations Cloudinary à la requête
         req.cloudinaryResult = {
@@ -346,6 +385,7 @@ export const uploadToCloudinaryMiddleware = async (req, res, next) => {
 
         next();
     } catch (error) {
+        console.error('❌ Erreur upload Cloudinary middleware:', error);
         logger.error('Erreur upload Cloudinary middleware:', error);
         return res.status(500).json({
             success: false,
