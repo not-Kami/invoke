@@ -69,13 +69,12 @@ export const getCloudinaryUrl = (publicId, options = {}) => {
     return cloudinary.url(publicId, options);
 };
 
-// Fonction pour générer un public_id unique basé sur le type et l'ID
+// Fonction pour générer un public_id fixe basé sur le type et l'ID
 export const generatePublicId = (type, id, imageType = null) => {
-    const timestamp = Date.now();
     if (imageType) {
-        return `invoke/${type}/${id}/${imageType}_${timestamp}`;
+        return `${type}/${id}/${imageType}`;
     }
-    return `invoke/${type}/${id}_${timestamp}`;
+    return `${type}/${id}`;
 };
 
 export default cloudinary;

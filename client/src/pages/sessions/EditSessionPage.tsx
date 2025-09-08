@@ -30,6 +30,8 @@ export default function EditSessionPage() {
   const [selectedPlayers, setSelectedPlayers] = useState<User[]>([]);
   const [availableGames, setAvailableGames] = useState<Game[]>([]);
   const [availablePlayers, setAvailablePlayers] = useState<User[]>([]);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   
   // États pour la recherche de joueurs
@@ -99,7 +101,7 @@ export default function EditSessionPage() {
 
         // Charger l'image si elle existe
         if (session.image) {
-
+          setImagePreview(session.image);
         }
       } else {
         setError(response.message || 'Failed to fetch session');
@@ -110,6 +112,47 @@ export default function EditSessionPage() {
     } finally {
       setFetching(false);
     }
+  };
+
+  const handleImageUpload = async (file: File) => {
+    if (!id) return;
+    
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const response = await fetch(`/api/v1/upload/immediate/session/${id}/banner`, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setImagePreview(result.data.secure_url);
+          console.log('Image uploaded successfully');
+        }
+      } else {
+        console.error('Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      handleImageUpload(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
+    // Optionnel: supprimer l'image du serveur
   };
 
   // Générer les fuseaux horaires
@@ -262,6 +305,7 @@ export default function EditSessionPage() {
       
       if (response.success) {
         console.log('Session updated successfully:', response.data);
+        
         navigate(`/sessions/${id}`);
       } else {
         throw new Error(response.message || 'Failed to update session');
@@ -462,6 +506,56 @@ export default function EditSessionPage() {
                 <label htmlFor="isOneShot" className="text-sm text-white">
                   This is a one-shot session
                 </label>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Image de la session */}
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <CardHeader>
+              <h2 className="text-xl font-semibold text-white">Session Banner</h2>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {!imagePreview ? (
+                  <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center">
+                    <input
+                      type="file"
+                      id="image-upload"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                      disabled={uploadingImage}
+                    />
+                    <label htmlFor="image-upload" className="cursor-pointer">
+                      <div className="flex flex-col items-center space-y-2">
+                        <div className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center">
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                        </div>
+                        <p className="text-white text-sm">
+                          {uploadingImage ? 'Uploading...' : 'Click to upload banner image'}
+                        </p>
+                      </div>
+                    </label>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <img
+                      src={imagePreview}
+                      alt="Session banner preview"
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      onClick={removeImage}
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

@@ -93,9 +93,20 @@ export default function DMDashboard({
                 {mySessions.map((session) => (
                   <div key={session._id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
                     <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-blue-500 rounded-lg flex items-center justify-center">
-                        <Gamepad2 className="h-6 w-6 text-white" />
-                      </div>
+                      {/* Image de session ou icône par défaut */}
+                      {session.image ? (
+                        <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                          <img 
+                            src={session.image} 
+                            alt={`Bannière ${session.title}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-blue-500 rounded-lg flex items-center justify-center">
+                          <Gamepad2 className="h-6 w-6 text-white" />
+                        </div>
+                      )}
                       <div>
                         <h3 className="font-semibold text-white">{session.title}</h3>
                         <p className="text-sm text-gray-300">{session.game?.name || 'Unknown Game'}</p>

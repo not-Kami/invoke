@@ -1,7 +1,7 @@
 
 import { Link, useNavigate } from 'react-router-dom';
 import { Calendar, ArrowRight } from 'lucide-react';
-import SessionCard from '../components/SessionCard';
+import SessionCard from '../../../components/sessions/SessionCard';
 import { Session } from '../../../types';
 
 interface FeaturedSessionsSectionProps {

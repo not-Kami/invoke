@@ -13,8 +13,9 @@ import JoinSessionModal from '../../components/sessions/JoinSessionModal';
 import { useJoinSession } from '../../hooks/useJoinSession';
 
 export default function SessionsPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { joinSession } = useJoinSession();
+  
   const [sessions, setSessions] = useState<any[]>([]);
   const [filteredSessions, setFilteredSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -147,6 +148,11 @@ export default function SessionsPage() {
     return !session.players.includes(user._id);
   };
 
+  const handleSessionClick = (session: any) => {
+    // Navigation vers la page de détail de la session
+    window.location.href = `/sessions/${session._id}`;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-64">
@@ -263,83 +269,103 @@ export default function SessionsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredSessions?.map((session) => (
-              <Card key={session._id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 mb-1">
-                        {session.title}
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-2">
-                        {session.game?.name || 'Unknown Game'}
-                      </p>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant={getStatusBadgeVariant(session.status)} size="sm">
-                          {getStatusDisplayName(session.status)}
-                        </Badge>
-                        <Badge variant="info" size="sm">
-                          {session.sessionType || 'Unknown'}
-                        </Badge>
-                        {session.isOneShot && (
-                          <Badge variant="default" size="sm">
-                            One-shot
-                          </Badge>
-                        )}
+              <Card key={session._id} className="hover:shadow-md transition-shadow overflow-hidden">
+                {/* Image de bannière en haut */}
+                <div className="relative h-48 w-full">
+                  {session.image ? (
+                    <img 
+                      src={session.image} 
+                      alt={`Bannière ${session.title}`}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center">
+                      <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-xl">
+                        <Calendar className="h-8 w-8 text-white" />
                       </div>
+                    </div>
+                  )}
+                  
+                  {/* Overlay fondu pour la lisibilité */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
+                  
+                  {/* Titre et badges superposés sur l'image */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+                    <h3 className="font-bold text-white text-xl mb-2">
+                      {session.title}
+                    </h3>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant={getStatusBadgeVariant(session.status)} size="sm">
+                        {getStatusDisplayName(session.status)}
+                      </Badge>
+                      <Badge variant="info" size="sm">
+                        {session.sessionType || 'Unknown'}
+                      </Badge>
+                      {session.isOneShot && (
+                        <Badge variant="default" size="sm">
+                          One-shot
+                        </Badge>
+                      )}
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-3">
-                    {session.description || 'No description available'}
-                  </p>
-                  
-                  <div className="space-y-3 text-sm">
-                    <div className="flex items-center text-gray-600">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      {session.date ? formatDateShort(session.date) : 'Date not set'}
+                </div>
+                <CardContent className="p-4 bg-black">
+                  {/* DM et jeu */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center">
+                      <Avatar
+                        firstName={session.dm?.firstName || 'Unknown'}
+                        lastName={session.dm?.lastName || 'DM'}
+                        src={session.dm?.avatar}
+                        size="sm"
+                      />
+                      <div className="ml-3">
+                        <p className="text-white font-semibold text-sm">
+                          {session.dm?.firstName || 'Unknown'} {session.dm?.lastName || 'DM'}
+                        </p>
+                        <p className="text-xs text-gray-300">★ 4.9</p>
+                      </div>
                     </div>
                     
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <Avatar
-                          firstName={session.dm?.firstName || 'Unknown'}
-                          lastName={session.dm?.lastName || 'DM'}
-                          src={session.dm?.avatar}
-                          size="sm"
+                    <div className="flex items-center">
+                      {typeof session.game === 'object' && session.game.images?.logo ? (
+                        <img 
+                          src={session.game.images.logo} 
+                          alt={`Logo ${session.game.name}`}
+                          className="w-8 h-8 rounded mr-2 object-contain"
                         />
-                        <div className="ml-2">
-                          <p className="text-gray-900 font-medium">
-                            {session.dm?.firstName || 'Unknown'} {session.dm?.lastName || 'DM'}
-                          </p>
-                          <p className="text-xs text-gray-500">Dungeon Master</p>
+                      ) : (
+                        <div className="w-8 h-8 bg-gray-400 rounded flex items-center justify-center mr-2">
+                          <span className="text-white font-bold text-xs">?</span>
                         </div>
-                      </div>
-                      
-                      <div className="flex items-center text-gray-500">
-                        <Users className="h-4 w-4 mr-1" />
-                        {session.players?.length || 0}/6
-                      </div>
+                      )}
+                      <span className="text-white font-medium text-sm">
+                        {session.game?.name || 'Unknown Game'}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
-                    <Link to={`/sessions/${session._id}`}>
-                      <Button variant="outline" size="sm" className="w-full">
-                        View Details
-                      </Button>
-                    </Link>
-                    
+                  {/* Description */}
+                  <p className="text-sm text-gray-300 mb-4 line-clamp-3">
+                    {session.description || 'No description available'}
+                  </p>
+
+                  {/* Bouton d'action principal */}
+                  <div className="mb-4">
                     {session.status === 'finished' || session.status === 'cancelled' ? (
-                      <div className="text-center">
-                        <p className="text-xs text-gray-500">
+                      <div className="text-center py-3">
+                        <p className="text-sm text-gray-500">
                           {session.status === 'finished' ? 'Session finished' : 'Session cancelled'}
                         </p>
+                      </div>
+                    ) : authLoading ? (
+                      <div className="text-center py-3">
+                        <p className="text-sm text-gray-400">Loading...</p>
                       </div>
                     ) : !user ? (
                       <Button
                         onClick={() => window.location.href = '/login'}
-                        size="sm"
+                        size="lg"
                         variant="outline"
                         className="w-full border-gray-600 text-gray-300 hover:text-white hover:border-gray-500"
                       >
@@ -348,24 +374,39 @@ export default function SessionsPage() {
                     ) : canJoinSession(session) ? (
                       <Button
                         onClick={() => handleJoinSession(session)}
-                        size="sm"
-                        className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white border-0"
+                        size="lg"
+                        className="w-full bg-purple-600 hover:bg-purple-700 text-white border-0"
                       >
                         <UserPlus className="h-4 w-4 mr-2" />
                         Join Session
                       </Button>
                     ) : (
-                      <div className="text-center">
-                        <p className="text-xs text-gray-500">
-                          {session.dm === user._id
-                            ? 'You are the DM'
-                            : session.players?.includes(user._id)
-                            ? 'Already joined'
-                            : 'Cannot join'
-                          }
-                        </p>
-                      </div>
+                      <Button
+                        onClick={() => window.location.href = `/sessions/${session._id}`}
+                        size="lg"
+                        className="w-full bg-purple-600 hover:bg-purple-700 text-white border-0"
+                      >
+                        View Details
+                      </Button>
                     )}
+                  </div>
+
+                  {/* Informations de session */}
+                  <div className="flex items-center justify-between text-sm text-gray-400">
+                    <div className="flex items-center">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      <span>{session.date ? formatDateShort(session.date) : 'Date not set'}</span>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <Users className="h-4 w-4 mr-2" />
+                      <span>{session.players?.length || 0}/6</span>
+                      {session.players && session.players.length < 6 && (
+                        <span className="ml-1 text-xs">
+                          (only {6 - session.players.length} spots available)
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>

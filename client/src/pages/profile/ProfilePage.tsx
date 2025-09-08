@@ -199,30 +199,43 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
   };
 
   const handleAvatarUpload = async () => {
-    if (!selectedImage) return;
+    if (!selectedImage || !user?._id) return;
 
     setAvatarLoading(true);
 
     try {
-      // const response = await usersApi.uploadAvatar(user._id, selectedImage);
+      const formData = new FormData();
+      formData.append('image', selectedImage);
       
-      // if (response.success && response.data) {
-      //   // Mettre à jour l'utilisateur local avec le nouvel avatar
-      //   const updatedUser = { ...user, avatar: response.data!.avatar };
+      const response = await fetch(`/api/v1/upload/immediate/user/${user._id}/avatar`, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
         
-      //   // Mettre à jour l'utilisateur dans le contexte d'auth
-      //   await updateUser(updatedUser);
-        
-      //   // Mettre à jour le profil local
-      //   setProfileData(prev => ({ ...prev, avatar: response.data!.avatar }));
-        
-      //   success('Avatar Updated', 'Your profile picture has been updated successfully!');
-        
-      //   // Réinitialiser l'image sélectionnée
-      //   setSelectedImage(null);
-      // } else {
-      //   error('Upload Error', response.message || 'Unknown error during upload');
-      // }
+        if (result.success && result.data) {
+          // Mettre à jour l'utilisateur local avec le nouvel avatar
+          const updatedUser = { ...user, avatar: result.data.secure_url };
+          
+          // Mettre à jour l'utilisateur dans le contexte d'auth
+          await updateUser(updatedUser);
+          
+          // Mettre à jour le profil local
+          setProfileData(prev => ({ ...prev, avatar: result.data.secure_url }));
+          
+          success('Avatar Updated', 'Your profile picture has been updated successfully!');
+          
+          // Réinitialiser l'image sélectionnée
+          setSelectedImage(null);
+        } else {
+          error('Upload Error', result.message || 'Unknown error during upload');
+        }
+      } else {
+        const errorData = await response.json();
+        error('Upload Error', errorData.message || 'Error uploading avatar');
+      }
     } catch (err) {
       console.error('Error uploading avatar:', err);
       error('Upload Error', 'Error uploading avatar. Please try again.');
