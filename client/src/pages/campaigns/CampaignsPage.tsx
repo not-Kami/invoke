@@ -38,7 +38,6 @@ export default function CampaignsPage() {
           setFilteredCampaigns(data.data || []);
         }
       } catch (error) {
-        console.error('Error fetching campaigns:', error);
         setCampaigns([]);
         setFilteredCampaigns([]);
       } finally {

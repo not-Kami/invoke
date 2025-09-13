@@ -40,7 +40,6 @@ export default function SignupPage() {
       // Succès → redirection
       navigate('/');
     } catch (error: any) {
-      console.error('Signup error:', error);
     }
   };
 

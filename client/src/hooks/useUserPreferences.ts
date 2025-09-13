@@ -42,7 +42,6 @@ export const useUserPreferences = () => {
           setPreferences(parsed);
         }
       } catch (error) {
-        console.error('Error loading user preferences:', error);
       } finally {
         setIsLoading(false);
       }
@@ -65,7 +64,6 @@ export const useUserPreferences = () => {
       
       return true;
     } catch (error) {
-      console.error('Error saving user preferences:', error);
       return false;
     }
   };
@@ -101,7 +99,6 @@ export const useUserPreferences = () => {
       setPreferences(defaultPreferences);
       return true;
     } catch (error) {
-      console.error('Error resetting preferences:', error);
       return false;
     }
   };

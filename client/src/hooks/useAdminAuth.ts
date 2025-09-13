@@ -9,18 +9,15 @@ export const useAdminAuth = () => {
   useEffect(() => {
     if (!loading) {
       if (!user) {
-        console.log('useAdminAuth: No user, redirecting to login');
         navigate('/login', { replace: true });
         return;
       }
 
       if (user.role !== 'admin') {
-        console.log('useAdminAuth: User is not admin, redirecting to home');
         navigate('/', { replace: true });
         return;
       }
 
-      console.log('useAdminAuth: User is admin, access granted');
     }
   }, [user, loading, navigate]);
 

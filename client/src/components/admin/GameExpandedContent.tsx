@@ -1,6 +1,7 @@
 
 import { Gamepad2, Calendar, Star, Users, BookOpen, Tag, Info } from 'lucide-react';
 import Badge from '../ui/Badge';
+import { getGameImageUrl } from '../../lib/api';
 
 interface GameExpandedContentProps {
   game: any;
@@ -12,17 +13,11 @@ const GameExpandedContent: React.FC<GameExpandedContentProps> = ({ game }) => {
       {/* En-tête avec image et titre */}
       <div className="flex items-start space-x-4">
         <div className="flex-shrink-0">
-          {game.image ? (
-            <img 
-              src={game.image} 
-              alt={game.name}
-              className="w-24 h-24 rounded-lg object-cover border border-slate-600"
-            />
-          ) : (
-            <div className="w-24 h-24 rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
-              <Gamepad2 className="w-12 h-12 text-white" />
-            </div>
-          )}
+          <img 
+            src={getGameImageUrl(game._id, 'logo', game.images?.logo)} 
+            alt={game.name}
+            className="w-24 h-24 rounded-lg object-cover border border-slate-600"
+          />
         </div>
         
         <div className="flex-1 min-w-0">

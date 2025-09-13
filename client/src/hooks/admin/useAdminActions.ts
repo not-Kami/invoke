@@ -18,7 +18,6 @@ export const useAdminActions = () => {
         throw new Error(response.error || 'Erreur lors de la suppression');
       }
     } catch (error) {
-      console.error('useAdminActions: Erreur lors de la suppression:', error);
       addError(`Erreur de suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
@@ -37,7 +36,6 @@ export const useAdminActions = () => {
         throw new Error(response.error || 'Erreur lors de la suppression');
       }
     } catch (error) {
-      console.error('useAdminActions: Erreur lors de la suppression:', error);
       addError(`Erreur de suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
@@ -56,7 +54,6 @@ export const useAdminActions = () => {
         throw new Error(response.error || 'Erreur lors de la suppression');
       }
     } catch (error) {
-      console.error('useAdminActions: Erreur lors de la suppression:', error);
       addError(`Erreur de suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
@@ -75,21 +72,17 @@ export const useAdminActions = () => {
         throw new Error(response.error || 'Erreur lors de la suppression');
       }
     } catch (error) {
-      console.error('useAdminActions: Erreur lors de la suppression:', error);
       addError(`Erreur de suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
 
   const toggleFeatured = async (type: string, id: string, featured: boolean, setter: any) => {
     try {
-      console.log(`useAdminActions: Mise à jour featured ${type} ${id} -> ${featured}`);
       
       let response;
       switch (type) {
         case 'user':
-          console.log('useAdminActions: Sending updateUserFeatured request:', { id, featured });
           response = await adminAPI.adminUpdateUserFeatured(id, featured);
-          console.log('useAdminActions: Response received:', response);
           if (response.success && response.data) {
             setter((prev: any[]) => prev.map((item: any) => 
               item._id === id ? { ...item, featured } : item
@@ -100,9 +93,7 @@ export const useAdminActions = () => {
           }
           break;
         case 'session':
-          console.log('useAdminActions: Sending adminUpdateSessionFeatured request:', { id, featured });
           response = await adminAPI.adminUpdateSessionFeatured(id, featured);
-          console.log('useAdminActions: Session featured response received:', response);
           if (response.success && response.data) {
             setter((prev: any[]) => prev.map((item: any) => 
               item._id === id ? { ...item, featured } : item
@@ -113,9 +104,7 @@ export const useAdminActions = () => {
           }
           break;
         case 'campaign':
-          console.log('useAdminActions: Sending updateCampaign request:', { id, featured });
           response = await adminAPI.updateCampaign(id, { featured });
-          console.log('useAdminActions: Campaign featured response received:', response);
           if (response.success && response.data) {
             setter((prev: any[]) => prev.map((item: any) => 
               item._id === id ? { ...item, featured } : item
@@ -126,9 +115,7 @@ export const useAdminActions = () => {
           }
           break;
         case 'game':
-          console.log('useAdminActions: Sending updateGame request:', { id, featured });
           response = await adminAPI.updateGame(id, { featured });
-          console.log('useAdminActions: Game featured response received:', response);
           if (response.success && response.data) {
             setter((prev: any[]) => prev.map((item: any) => 
               item._id === id ? { ...item, featured } : item
@@ -142,14 +129,12 @@ export const useAdminActions = () => {
           throw new Error(`Type non supporté: ${type}`);
       }
     } catch (error) {
-      console.error('useAdminActions: Erreur lors de la mise à jour featured:', error);
       addError(`Erreur de mise à jour: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
 
   // TODO: Implémenter exportSession quand l'API sera disponible
   const exportSession = async (_sessionId: string) => {
-    console.log('exportSession not implemented yet');
     addSuccess('Export des sessions pas encore implémenté');
   };
 
@@ -162,7 +147,6 @@ export const useAdminActions = () => {
         throw new Error(response.error || 'Erreur lors de l\'envoi de la réponse');
       }
     } catch (error) {
-      console.error('useAdminActions: Erreur lors de l\'envoi de la réponse:', error);
       addError(`Erreur d'envoi: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };

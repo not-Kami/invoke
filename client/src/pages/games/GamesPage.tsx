@@ -1,88 +1,13 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Game } from '../../lib/api';
 import GameFilters from '../../components/games/GameFilters';
+import GameCard from '../../components/games/GameCard';
 import { Loader2, AlertCircle } from 'lucide-react';
-import { publicAPI, getGameImageUrl } from '../../lib/api';
-import { Card } from '../../components/ui/Card';
+import { publicAPI } from '../../lib/api';
+import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 
-// Composant GameCard simple pour la page games
-function SimpleGameCard({ game, onClick, className = "" }: { 
-  game: Game; 
-  onClick: (game: Game) => void; 
-  className?: string;
-}) {
-  // Calculer les URLs des images dynamiquement
-  const portraitUrl = game.images?.portrait ? getGameImageUrl(game._id, 'portrait', game.images.portrait) : null;
-  const logoUrl = game.images?.logo ? getGameImageUrl(game._id, 'logo', game.images.logo) : null;
-
-  return (
-    <Card 
-      className={`relative bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 transition-all duration-300 overflow-hidden group cursor-pointer ${className}`}
-      onClick={() => onClick(game)}
-    >
-      {/* Image de fond - Portrait du jeu */}
-      <div className="absolute inset-0 w-full h-full">
-        {/* Fallback vers le gradient si pas d'image */}
-        <div className="w-full h-full bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-xl">
-            <div className="text-white text-2xl font-bold">🎲</div>
-          </div>
-        </div>
-        
-        {/* Image portrait du jeu si disponible */}
-        {portraitUrl && (
-          <img 
-            src={portraitUrl}
-            alt={`Portrait ${game.name}`}
-            className="absolute inset-0 w-full h-full object-cover"
-            onLoad={() => console.log('✅ Image portrait chargée pour', game.name, ':', portraitUrl)}
-            onError={(e) => console.error('❌ Erreur chargement image pour', game.name, ':', e)}
-          />
-        )}
-        
-        {/* Gradient overlay transparent -> opaque de haut en bas */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-      </div>
-
-      {/* Logo du jeu en premier plan (haut de la carte) */}
-      {logoUrl && (
-        <div className="absolute top-4 left-4 z-20">
-          <div className="w-16 h-16 rounded-lg overflow-hidden">
-            <img 
-              src={logoUrl}
-              alt={`Logo ${game.name}`}
-              className="w-full h-full object-contain"
-              onLoad={() => console.log('✅ Logo chargé pour', game.name, ':', logoUrl)}
-              onError={(e) => console.error('❌ Erreur chargement logo pour', game.name, ':', e)}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Contenu en bas de la carte */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
-        <h3 className="font-display text-xl font-bold text-white mb-2">{game.name}</h3>
-        <p className="text-gray-200 text-sm mb-3 line-clamp-2">{game.description}</p>
-        
-        {/* Métadonnées compactes */}
-        <div className="flex items-center justify-between text-xs text-gray-300">
-          <span className="bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
-            {game.genre}
-          </span>
-          <span className="bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
-            {game.system}
-          </span>
-        </div>
-      </div>
-    </Card>
-  );
-}
 
 export default function GamesPage() {
-  const [games, setGames] = useState<Game[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
   // État des filtres simplifiés
   const [filters, setFilters] = useState({
     searchTerm: '',
@@ -90,56 +15,68 @@ export default function GamesPage() {
     system: 'all'
   });
 
-      // Load games from API
+  // État pour les jeux mis en avant
+  const [featuredGames, setFeaturedGames] = useState<Game[]>([]);
+  const [featuredLoading, setFeaturedLoading] = useState(true);
+
+  // Charger les jeux mis en avant
   useEffect(() => {
-    const loadGames = async () => {
+    const loadFeaturedGames = async () => {
       try {
-        setLoading(true);
-        setError(null);
-        
-        const response = await publicAPI.getGames();
-        
+        setFeaturedLoading(true);
+        const response = await publicAPI.getFeaturedGames();
         if (response.success && response.data) {
-          setGames(response.data);
-        } else {
-          setError(response.error || 'Error loading games');
+          setFeaturedGames(response.data);
         }
-      } catch (err) {
-        console.error('Error loading games:', err);
-        setError('Server connection error');
+      } catch (error) {
       } finally {
-        setLoading(false);
+        setFeaturedLoading(false);
       }
     };
 
-    loadGames();
+    loadFeaturedGames();
   }, []);
+
+  // Utiliser le hook de scroll infini pour les autres jeux
+  const {
+    items: regularGames,
+    loading: regularLoading,
+    error,
+    hasMore,
+    lastElementRef,
+    reset
+  } = useInfiniteScroll<Game>(
+    publicAPI.getGamesPaginated as any, // Type assertion pour éviter les conflits de types
+    12, // 12 jeux par page
+    { threshold: 0.1 }, // Charger quand on est à 10% du bas
+    filters.searchTerm,
+    filters.genre,
+    filters.system
+  );
+
+  // Filtrer les jeux réguliers pour éviter les doublons avec les jeux mis en avant
+  const featuredGameIds = new Set(featuredGames.map(game => game._id));
+  const filteredRegularGames = regularGames.filter(game => !featuredGameIds.has(game._id));
+  
+  // Combiner les jeux mis en avant et les jeux réguliers (sans doublons)
+  const allGames = [...featuredGames, ...filteredRegularGames];
+  const loading = featuredLoading || regularLoading;
 
   // Générer les listes uniques de genres et systèmes
   const availableGenres = useMemo(() => {
-    const genres = [...new Set(games.map(game => game.genre))];
+    const genres = [...new Set(allGames.map(game => game.genre))];
     return genres.sort();
-  }, [games]);
+  }, [allGames]);
 
   const availableSystems = useMemo(() => {
-    const systems = [...new Set(games.map(game => game.system))];
+    const systems = [...new Set(allGames.map(game => game.system))];
     return systems.sort();
-  }, [games]);
-
-      // Filter games based on criteria
-  const filteredGames = useMemo(() => {
-    return games.filter(game => {
-      const matchesSearch = game.name.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
-                          game.description.toLowerCase().includes(filters.searchTerm.toLowerCase());
-      const matchesGenre = filters.genre === 'all' || game.genre === filters.genre;
-      const matchesSystem = filters.system === 'all' || game.system === filters.system;
-      
-      return matchesSearch && matchesGenre && matchesSystem;
-    });
-  }, [games, filters]);
+  }, [allGames]);
 
   const handleFiltersChange = (newFilters: typeof filters) => {
     setFilters(newFilters);
+    // Réinitialiser la liste quand les filtres changent
+    reset();
   };
 
   const handleClearFilters = () => {
@@ -148,11 +85,12 @@ export default function GamesPage() {
       genre: 'all',
       system: 'all'
     });
+    // Réinitialiser la liste quand on efface les filtres
+    reset();
   };
 
-  const handleGameClick = (game: Game) => {
+  const handleGameClick = (_game: Game) => {
     // TODO: Navigate to game detail page
-    console.log('Selected game:', game.name);
   };
 
   if (loading) {
@@ -188,9 +126,9 @@ export default function GamesPage() {
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Games Library</h1>
-          <p className="text-gray-300">Discover our collection of tabletop role-playing games</p>
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-white mb-4">Games Library</h1>
+          <p className="text-gray-300 text-lg">Discover our collection of tabletop role-playing games</p>
         </div>
 
         {/* Filtres */}
@@ -200,29 +138,38 @@ export default function GamesPage() {
           onClearFilters={handleClearFilters}
           availableGenres={availableGenres}
           availableSystems={availableSystems}
-          totalResults={filteredGames.length}
+          totalResults={allGames.length}
         />
 
-        {/* Games grid */}
-        <div className="mt-8">
-          {filteredGames.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-gray-400 text-lg mb-2">No games found</div>
-              <p className="text-gray-500">Try modifying your search filters</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredGames.map(game => (
-                <SimpleGameCard
-                  key={game._id}
+        {/* Grille des jeux */}
+        {allGames.length === 0 && !loading ? (
+          <div className="text-center py-12">
+            <div className="text-gray-400 text-lg mb-2">No games found</div>
+            <p className="text-gray-500">Try modifying your search filters</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {allGames.map((game, index) => (
+                <GameCard
+                  key={`game-${game._id}-${index}`}
                   game={game}
                   onClick={handleGameClick}
-                  className="h-80"
+                  className={`h-96 ${featuredGames.some(fg => fg._id === game._id) ? 'border-2 border-yellow-400/30' : ''}`}
+                  ref={index === allGames.length - 1 ? lastElementRef : undefined}
                 />
-              ))}
+            ))}
+          </div>
+        )}
+
+        {/* Indicateur de chargement pour le scroll infini */}
+        {hasMore && (
+          <div className="flex justify-center mt-8">
+            <div className="flex items-center space-x-2 text-gray-400">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <span>Chargement de plus de jeux...</span>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

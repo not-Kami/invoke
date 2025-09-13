@@ -38,8 +38,8 @@ export default function GameCard({
   };
 
   // Calculer les URLs des images dynamiquement
-  const portraitUrl = game.images?.portrait ? getGameImageUrl(game._id, 'portrait', game.images.portrait) : null;
-  const logoUrl = game.images?.logo ? getGameImageUrl(game._id, 'logo', game.images.logo) : null;
+  const portraitUrl = getGameImageUrl(game._id, 'portrait', game.images?.portrait);
+  const logoUrl = getGameImageUrl(game._id, 'logo', game.images?.logo);
 
   return (
     <Card 
@@ -48,46 +48,33 @@ export default function GameCard({
     >
       {/* Image de fond - Portrait du jeu */}
       <div className="absolute inset-0 w-full h-full">
-        {/* Fallback vers le gradient si pas d'images */}
-        <div className="w-full h-full bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-xl">
-            <div className="text-white text-2xl font-bold">🎲</div>
-          </div>
-        </div>
-        
-                         {/* Image portrait du jeu si disponible */}
-                 {portraitUrl && (
-                   <img 
-                     src={portraitUrl}
-                     alt={`Portrait ${game.name}`}
-                     className="absolute inset-0 w-full h-full object-cover"
-                     onLoad={() => {}}
-                     onError={(e) => {
-                       console.error('Erreur chargement image pour', game.name, ':', e);
-                     }}
-                   />
-                 )}
+        {/* Image portrait du jeu (avec fallback automatique) */}
+        <img 
+          src={portraitUrl}
+          alt={`Portrait ${game.name}`}
+          className="absolute inset-0 w-full h-full object-cover"
+          onLoad={() => {}}
+          onError={() => {
+          }}
+        />
         
         {/* Gradient overlay transparent -> opaque de haut en bas */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
       </div>
 
-             {/* Logo du jeu en premier plan (haut de la carte) */}
-       {logoUrl && (
-         <div className="absolute top-4 left-4 z-20">
-           <div className="w-16 h-16 rounded-lg overflow-hidden">
-             <img 
-               src={logoUrl}
-               alt={`Logo ${game.name}`}
-               className="w-full h-full object-contain"
-               onLoad={() => {}}
-               onError={(e) => {
-                 console.error('Erreur chargement logo pour', game.name, ':', e);
-               }}
-             />
-           </div>
-         </div>
-       )}
+      {/* Logo du jeu en premier plan (haut de la carte) */}
+      <div className="absolute top-4 left-4 z-20">
+        <div className="w-16 h-16 rounded-lg overflow-hidden">
+          <img 
+            src={logoUrl}
+            alt={`Logo ${game.name}`}
+            className="w-full h-full object-contain"
+            onLoad={() => {}}
+            onError={() => {
+            }}
+          />
+        </div>
+      </div>
 
       {/* Bouton favori en haut à droite */}
       {showFavoriteButton && onToggleFavorite && (

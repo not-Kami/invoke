@@ -28,19 +28,14 @@ const ConversationsBubble: React.FC<ConversationsBubbleProps> = ({ className = '
   const loadUserConversations = async () => {
     try {
       setLoading(true);
-      console.log('🔐 ConversationsBubble - Loading conversations for user:', user?._id);
       // Utiliser la route simple /user pour l'utilisateur connecté
       const response = await conversationsApi.getUserConversations();
-      console.log('🔐 ConversationsBubble - getUserConversations response:', response);
       
       if (response.success && response.data) {
         setConversations(response.data);
-        console.log('🔐 ConversationsBubble - Conversations loaded:', response.data.length);
       } else {
-        console.error('🔐 ConversationsBubble - Failed to load conversations:', response.error);
       }
     } catch (error) {
-      console.error('🔐 ConversationsBubble - Error loading conversations:', error);
     } finally {
       setLoading(false);
     }
@@ -60,7 +55,6 @@ const ConversationsBubble: React.FC<ConversationsBubbleProps> = ({ className = '
         setSelectedConversation(null);
       }
     } catch (error) {
-      console.error('Erreur lors de l\'envoi de la réponse:', error);
     } finally {
       setSending(false);
     }

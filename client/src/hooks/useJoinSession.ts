@@ -29,7 +29,6 @@ export function useJoinSession(): UseJoinSessionReturn {
     setError(null);
 
     try {
-      console.log('Attempting to join session:', sessionId);
       
       const response = await adminAPI.joinSession(sessionId);
       
@@ -37,7 +36,6 @@ export function useJoinSession(): UseJoinSessionReturn {
         throw new Error(response.message || 'Failed to join session');
       }
 
-      console.log('Successfully joined session:', response.data);
       
       addNotification(
         'success',

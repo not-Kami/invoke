@@ -38,7 +38,6 @@ export function useDashboardData() {
         setSessions(sessionsData);
         setCampaigns(campaignsData);
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
       } finally {
         setLoading(false);
       }

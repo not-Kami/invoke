@@ -29,9 +29,7 @@ const ConversationPage: React.FC = () => {
     try {
       setLoading(true);
       const response = await adminAPI.getConversation(id!);
-      console.log('ConversationPage Debug - API Response:', response);
       if (response.success && response.data) {
-        console.log('ConversationPage Debug - Conversation data:', response.data);
         
         // Forcer le statut "lu" immédiatement
         const conversationData = {
@@ -48,7 +46,6 @@ const ConversationPage: React.FC = () => {
         throw new Error(response.error || 'Erreur lors du chargement de la conversation');
       }
     } catch (error) {
-      console.error('Erreur lors du chargement de la conversation:', error);
       addError(`Erreur de chargement: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     } finally {
       setLoading(false);
@@ -61,7 +58,6 @@ const ConversationPage: React.FC = () => {
       // Pour l'instant, on met à jour localement
       setConversation(prev => prev ? { ...prev, unreadCount: 0, isUnread: false } : null);
     } catch (error) {
-      console.error('Erreur lors du marquage comme lu:', error);
     }
   };
 
@@ -84,7 +80,6 @@ const ConversationPage: React.FC = () => {
         throw new Error(response.error || 'Erreur lors de l\'envoi de la réponse');
       }
     } catch (error) {
-      console.error('Erreur lors de l\'envoi de la réponse:', error);
       addError(`Erreur d'envoi: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     } finally {
       setSending(false);
@@ -104,7 +99,6 @@ const ConversationPage: React.FC = () => {
           throw new Error(response.error || 'Erreur lors de l\'archivage');
         }
       } catch (error) {
-        console.error('Erreur lors de l\'archivage:', error);
         addError(`Erreur d'archivage: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
       }
     }
@@ -123,7 +117,6 @@ const ConversationPage: React.FC = () => {
           throw new Error(response.error || 'Erreur lors de la suppression');
         }
       } catch (error) {
-        console.error('Erreur lors de la suppression:', error);
         addError(`Erreur de suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
       }
     }

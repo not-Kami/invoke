@@ -162,7 +162,6 @@ const ContactForm: React.FC<ContactFormProps> = ({
       }
 
     } catch (error) {
-      console.error('Error sending form:', error);
       setSubmitStatus('error');
       
       if (onError) {
@@ -186,7 +185,6 @@ const ContactForm: React.FC<ContactFormProps> = ({
     if (createdConversationId) {
       // TODO: Open conversation popup/modal
       // For now, we'll just show a message
-      console.log('Opening conversation:', createdConversationId);
     }
   };
 

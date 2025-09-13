@@ -6,13 +6,16 @@ import {
   BookOpen, 
   Shield, 
   Heart,
-
   ArrowRight,
-  Play
+  Play,
+  User
 } from 'lucide-react';
 import InvokeLogo from '../assets/invoke-logo.svg';
+import { useAuth } from '../contexts/AuthContext';
 
 const AboutPage: React.FC = () => {
+  const { user } = useAuth();
+  
   const features = [
     {
       icon: Gamepad2,
@@ -44,10 +47,10 @@ const AboutPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col">
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 py-24">
+      <div className="relative overflow-hidden flex-1 flex items-center">
+        <div className="max-w-7xl mx-auto px-6 py-24 w-full">
           <div className="text-center">
             <div className="flex justify-center mb-8">
               <img src={InvokeLogo} alt="Invoke" className="w-24 h-24" />
@@ -60,17 +63,35 @@ const AboutPage: React.FC = () => {
               We believe that every gaming session should be a memorable adventure.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/signup">
-                <button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 flex items-center space-x-2">
-                  <Play className="w-5 h-5" />
-                  <span>Start the Adventure</span>
-                </button>
-              </Link>
-              <Link to="/games">
-                <button className="border-2 border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200">
-                  Discover Games
-                </button>
-              </Link>
+              {user ? (
+                <>
+                  <Link to="/dashboard">
+                    <button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 flex items-center space-x-2">
+                      <User className="w-5 h-5" />
+                      <span>Go to Dashboard</span>
+                    </button>
+                  </Link>
+                  <Link to="/games">
+                    <button className="border-2 border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200">
+                      Discover Games
+                    </button>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link to="/signup">
+                    <button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 flex items-center space-x-2">
+                      <Play className="w-5 h-5" />
+                      <span>Start the Adventure</span>
+                    </button>
+                  </Link>
+                  <Link to="/games">
+                    <button className="border-2 border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200">
+                      Discover Games
+                    </button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -145,17 +166,29 @@ const AboutPage: React.FC = () => {
       <div className="py-24">
         <div className="max-w-4xl mx-auto text-center px-6">
           <h2 className="text-4xl font-cinzel font-bold text-white mb-6">
-            Ready to Start?
+            {user ? 'Ready to Play?' : 'Ready to Start?'}
           </h2>
           <p className="text-xl text-slate-400 mb-8">
-            Join thousands of players who have already chosen Invoke for their adventures
+            {user 
+              ? 'Continue your adventure and discover new gaming experiences'
+              : 'Join thousands of players who have already chosen Invoke for their adventures'
+            }
           </p>
-          <Link to="/signup">
-            <button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 flex items-center space-x-2 mx-auto">
-              <span>Join Invoke</span>
-              <ArrowRight className="w-5 h-5" />
-            </button>
-          </Link>
+          {user ? (
+            <Link to="/dashboard">
+              <button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 flex items-center space-x-2 mx-auto">
+                <span>Go to Dashboard</span>
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </Link>
+          ) : (
+            <Link to="/signup">
+              <button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 flex items-center space-x-2 mx-auto">
+                <span>Join Invoke</span>
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </Link>
+          )}
         </div>
       </div>
     </div>

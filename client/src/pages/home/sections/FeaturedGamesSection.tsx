@@ -1,133 +1,103 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Gamepad2, Sparkles, ArrowRight } from 'lucide-react';
-import GameCard from '../components/GameCard';
-import { Game } from '../../../types';
+import { Game } from '../../../lib/api';
+import GameCard from '../../../components/games/GameCard';
 
 interface FeaturedGamesSectionProps {
   featuredGames: Game[];
   loading: boolean;
-  onToggleFavorite: (game: Game) => void;
-  isFavorite: (gameId: string) => boolean;
 }
 
 export default function FeaturedGamesSection({ 
   featuredGames, 
-  loading, 
-  onToggleFavorite, 
-  isFavorite 
+  loading
 }: FeaturedGamesSectionProps) {
   const navigate = useNavigate();
-  const [currentGameIndex, setCurrentGameIndex] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
+  
+  const totalGames = featuredGames.length;
   const [isMobile, setIsMobile] = useState(false);
-  const sliderRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Détection mobile
+  
+  // Détecter si on est sur mobile
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 640);
+      setIsMobile(window.innerWidth < 768); // md breakpoint
     };
     
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+  
+  const visibleCards = isMobile ? 1 : 4; // 1 carte sur mobile, 4 sur desktop
 
-  // Recalculer le centrage quand la taille change
-  useEffect(() => {
-    const handleResize = () => {
-      setCurrentGameIndex(prev => prev);
-    };
+  // Fonction pour aller à la carte suivante
+  const nextCard = () => {
+    if (totalGames <= 1) return;
     
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Fonction pour aller au jeu suivant
-  const nextGame = () => {
-    setCurrentGameIndex((prev) => 
-      prev === featuredGames.length - 1 ? 0 : prev + 1
-    );
+    setCurrentIndex((prev) => {
+      const newIndex = prev + 1;
+      
+      // Si on dépasse la fin, on revient au début
+      if (newIndex + visibleCards > totalGames) {
+        return 0;
+      }
+      return newIndex;
+    });
   };
 
-  // Fonction pour aller au jeu précédent
-  const prevGame = () => {
-    setCurrentGameIndex((prev) => 
-      prev === 0 ? featuredGames.length - 1 : prev - 1
-    );
-  };
-
-  // Fonction pour aller directement à une carte spécifique
-  const goToGame = (index: number) => {
-    setCurrentGameIndex(index);
-  };
-
-  // Calcul simple du centrage
-  const getSliderTransform = () => {
-    const cardWidth = isMobile ? 240 : 320; // w-60 = 240px, w-80 = 320px
-    const gap = isMobile ? 8 : 16;
-    const totalWidth = cardWidth + gap;
+  // Fonction pour aller à la carte précédente
+  const prevCard = () => {
+    if (totalGames <= 1) return;
     
-    // Centrer la carte active
-    const centerOffset = (window.innerWidth - cardWidth) / 2;
-    return -currentGameIndex * totalWidth + centerOffset;
+    setCurrentIndex((prev) => {
+      const newIndex = prev - 1;
+      
+      // Si on va en négatif, on va à la fin
+      if (newIndex < 0) {
+        return Math.max(0, totalGames - visibleCards);
+      }
+      return newIndex;
+    });
   };
 
-  // Fonctions pour le drag & drop simple
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setStartX(e.pageX - (containerRef.current?.offsetLeft || 0));
-    setScrollLeft(currentGameIndex * (isMobile ? 240 : 320));
+  // Fonction pour naviguer vers la page détaillée du jeu
+  const handleGameClick = (game: Game) => {
+    navigate(`/game/${game._id}`);
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    e.preventDefault();
-    const x = e.pageX - (containerRef.current?.offsetLeft || 0);
-    const walk = (x - startX) * 2;
-    const cardWidth = isMobile ? 240 : 320;
-    const newIndex = Math.round((-walk + scrollLeft) / cardWidth);
-    
-    // Limiter aux bornes du slider
-    const clampedIndex = Math.max(0, Math.min(featuredGames.length - 1, newIndex));
-    setCurrentGameIndex(clampedIndex);
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  // Support tactile pour mobile
+  // Gestion des événements tactiles pour mobile
   const handleTouchStart = (e: React.TouchEvent) => {
-    setIsDragging(true);
-    setStartX(e.touches[0].pageX - (containerRef.current?.offsetLeft || 0));
-    setScrollLeft(currentGameIndex * (isMobile ? 240 : 320));
+    setTouchStart(e.targetTouches[0].clientX);
+    setTouchEnd(0); // Reset touchEnd
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return;
-    const x = e.touches[0].pageX - (containerRef.current?.offsetLeft || 0);
-    const walk = (x - startX) * 2;
-    const cardWidth = isMobile ? 240 : 320;
-    const newIndex = Math.round((-walk + scrollLeft) / cardWidth);
-    
-    // Limiter aux bornes du slider
-    const clampedIndex = Math.max(0, Math.min(featuredGames.length - 1, newIndex));
-    setCurrentGameIndex(clampedIndex);
+    setTouchEnd(e.targetTouches[0].clientX);
   };
 
   const handleTouchEnd = () => {
-    setIsDragging(false);
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      nextCard();
+    }
+    if (isRightSwipe) {
+      prevCard();
+    }
+    
+    // Reset pour éviter les conflits
+    setTouchStart(0);
+    setTouchEnd(0);
   };
 
-  // Fonction pour naviguer vers la page Games avec le jeu sélectionné
-  const handleGameClick = (game: Game) => {
-    navigate(`/games?game=${game._id}`);
-  };
 
   if (loading) {
     return (
@@ -187,74 +157,58 @@ export default function FeaturedGamesSection({
           <p className="text-gray-300 text-lg">Discover our selection of recommended games</p>
         </div>
         
-        {/* Featured games slider */}
-        <div className="relative group w-full">
-          {/* Navigation buttons */}
-          <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <button
-              onClick={prevGame}
-              className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-200 shadow-lg hover:scale-110"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-          </div>
-          <div className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <button
-              onClick={nextGame}
-              className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-200 shadow-lg hover:scale-110"
-            >
-              <ChevronRight className="h-6 w-6" />
-            </button>
-          </div>
-
-          {/* Slider container */}
+        {/* Featured games carousel */}
+        <div className="w-full">
+          {/* Games carousel - responsive avec transition de translation */}
           <div 
-            ref={containerRef}
-            className="overflow-hidden"
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
+            className="relative mb-6"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <div 
-              ref={sliderRef}
-              className="flex transition-transform duration-300 ease-out"
-              style={{ transform: `translateX(${getSliderTransform()}px)` }}
-            >
-              {featuredGames.map((game) => (
-                <div 
-                  key={game._id} 
-                  className={`flex-shrink-0 ${isMobile ? 'w-60 mx-1' : 'w-80 mx-2'}`}
-                >
-                  <GameCard
-                    game={game}
-                    isFavorite={isFavorite(game._id)}
-                    onToggleFavorite={onToggleFavorite}
-                    onClick={handleGameClick}
-                    className="h-96"
-                  />
-                </div>
-              ))}
+            {/* Container avec padding pour éviter la coupure des cartes */}
+            <div className="px-4 md:px-0">
+              <div 
+                className="flex gap-6 transition-transform duration-500 ease-in-out"
+                style={{
+                  transform: `translateX(-${currentIndex * (100 / visibleCards)}%)`
+                }}
+              >
+                {featuredGames.map((game, index) => (
+                  <div 
+                    key={`${game._id}-${index}`}
+                    className={`flex-shrink-0 ${isMobile ? 'w-full' : 'w-1/4'}`}
+                  >
+                    <div className="group relative overflow-visible">
+                      <GameCard
+                        game={game}
+                        onClick={() => handleGameClick(game)}
+                        className="h-80 w-full transition-transform duration-300 ease-out hover:scale-105 hover:shadow-2xl cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Navigation indicators */}
-          <div className="flex justify-center mt-8 space-x-2">
-            {featuredGames.map((_, index) => (
+          {/* Navigation arrows - sous le slider */}
+          {totalGames > 1 && (
+            <div className="flex justify-center items-center space-x-4 mb-8">
               <button
-                key={index}
-                onClick={() => goToGame(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                  index === currentGameIndex 
-                    ? 'bg-purple-400 scale-125' 
-                    : 'bg-white/30 hover:bg-white/50'
-                }`}
-              />
-            ))}
-          </div>
+                onClick={prevCard}
+                className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-200 shadow-lg hover:scale-110"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+              <button
+                onClick={nextCard}
+                className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-200 shadow-lg hover:scale-110"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* View all games button */}

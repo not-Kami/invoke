@@ -17,7 +17,10 @@ userRouter.use(protect); // Toutes les routes suivantes nécessitent une authent
 
 // ===== GESTION DES UTILISATEURS (Admin uniquement) =====
 userRouter.get("/", restrictTo("admin"), userController.getUsers);
-userRouter.get("/:id", userController.getUser); // L'utilisateur peut voir son propre profil
+userRouter.get("/:id", userController.getUser);
+
+// ===== LISTE DES JOUEURS POUR INVITATIONS (DMs uniquement) =====
+userRouter.get("/list/players", userController.getPlayersForInvitation); // L'utilisateur peut voir son propre profil
 
 // ===== PROFIL UTILISATEUR =====
 userRouter.put("/:id/profile", userController.updateProfile); // Profil de base uniquement

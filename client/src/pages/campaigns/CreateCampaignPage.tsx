@@ -42,7 +42,6 @@ export default function CreateCampaignPage() {
           setAvailableGames(response.data);
         }
       } catch (error) {
-        console.error('Error fetching games:', error);
         setAvailableGames([]);
       }
     };
@@ -50,19 +49,14 @@ export default function CreateCampaignPage() {
     // Charger les joueurs disponibles depuis l'API
     const fetchPlayers = async () => {
       try {
-        console.log('🔐 CreateCampaignPage - Fetching users, user role:', user?.role);
         const response = await adminAPI.getUsers();
-        console.log('🔐 CreateCampaignPage - getUsers response:', response);
         
         if (response.success && response.data) {
           setAvailablePlayers(response.data);
-          console.log('🔐 CreateCampaignPage - Users loaded:', response.data.length);
         } else {
-          console.error('🔐 CreateCampaignPage - Failed to fetch users:', response.error);
           setAvailablePlayers([]);
         }
       } catch (error) {
-        console.error('🔐 CreateCampaignPage - Error fetching players:', error);
         setAvailablePlayers([]);
       }
     };
@@ -93,7 +87,7 @@ export default function CreateCampaignPage() {
     try {
       // Validation
       if (!formData.name || !formData.description || !formData.gameId) {
-        throw new Error('Veuillez remplir tous les champs obligatoires');
+        throw new Error('Please fill in all required fields');
       }
 
       // Simuler la création de campagne
@@ -118,27 +112,27 @@ export default function CreateCampaignPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">Créer une Campagne</h1>
+          <h1 className="text-3xl font-bold text-white">Create Campaign</h1>
           <p className="mt-2 text-gray-300">
-            Lancez une nouvelle campagne de jeu de rôle épique
+            Launch a new epic role-playing campaign
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Informations de base */}
+          {/* Basic Information */}
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardHeader>
-              <h2 className="text-xl font-semibold text-white">Informations de Base</h2>
+              <h2 className="text-xl font-semibold text-white">Basic Information</h2>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Nom de la Campagne *
+                  Campaign Name *
                 </label>
                 <Input
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  placeholder="Ex: La Quête du Dragon Éternel"
+                  placeholder="Ex: The Eternal Dragon Quest"
                   required
                 />
               </div>
@@ -152,7 +146,7 @@ export default function CreateCampaignPage() {
                   onChange={(e) => handleInputChange('description', e.target.value)}
                   rows={6}
                   className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-                  placeholder="Décrivez l'univers, l'histoire, les objectifs de la campagne, le style de jeu, et tout ce qui peut intéresser les joueurs..."
+                  placeholder="Describe the universe, story, campaign objectives, play style, and anything that might interest players..."
                   required
                 />
               </div>
@@ -160,7 +154,7 @@ export default function CreateCampaignPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Jeu *
+                    Game *
                   </label>
                   <select
                     value={formData.gameId}
@@ -168,7 +162,7 @@ export default function CreateCampaignPage() {
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     required
                   >
-                    <option value="">Sélectionnez un jeu</option>
+                    <option value="">Select a game</option>
                     {availableGames.map(game => (
                       <option key={game._id} value={game._id}>
                         {game.name} ({game.system})
@@ -179,7 +173,7 @@ export default function CreateCampaignPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Nombre Max de Joueurs
+                    Max Players
                   </label>
                   <Input
                     type="number"
@@ -199,21 +193,21 @@ export default function CreateCampaignPage() {
                     onChange={(e) => handleInputChange('isActive', e.target.checked)}
                     className="mr-2 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                   />
-                  <span className="text-sm text-gray-300">Campagne active (visible pour les joueurs)</span>
+                  <span className="text-sm text-gray-300">Active campaign (visible to players)</span>
                 </label>
               </div>
             </CardContent>
           </Card>
 
-          {/* Sélection des joueurs */}
+          {/* Player Selection */}
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardHeader>
-              <h2 className="text-xl font-semibold text-white">Sélection des Joueurs</h2>
+              <h2 className="text-xl font-semibold text-white">Player Selection</h2>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Joueurs Sélectionnés ({selectedPlayers.length}/{formData.maxPlayers})
+                  Selected Players ({selectedPlayers.length}/{formData.maxPlayers})
                 </label>
                 <div className="space-y-2">
                   {selectedPlayers.map(player => (
@@ -240,7 +234,7 @@ export default function CreateCampaignPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Joueurs Disponibles
+                  Available Players
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {availablePlayers
@@ -269,7 +263,7 @@ export default function CreateCampaignPage() {
             </CardContent>
           </Card>
 
-          {/* Informations sur la gestion des sessions */}
+          {/* Session Management Information */}
           <Card className="bg-white/5 backdrop-blur-sm border-white/10">
             <CardContent className="p-6">
               <div className="flex items-start space-x-3">
@@ -278,19 +272,19 @@ export default function CreateCampaignPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-medium text-white mb-2">
-                    Gestion des Sessions
+                    Session Management
                   </h3>
                   <p className="text-gray-400 text-sm leading-relaxed">
-                    Une fois votre campagne créée, vous pourrez organiser des sessions individuelles 
-                    au sein de celle-ci. Chaque session peut avoir ses propres objectifs, dates et 
-                    participants, tout en maintenant la continuité de l'histoire de la campagne.
+                    Once your campaign is created, you'll be able to organize individual sessions 
+                    within it. Each session can have its own objectives, dates and 
+                    participants, while maintaining the continuity of the campaign's story.
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Messages d'erreur */}
+          {/* Error Messages */}
           {error && (
             <div className="flex items-center space-x-2 p-4 bg-red-500/20 border border-red-500/30 rounded-lg">
               <AlertCircle className="h-5 w-5 text-red-400" />
@@ -298,7 +292,7 @@ export default function CreateCampaignPage() {
             </div>
           )}
 
-          {/* Boutons d'action */}
+          {/* Action Buttons */}
           <div className="flex justify-end space-x-4">
             <Button
               type="button"
@@ -306,14 +300,14 @@ export default function CreateCampaignPage() {
               onClick={() => navigate('/campaigns')}
               className="border-white/20 text-white hover:bg-white/10"
             >
-              Annuler
+              Cancel
             </Button>
             <Button
               type="submit"
               disabled={loading}
               className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0"
             >
-              {loading ? 'Création...' : 'Créer la Campagne'}
+              {loading ? 'Creating...' : 'Create Campaign'}
             </Button>
           </div>
         </form>

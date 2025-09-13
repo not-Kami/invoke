@@ -85,7 +85,6 @@ const GameModal: React.FC<GameModalProps> = ({
   // Upload immédiat d'image
   const handleImageUpload = async (file: File, imageType: 'logo' | 'portrait' | 'banner') => {
     if (!game?._id) {
-      console.error('❌ Impossible d\'uploader : aucun ID de jeu');
       return;
     }
 
@@ -101,8 +100,6 @@ const GameModal: React.FC<GameModalProps> = ({
       });
       
       if (!response.ok) {
-        const error = await response.text();
-        console.error(`❌ Erreur upload ${imageType}:`, error);
         throw new Error(`Erreur upload ${imageType}`);
       }
       
@@ -118,7 +115,6 @@ const GameModal: React.FC<GameModalProps> = ({
       }));
       
     } catch (error) {
-      console.error(`❌ Erreur upload ${imageType}:`, error);
     } finally {
       setUploadingImages(prev => ({ ...prev, [imageType]: false }));
     }
@@ -127,7 +123,6 @@ const GameModal: React.FC<GameModalProps> = ({
   // Gestion de la sélection de fichier
   const handleFileSelect = (file: File, imageType: 'logo' | 'portrait' | 'banner') => {
     if (!game?._id) {
-      console.error('❌ Impossible d\'uploader : aucun ID de jeu');
       return;
     }
     
@@ -138,7 +133,6 @@ const GameModal: React.FC<GameModalProps> = ({
   // Suppression d'image
   const handleRemoveImage = async (imageType: 'logo' | 'portrait' | 'banner') => {
     if (!game?._id) {
-      console.error('❌ Impossible de supprimer : aucun ID de jeu');
       return;
     }
 
@@ -168,7 +162,6 @@ const GameModal: React.FC<GameModalProps> = ({
       }));
       
     } catch (error) {
-      console.error(`❌ Erreur suppression ${imageType}:`, error);
     }
   };
 
@@ -178,7 +171,6 @@ const GameModal: React.FC<GameModalProps> = ({
       const match = url.match(/\/upload\/v\d+\/(.+?)(?:\.[^.]+)?$/);
       return match ? match[1] : null;
     } catch (error) {
-      console.warn(`Impossible d'extraire le public_id de l'URL: ${url}`);
       return null;
     }
   };
@@ -218,7 +210,6 @@ const GameModal: React.FC<GameModalProps> = ({
       await onSave(formData as Game);
       onClose();
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
     } finally {
       setIsSubmitting(false);
     }

@@ -2,6 +2,7 @@
 import { Card, CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
+import { useNavigate } from 'react-router-dom';
 import { 
   Calendar, 
   Users, 
@@ -32,17 +33,12 @@ export default function DMDashboard({
   onAddMasteredGame,
   onRemoveMasteredGame
 }: DMDashboardProps) {
+  const navigate = useNavigate();
   // Debug: Log des données reçues
-  console.log('🔍 DMDashboard Debug Info:');
-  console.log('📊 sessions reçues:', sessions);
-  console.log('👤 userId:', userId);
-  console.log('⏳ loading:', loading);
-  console.log('🎮 masteredGames:', masteredGames);
   
   // Filtrer les sessions de l'utilisateur (en tant que DM)
   const mySessions = sessions.filter(session => session.dm?._id === userId).slice(0, 5);
   
-  console.log('✅ Sessions filtrées (mySessions):', mySessions);
 
   // Données mockées pour les fonctionnalités à venir
   const dmSettings = [
@@ -91,7 +87,11 @@ export default function DMDashboard({
             ) : mySessions.length > 0 ? (
               <div className="space-y-4">
                 {mySessions.map((session) => (
-                  <div key={session._id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
+                  <div 
+                    key={session._id} 
+                    className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 cursor-pointer transition-colors"
+                    onClick={() => navigate(`/sessions/${session._id}`)}
+                  >
                     <div className="flex items-center space-x-4">
                       {/* Image de session ou icône par défaut */}
                       {session.image ? (
