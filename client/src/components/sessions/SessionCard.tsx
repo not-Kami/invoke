@@ -134,7 +134,7 @@ export default function SessionCard({
           {session.description || 'No description available'}
         </p>
 
-        {/* Bouton d'action principal */}
+        {/* Boutons d'action */}
         <div className="mb-4">
           {session.status === 'finished' || session.status === 'cancelled' ? (
             <div className="text-center py-3">
@@ -147,31 +147,54 @@ export default function SessionCard({
               <p className="text-sm text-gray-400">Loading...</p>
             </div>
           ) : !user ? (
-            <Button
-              onClick={() => window.location.href = '/login'}
-              size="lg"
-              variant="outline"
-              className="w-full border-gray-600 text-gray-300 hover:text-white hover:border-gray-500"
-            >
-              Login to Join
-            </Button>
-          ) : canJoinSession && canJoinSession(session) ? (
-            <Button
-              onClick={() => handleJoinSession && handleJoinSession(session)}
-              size="lg"
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white border-0"
-            >
-              <UserPlus className="h-4 w-4 mr-2" />
-              Join Session
-            </Button>
+            <div className="space-y-2">
+              <Button
+                onClick={() => window.location.href = '/login'}
+                size="lg"
+                variant="outline"
+                className="w-full border-gray-600 text-gray-300 hover:text-white hover:border-gray-500"
+              >
+                Login to Join
+              </Button>
+              <Button
+                onClick={() => window.location.href = `/sessions/${session._id}`}
+                size="sm"
+                variant="outline"
+                className="w-full border-gray-600 text-gray-300 hover:text-white hover:border-gray-500"
+              >
+                More Info
+              </Button>
+            </div>
           ) : (
-            <Button
-              onClick={() => window.location.href = `/sessions/${session._id}`}
-              size="lg"
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white border-0"
-            >
-              View Details
-            </Button>
+            <div className="space-y-2">
+              {canJoinSession && canJoinSession(session) ? (
+                <Button
+                  onClick={() => handleJoinSession && handleJoinSession(session)}
+                  size="lg"
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white border-0"
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Join Session
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => window.location.href = `/sessions/${session._id}`}
+                  size="lg"
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white border-0"
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Join Session
+                </Button>
+              )}
+              <Button
+                onClick={() => window.location.href = `/sessions/${session._id}`}
+                size="sm"
+                variant="outline"
+                className="w-full border-gray-600 text-gray-300 hover:text-white hover:border-gray-500"
+              >
+                More Info
+              </Button>
+            </div>
           )}
         </div>
 

@@ -50,6 +50,7 @@ export interface Session {
   status: 'open' | 'full' | 'finished' | 'cancelled';
   image: string | null;
   featured: boolean;
+  estimatedDuration?: number;
   createdAt: string;
   updatedAt: string;
 }

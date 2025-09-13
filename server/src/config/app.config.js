@@ -14,6 +14,7 @@ import characterRouter from "../resources/character/character.route.js";
 import tableRouter from "../resources/table/table.route.js";
 import uploadRouter from "../resources/upload/upload.route.js";
 import conversationRouter from "../resources/conversation/conversation.route.js";
+import searchRouter from "../resources/search/search.route.js";
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use('/api/v1/characters', characterRouter);
 app.use('/api/v1/tables', sensitiveOperationLimiter, tableRouter);
 app.use('/api/v1/upload', uploadRouter);
 app.use('/api/v1/conversations', conversationRouter);
+app.use('/api/v1/search', searchRouter);
 
 // Health check endpoint
 app.get('/api/v1/health', (req, res) => {

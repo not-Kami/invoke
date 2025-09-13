@@ -20,7 +20,7 @@ export default function SessionsPage() {
   const [filteredSessions, setFilteredSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('open');
   
   // Join session modal states
   const [joinModalOpen, setJoinModalOpen] = useState(false);
@@ -152,6 +152,11 @@ export default function SessionsPage() {
     return !isAlreadyPlayer;
   };
 
+  const isSessionDM = (session: any) => {
+    if (!user) return false;
+    // Vérifier si l'utilisateur actuel est le MJ de cette session spécifique
+    return session.dm === user._id || (typeof session.dm === 'object' && session.dm._id === user._id);
+  };
 
   if (loading) {
     return (
@@ -247,7 +252,13 @@ export default function SessionsPage() {
         {!filteredSessions || filteredSessions.length === 0 ? (
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardContent className="p-12 text-center">
-              <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <div className="h-16 w-16 mx-auto mb-4 flex items-center justify-center">
+                <img 
+                  src="/invoke-logo.svg" 
+                  alt="Invoke Logo" 
+                  className="h-16 w-16 object-contain"
+                />
+              </div>
               <h3 className="text-lg font-medium text-white mb-2">
                 No sessions found
               </h3>
@@ -370,6 +381,15 @@ export default function SessionsPage() {
                         className="w-full border-gray-600 text-gray-300 hover:text-white hover:border-gray-500"
                       >
                         Login to Join
+                      </Button>
+                    ) : isSessionDM(session) ? (
+                      <Button
+                        onClick={() => window.location.href = `/sessions/${session._id}`}
+                        size="lg"
+                        className="w-full bg-green-600 hover:bg-green-700 text-white border-0"
+                      >
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Invite Players
                       </Button>
                     ) : canJoinSession(session) ? (
                       <Button

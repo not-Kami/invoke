@@ -18,11 +18,33 @@ import {
   AlertCircle,
   CheckCircle,
   XCircle,
-  Edit
+  Edit,
+  LogOut
 } from 'lucide-react';
 import { formatDateShort } from '../../lib/utils';
 import JoinSessionModal from '../../components/sessions/JoinSessionModal';
+import InvitePlayersModal from '../../components/InvitePlayersModal';
+import LeaveSessionModal from '../../components/LeaveSessionModal';
 import { useJoinSession } from '../../hooks/useJoinSession';
+
+// Fonction utilitaire pour formater la durée
+const formatDuration = (minutes: number) => {
+  if (minutes < 60) {
+    return `${minutes} minutes`;
+  } else if (minutes === 60) {
+    return '1 hour';
+  } else {
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    if (remainingMinutes === 0) {
+      return `${hours} hours`;
+    } else if (remainingMinutes === 30) {
+      return `${hours}.5 hours`;
+    } else {
+      return `${hours}h ${remainingMinutes}min`;
+    }
+  }
+};
 
 interface PopulatedSession extends Omit<Session, 'dm' | 'game' | 'players'> {
   dm: User;
@@ -33,6 +55,7 @@ interface PopulatedSession extends Omit<Session, 'dm' | 'game' | 'players'> {
     genre: string;
   };
   players: User[];
+  estimatedDuration?: number;
 }
 
 export default function SessionDetailPage() {
@@ -45,6 +68,8 @@ export default function SessionDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [joinModalOpen, setJoinModalOpen] = useState(false);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [leaveModalOpen, setLeaveModalOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -60,6 +85,8 @@ export default function SessionDetailPage() {
       const response = await publicAPI.getSession(id!);
       
       if (response.success && response.data) {
+        console.log('Session data:', response.data);
+        console.log('Players:', response.data.players);
         setSession(response.data as PopulatedSession);
       } else {
         setError(response.message || 'Failed to fetch session');
@@ -106,6 +133,66 @@ export default function SessionDetailPage() {
 
   const handleCloseJoinModal = () => {
     setJoinModalOpen(false);
+  };
+
+  const isSessionDM = () => {
+    if (!user || !session) return false;
+    return typeof session.dm === 'string' ? session.dm === user._id : session.dm._id === user._id;
+  };
+
+  const isPlayerInSession = () => {
+    if (!user || !session || !session.players) return false;
+    return session.players.some(player => 
+      typeof player === 'string' ? player === user._id : player._id === user._id
+    );
+  };
+
+  const handleInvitePlayers = () => {
+    setInviteModalOpen(true);
+  };
+
+  const handleInvite = async (playerIds: string[]) => {
+    if (!session) return;
+    
+    try {
+      // Ici, vous devrez implémenter l'API pour inviter des joueurs
+      // Pour l'instant, on simule l'invitation
+      console.log('Inviting players:', playerIds, 'to session:', session._id);
+      
+      // TODO: Implémenter l'API d'invitation
+      // await publicAPI.invitePlayersToSession(session._id, playerIds);
+      
+      // Rafraîchir les données de la session
+      fetchSession();
+    } catch (error) {
+      console.error('Error inviting players:', error);
+    }
+  };
+
+  const handleLeaveSession = () => {
+    setLeaveModalOpen(true);
+  };
+
+  const handleLeave = async (reason: string) => {
+    if (!session || !user) return;
+    
+    try {
+      console.log('Leaving session:', session._id, 'with reason:', reason);
+      
+      // Appel API pour quitter la session
+      const response = await publicAPI.leaveSession(session._id, reason);
+      
+      if (response.success) {
+        alert(`You have successfully left the session. Reason: ${reason}`);
+        // Recharger les données de la session
+        fetchSession();
+      } else {
+        alert(`Failed to leave session: ${response.message}`);
+      }
+    } catch (error) {
+      console.error('Error leaving session:', error);
+      alert('Failed to leave session. Please try again.');
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -175,13 +262,13 @@ export default function SessionDetailPage() {
             Back to Sessions
           </Button>
           
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-white">{session.title}</h1>
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl lg:text-3xl font-bold text-white">{session.title}</h1>
               <p className="mt-2 text-gray-300">{session.description}</p>
             </div>
             
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
               <Badge className={`${getStatusColor(session.status)} text-white`}>
                 <div className="flex items-center space-x-1">
                   {getStatusIcon(session.status)}
@@ -189,46 +276,54 @@ export default function SessionDetailPage() {
                 </div>
               </Badge>
               
-              {!user ? (
-                <Button
-                  onClick={() => navigate('/login')}
-                  variant="outline"
-                  className="border-gray-600 text-gray-300 hover:text-white hover:border-gray-500"
-                >
-                  Login to Join
-                </Button>
-              ) : canJoinSession() ? (
-                <Button
-                  onClick={handleJoinSession}
-                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white border-0"
-                >
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Join Session
-                </Button>
-              ) : (
-                <div className="text-sm text-gray-400">
-                  {session.dm._id === user._id
-                    ? 'You are the DM'
-                    : session.players.some(player => player._id === user._id)
-                    ? 'Already joined'
-                    : session.status === 'full'
-                    ? 'Session full'
-                    : 'Cannot join'
-                  }
-                </div>
-              )}
-              
-              {/* Bouton Modifier pour le MJ */}
-              {user && session.dm._id === user._id && (
-                <Button
-                  onClick={() => navigate(`/sessions/${session._id}/edit`)}
-                  variant="outline"
-                  className="border-blue-600 text-blue-400 hover:text-white hover:bg-blue-600"
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Session
-                </Button>
-              )}
+              <div className="flex flex-col sm:flex-row gap-2">
+                {!user ? (
+                  <Button
+                    onClick={() => navigate('/login')}
+                    variant="outline"
+                    className="border-gray-600 text-gray-300 hover:text-white hover:border-gray-500"
+                  >
+                    Login to Join
+                  </Button>
+                ) : canJoinSession() ? (
+                  <Button
+                    onClick={handleJoinSession}
+                    className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white border-0"
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Join Session
+                  </Button>
+                ) : isPlayerInSession() ? (
+                  <Button
+                    onClick={handleLeaveSession}
+                    className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-0"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Leave Session
+                  </Button>
+                ) : (
+                  <div className="text-sm text-gray-400 px-3 py-2">
+                    {session.dm._id === user._id
+                      ? 'You are the DM'
+                      : session.status === 'full'
+                      ? 'Session full'
+                      : 'Cannot join'
+                    }
+                  </div>
+                )}
+                
+                {/* Bouton Modifier pour le MJ */}
+                {user && session.dm._id === user._id && (
+                  <Button
+                    onClick={() => navigate(`/sessions/${session._id}/edit`)}
+                    variant="outline"
+                    className="border-blue-600 text-blue-400 hover:text-white hover:bg-blue-600"
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Session
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -317,6 +412,16 @@ export default function SessionDetailPage() {
                   </div>
                 </div>
                 
+                {session.estimatedDuration && (
+                  <div className="flex items-center space-x-3">
+                    <Clock className="h-5 w-5 text-primary-400" />
+                    <div>
+                      <p className="text-white font-medium">Duration</p>
+                      <p className="text-sm text-gray-300">{formatDuration(session.estimatedDuration)}</p>
+                    </div>
+                  </div>
+                )}
+                
                 {session.timezone && (
                   <div className="flex items-center space-x-3">
                     <Clock className="h-5 w-5 text-primary-400" />
@@ -360,12 +465,28 @@ export default function SessionDetailPage() {
             {/* Players */}
             <Card className="bg-white/10 backdrop-blur-sm border-white/20">
               <CardHeader>
-                <h3 className="text-lg font-semibold text-white">
-                  Players ({session.players.length}/{session.maxPlayers})
-                </h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-white">
+                    Players ({session.players?.length || 0}/{session.maxPlayers})
+                  </h3>
+                  {isSessionDM() && (session.players?.length || 0) < session.maxPlayers && (
+                    <Button
+                      onClick={handleInvitePlayers}
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      <UserPlus className="h-4 w-4 mr-1" />
+                      Invite
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
-                {session.players.length > 0 ? (
+                {(() => {
+                  console.log('Rendering players:', session.players, 'Length:', session.players?.length);
+                  return null;
+                })()}
+                {session.players && session.players.length > 0 ? (
                   <div className="space-y-3">
                     {session.players.map(player => (
                       <div key={typeof player === 'string' ? player : player._id} className="flex items-center space-x-3">
@@ -403,6 +524,24 @@ export default function SessionDetailPage() {
         onClose={handleCloseJoinModal}
         onConfirm={handleConfirmJoin}
         loading={joinLoading}
+      />
+
+      {/* Invite Players Modal */}
+      <InvitePlayersModal
+        isOpen={inviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        onInvite={handleInvite}
+        currentPlayers={session?.players?.filter(p => typeof p === 'object') || []}
+        maxPlayers={session?.maxPlayers || 6}
+        title="Invite Players to Session"
+      />
+
+      {/* Leave Session Modal */}
+      <LeaveSessionModal
+        isOpen={leaveModalOpen}
+        onClose={() => setLeaveModalOpen(false)}
+        onLeave={handleLeave}
+        sessionTitle={session?.title || 'Unknown Session'}
       />
     </div>
   );

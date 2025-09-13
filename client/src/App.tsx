@@ -13,6 +13,7 @@ import GamesPage from './pages/games/GamesPage';
 import GameDetailPage from './pages/games/GameDetailPage';
 import CampaignsPage from './pages/campaigns/CampaignsPage';
 import CreateCampaignPage from './pages/campaigns/CreateCampaignPage';
+import CampaignDetailPage from './pages/campaigns/CampaignDetailPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import ContactPage from './pages/contact/ContactPage';
@@ -23,6 +24,10 @@ import SecureRoute from './components/auth/SecureRoute';
 import AdminLayout from './components/admin/AdminLayout';
 import AdminPage from './pages/admin/AdminPage';
 import ConversationPage from './pages/admin/conversations/ConversationPage';
+import AdminUserDetailPage from './pages/admin/users/UserDetailPage';
+import AdminSessionDetailPage from './pages/admin/sessions/SessionDetailPage';
+import AdminGameDetailPage from './pages/admin/games/GameDetailPage';
+import AdminCampaignDetailPage from './pages/admin/campaigns/CampaignDetailPage';
 import OnboardingDemo from './components/onboarding/OnboardingDemo';
 
 function App() {
@@ -57,6 +62,7 @@ function App() {
               </Layout>
             </ProtectedRoute>
           } />
+          <Route path="/campaigns/:id" element={<Layout><CampaignDetailPage /></Layout>} />
           <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
           <Route path="/about" element={<Layout><AboutPage /></Layout>} />
           <Route path="/login" element={<Layout><LoginPage /></Layout>} />
@@ -112,6 +118,39 @@ function App() {
             <Layout>
               <OnboardingDemo />
             </Layout>
+          } />
+
+          {/* Routes Admin Detail - Protégées */}
+          <Route path="/admin/users/:id" element={
+            <SecureRoute requiredRole="admin" showSecurityInfo={true}>
+              <AdminLayout>
+                <AdminUserDetailPage />
+              </AdminLayout>
+            </SecureRoute>
+          } />
+          
+          <Route path="/admin/sessions/:id" element={
+            <SecureRoute requiredRole="admin" showSecurityInfo={true}>
+              <AdminLayout>
+                <AdminSessionDetailPage />
+              </AdminLayout>
+            </SecureRoute>
+          } />
+          
+          <Route path="/admin/games/:id" element={
+            <SecureRoute requiredRole="admin" showSecurityInfo={true}>
+              <AdminLayout>
+                <AdminGameDetailPage />
+              </AdminLayout>
+            </SecureRoute>
+          } />
+          
+          <Route path="/admin/campaigns/:id" element={
+            <SecureRoute requiredRole="admin" showSecurityInfo={true}>
+              <AdminLayout>
+                <AdminCampaignDetailPage />
+              </AdminLayout>
+            </SecureRoute>
           } />
 
           {/* Route Conversation - Protégée */}

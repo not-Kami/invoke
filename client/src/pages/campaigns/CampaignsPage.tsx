@@ -24,7 +24,7 @@ export default function CampaignsPage() {
   const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('active');
 
   useEffect(() => {
     // Charger les campagnes depuis l'API
@@ -118,7 +118,7 @@ export default function CampaignsPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                className="block w-full rounded-lg border border-gray-600 bg-gray-800 text-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
               >
                 <option value="all">All Campaigns</option>
                 <option value="active">Active</option>
@@ -133,8 +133,12 @@ export default function CampaignsPage() {
         {filteredCampaigns.length === 0 ? (
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardContent className="p-12 text-center">
-              <div className="h-12 w-12 bg-gray-400 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                <span className="text-white text-2xl">🎲</span>
+              <div className="h-16 w-16 mx-auto mb-4 flex items-center justify-center">
+                <img 
+                  src="/invoke-logo.svg" 
+                  alt="Invoke Logo" 
+                  className="h-16 w-16 object-contain"
+                />
               </div>
               <h3 className="text-lg font-medium text-white mb-2">
                 No campaigns found

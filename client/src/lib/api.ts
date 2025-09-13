@@ -54,11 +54,15 @@ interface Session {
 interface Campaign {
   _id: string;
   name: string;
+  title?: string;
   description: string;
   game: string | Game;
   dm: string | User;
   players: string[] | User[];
   sessions: string[] | Session[];
+  maxPlayers?: number;
+  status?: string;
+  duration?: string;
   active: boolean;
   featured: boolean;
   createdAt: string;
@@ -71,6 +75,8 @@ interface Game {
   description: string;
   genre: string;
   system: string;
+  publisher?: string;
+  complexity?: string;
   players?: string;
   duration?: string;
   images: {
@@ -272,6 +278,7 @@ export const adminAPI = {
 
   // Games
   getGames: () => apiCall<Game[]>('/games?admin=true'),
+  getGame: (id: string) => apiCall<Game>(`/games/${id}`),
   getFeaturedGames: () => apiCall<Game[]>('/games/featured'),
   createGame: (data: Partial<Game>) => 
     apiCall<Game>('/games', {
@@ -283,11 +290,17 @@ export const adminAPI = {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
+  updateGameFeatured: (id: string, featured: boolean) => 
+    apiCall<Game>(`/games/${id}/featured`, {
+      method: 'PUT',
+      body: JSON.stringify({ featured }),
+    }),
   deleteGame: (id: string) => 
     apiCall(`/games/${id}`, { method: 'DELETE' }),
 
   // Campaigns
   getCampaigns: () => apiCall<Campaign[]>('/campaigns'),
+  getCampaign: (id: string) => apiCall<Campaign>(`/campaigns/${id}`),
   getFeaturedCampaigns: () => apiCall<Campaign[]>('/campaigns/featured'),
   updateCampaign: (id: string, data: Partial<Campaign>) => 
     apiCall<Campaign>(`/campaigns/${id}`, {
@@ -475,7 +488,14 @@ export const authAPI = {
 export const publicAPI = {
   getFeaturedSessions: () => apiCall<Session[]>('/sessions/featured'),
   getSession: (id: string) => apiCall<Session>(`/sessions/${id}`),
+  getCampaign: (id: string) => apiCall<Campaign>(`/campaigns/${id}`),
+  getUsersForInvite: () => apiCall<User[]>('/users/list/players'),
   getFeaturedGames: () => apiCall<Game[]>('/games/featured'),
+  leaveSession: (sessionId: string, reason: string) => 
+    apiCall<Session>(`/sessions/${sessionId}/leave`, {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    }),
   getGames: () => apiCall<Game[]>('/games'), // API publique pour tous les jeux
   getGame: (id: string) => apiCall<Game>(`/games/${id}`), // API pour un jeu spécifique
   getGameSessions: (gameId: string) => apiCall<Session[]>(`/sessions?game=${gameId}`), // Sessions d'un jeu spécifique
@@ -553,6 +573,31 @@ export const getUserAvatarUrl = (userId: string, filename: string): string => {
   // Sinon, construire l'URL locale (ancien système)
   const baseUrl = import.meta.env.DEV ? 'http://localhost:3000' : (import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || 'https://dev-api-invoke.onrender.com');
   return `${baseUrl}/uploads/user/${userId}/${filename}`;
+};
+
+// ===== RECHERCHE GLOBALE =====
+export const searchAPI = {
+  // Recherche globale
+  globalSearch: (query: string, type?: string, limit?: number) => 
+    apiCall<{
+      users: User[];
+      sessions: Session[];
+      games: Game[];
+      campaigns: Campaign[];
+      total: number;
+      query: string;
+      type: string;
+    }>(`/search?q=${encodeURIComponent(query)}${type ? `&type=${type}` : ''}${limit ? `&limit=${limit}` : ''}`),
+  
+  // Suggestions de recherche
+  getSuggestions: (query: string) => 
+    apiCall<Array<{
+      type: 'user' | 'session' | 'game' | 'campaign';
+      id: string;
+      title: string;
+      subtitle: string;
+      icon: string;
+    }>>(`/search/suggestions?q=${encodeURIComponent(query)}`)
 };
 
 export type { User, Session, Campaign, Game, ApiResponse };
