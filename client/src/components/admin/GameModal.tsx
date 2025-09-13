@@ -100,7 +100,6 @@ const GameModal: React.FC<GameModalProps> = ({
       });
       
       if (!response.ok) {
-        const error = await response.text();
         throw new Error(`Erreur upload ${imageType}`);
       }
       

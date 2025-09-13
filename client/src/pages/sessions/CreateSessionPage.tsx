@@ -196,7 +196,7 @@ export default function CreateSessionPage() {
       const sessionData = {
         title: formData.title,
         description: formData.description,
-        date: `${formData.date}T${formData.time}:00.000Z`,
+        date: `${formData.date}T${formData.startTime}:00.000Z`,
         timezone: formData.timezone,
         sessionType: formData.sessionType,
         isOneShot: formData.isOneShot,

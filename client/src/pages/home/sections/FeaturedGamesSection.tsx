@@ -7,19 +7,14 @@ import GameCard from '../../../components/games/GameCard';
 interface FeaturedGamesSectionProps {
   featuredGames: Game[];
   loading: boolean;
-  onToggleFavorite: (game: Game) => void;
-  isFavorite: (gameId: string) => boolean;
 }
 
 export default function FeaturedGamesSection({ 
   featuredGames, 
-  loading, 
-  onToggleFavorite, 
-  isFavorite 
+  loading
 }: FeaturedGamesSectionProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   
@@ -38,10 +33,6 @@ export default function FeaturedGamesSection({
   }, []);
   
   const visibleCards = isMobile ? 1 : 4; // 1 carte sur mobile, 4 sur desktop
-  
-  // Obtenir les cartes visibles à partir de l'index actuel
-  // Sur mobile : 1 carte, sur desktop : 4 cartes
-  const visibleGames = featuredGames.slice(currentIndex, currentIndex + visibleCards);
 
   // Fonction pour aller à la carte suivante
   const nextCard = () => {
@@ -107,13 +98,6 @@ export default function FeaturedGamesSection({
     setTouchEnd(0);
   };
 
-  // Gestion du clic sur une carte (évite les conflits avec le swipe)
-  const handleCardClick = (game: Game, e: React.MouseEvent) => {
-    // Vérifier si c'est un vrai clic (pas un swipe)
-    if (Math.abs(touchStart - touchEnd) < 10) {
-      handleGameClick(game);
-    }
-  };
 
   if (loading) {
     return (
@@ -198,7 +182,7 @@ export default function FeaturedGamesSection({
                     <div className="group relative overflow-visible">
                       <GameCard
                         game={game}
-                        onClick={(e) => handleCardClick(game, e)}
+                        onClick={() => handleGameClick(game)}
                         className="h-80 w-full transition-transform duration-300 ease-out hover:scale-105 hover:shadow-2xl cursor-pointer"
                       />
                     </div>

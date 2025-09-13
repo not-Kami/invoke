@@ -69,8 +69,8 @@ export default function EditSessionPage() {
           title: session.title,
           description: session.description,
           date: new Date(session.date).toISOString().split('T')[0],
-          startTime: session.startTime || new Date(session.date).toTimeString().slice(0, 5),
-          estimatedDuration: session.estimatedDuration || 120,
+          startTime: new Date(session.date).toTimeString().slice(0, 5),
+          estimatedDuration: 120,
           timezone: session.timezone || 'UTC',
           sessionType: session.sessionType,
           isOneShot: session.isOneShot,
@@ -182,17 +182,6 @@ export default function EditSessionPage() {
     return timezones;
   };
 
-  // Générer les heures par intervalles de 5 minutes
-  const generateTimeOptions = () => {
-    const times = [];
-    for (let hour = 0; hour < 24; hour++) {
-      for (let minute = 0; minute < 60; minute += 5) {
-        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        times.push(timeString);
-      }
-    }
-    return times;
-  };
 
   useEffect(() => {
     // Load available games from API
@@ -276,7 +265,7 @@ export default function EditSessionPage() {
       const sessionData = {
         title: formData.title,
         description: formData.description,
-        date: `${formData.date}T${formData.time}:00.000Z`,
+        date: `${formData.date}T${formData.startTime}:00.000Z`,
         timezone: formData.timezone,
         sessionType: formData.sessionType,
         isOneShot: formData.isOneShot,

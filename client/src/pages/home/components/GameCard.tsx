@@ -54,7 +54,7 @@ export default function GameCard({
           alt={`Portrait ${game.name}`}
           className="absolute inset-0 w-full h-full object-cover"
           onLoad={() => {}}
-          onError={(e) => {
+          onError={() => {
           }}
         />
         
@@ -70,7 +70,7 @@ export default function GameCard({
             alt={`Logo ${game.name}`}
             className="w-full h-full object-contain"
             onLoad={() => {}}
-            onError={(e) => {
+            onError={() => {
             }}
           />
         </div>

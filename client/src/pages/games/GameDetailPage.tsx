@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, Users, MapPin, Clock, Star, Gamepad2, Sparkles } from 'lucide-react';
-import { publicAPI, Game, Session, usersApi } from '../../lib/api';
+import { publicAPI, Game, Session } from '../../lib/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { useFavoriteGames } from '../../hooks/useFavoriteGames';
 import SessionCard from '../../components/sessions/SessionCard';
@@ -18,7 +18,7 @@ export default function GameDetailPage({}: GameDetailPageProps) {
   const [error, setError] = useState<string | null>(null);
   
   // Hook pour gérer les favoris
-  const { favoriteGames, addFavoriteGame, removeFavoriteGame, isFavorite } = useFavoriteGames();
+  const { addFavoriteGame, removeFavoriteGame, isFavorite } = useFavoriteGames();
 
   useEffect(() => {
     const fetchGameData = async () => {
@@ -31,7 +31,7 @@ export default function GameDetailPage({}: GameDetailPageProps) {
           publicAPI.getGameSessions(gameId)
         ]);
         
-        setGame(gameResponse.data);
+        setGame(gameResponse.data || null);
         // L'API retourne { success: true, data: [], ... }
         setSessions(sessionsResponse.data || []);
       } catch (err) {

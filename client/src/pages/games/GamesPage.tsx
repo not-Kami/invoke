@@ -89,7 +89,7 @@ export default function GamesPage() {
     reset();
   };
 
-  const handleGameClick = (game: Game) => {
+  const handleGameClick = (_game: Game) => {
     // TODO: Navigate to game detail page
   };
 

@@ -5,7 +5,7 @@ import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import Avatar from '../../components/ui/Avatar';
 import Input from '../../components/ui/Input';
-import { usersApi, publicAPI, adminAPI, Game } from '../../lib/api';
+import { usersApi, adminAPI, Game } from '../../lib/api';
 import { useNotification } from '../../hooks/useNotification';
 import { useFavoriteGames } from '../../hooks/useFavoriteGames';
 import { useMasteredGames } from '../../hooks/useMasteredGames';
