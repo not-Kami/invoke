@@ -50,7 +50,6 @@ export default function SessionsPage() {
         setFilteredSessions([]);
       }
     } catch (error) {
-      console.error('Error fetching sessions:', error);
       setError('An error occurred while fetching sessions');
       setSessions([]);
       setFilteredSessions([]);
@@ -145,7 +144,12 @@ export default function SessionsPage() {
     if (!session.players || session.players.length >= 6) return false;
     
     // Vérifier si l'utilisateur est déjà dans la session
-    return !session.players.includes(user._id);
+    // Gérer les cas où players est un tableau d'objets ou de strings
+    const isAlreadyPlayer = session.players.some((player: any) => 
+      typeof player === 'string' ? player === user._id : player._id === user._id
+    );
+    
+    return !isAlreadyPlayer;
   };
 
 

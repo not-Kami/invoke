@@ -71,6 +71,8 @@ interface Game {
   description: string;
   genre: string;
   system: string;
+  players?: string;
+  duration?: string;
   images: {
     logo?: string;
     portrait?: string;
@@ -135,6 +137,15 @@ async function apiCall<T>(
       credentials: 'include', // Inclure les cookies dans les requêtes
     });
 
+    // Pour l'endpoint /auth/me, gérer les erreurs 401 silencieusement
+    if (endpoint === '/auth/me' && response.status === 401) {
+      return {
+        success: false,
+        error: 'Not authenticated',
+        data: undefined
+      } as ApiResponse<T>;
+    }
+
     const data = await response.json();
 
     if (!response.ok) {
@@ -174,6 +185,9 @@ async function apiCall<T>(
 export const adminAPI = {
   // Récupérer tous les utilisateurs
   getUsers: () => apiCall<User[]>('/users'),
+  
+  // Récupérer la liste des joueurs pour invitations (DMs)
+  getPlayersForInvitation: () => apiCall<User[]>('/users/list/players'),
   
   // Récupérer les MJ mis en avant
   getFeaturedDMs: () => apiCall<User[]>('/users/featured-dms'),
@@ -257,7 +271,7 @@ export const adminAPI = {
     apiCall(`/sessions/${id}`, { method: 'DELETE' }),
 
   // Games
-  getGames: () => apiCall<Game[]>('/games'),
+  getGames: () => apiCall<Game[]>('/games?admin=true'),
   getFeaturedGames: () => apiCall<Game[]>('/games/featured'),
   createGame: (data: Partial<Game>) => 
     apiCall<Game>('/games', {
@@ -332,9 +346,17 @@ export const usersApi = {
   getFavorites: (userId: string) => 
     apiCall<Game[]>(`/users/${userId}/favorites`),
   addFavorite: (userId: string, gameId: string) => 
-    apiCall<User>(`/users/${userId}/favorites`, { method: 'POST', body: JSON.stringify({ gameId }) }),
+    apiCall<Game[]>(`/users/${userId}/favorites`, { method: 'POST', body: JSON.stringify({ gameId }) }),
   removeFavorite: (userId: string, gameId: string) => 
-    apiCall<User>(`/users/${userId}/favorites/${gameId}`, { method: 'DELETE' }),
+    apiCall<Game[]>(`/users/${userId}/favorites/${gameId}`, { method: 'DELETE' }),
+  
+  // Jeux maîtrisés (DM uniquement)
+  getMastered: (userId: string) => 
+    apiCall<Game[]>(`/users/${userId}/mastered`),
+  addMastered: (userId: string, gameId: string) => 
+    apiCall<Game[]>(`/users/${userId}/mastered`, { method: 'POST', body: JSON.stringify({ gameId }) }),
+  removeMastered: (userId: string, gameId: string) => 
+    apiCall<Game[]>(`/users/${userId}/mastered/${gameId}`, { method: 'DELETE' }),
   
   // Évaluations
   getEvaluations: (userId: string) => 
@@ -444,13 +466,52 @@ export const publicAPI = {
   getSession: (id: string) => apiCall<Session>(`/sessions/${id}`),
   getFeaturedGames: () => apiCall<Game[]>('/games/featured'),
   getGames: () => apiCall<Game[]>('/games'), // API publique pour tous les jeux
+  getGame: (id: string) => apiCall<Game>(`/games/${id}`), // API pour un jeu spécifique
+  getGameSessions: (gameId: string) => apiCall<Session[]>(`/sessions?game=${gameId}`), // Sessions d'un jeu spécifique
+  getGameCampaigns: (gameId: string) => apiCall<any[]>(`/campaigns?game=${gameId}`), // Campagnes d'un jeu spécifique
+  getGamesPaginated: async (page: number, limit: number, search?: string, genre?: string, system?: string) => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    if (search) params.append('q', search);
+    if (genre && genre !== 'all') params.append('genre', genre);
+    if (system && system !== 'all') params.append('system', system);
+    
+    const response = await fetch(`${API_BASE_URL}/games?${params.toString()}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
+  },
   getFeaturedDMs: () => apiCall<User[]>('/users/featured-dms'),
 };
 
 // ===== UTILITAIRES =====
 
-// Fonction pour calculer l'URL d'une image de jeu
-export const getGameImageUrl = (gameId: string, _imageType: 'logo' | 'portrait' | 'banner', filename: string): string => {
+// Import des images de fallback
+import defaultGameLogo from '../assets/invoke-logo.svg';
+import fallbackGameImage from '../assets/fallback-game-image.png';
+
+// Fonction pour calculer l'URL d'une image de jeu avec fallback
+export const getGameImageUrl = (gameId: string, imageType: 'logo' | 'portrait' | 'banner', filename: string | null | undefined): string => {
+  // Si pas de filename ou filename vide, retourner l'image de fallback appropriée
+  if (!filename || filename.trim() === '') {
+    // Pour les logos, utiliser le logo de l'app
+    if (imageType === 'logo') {
+      return defaultGameLogo;
+    }
+    // Pour les portraits et bannières, utiliser l'image de fallback générique
+    return fallbackGameImage;
+  }
+  
   // Si c'est déjà une URL complète (Cloudinary), la retourner directement
   if (filename.startsWith('http://') || filename.startsWith('https://')) {
     return filename;
@@ -459,6 +520,16 @@ export const getGameImageUrl = (gameId: string, _imageType: 'logo' | 'portrait' 
   // Sinon, construire l'URL locale (ancien système)
   const baseUrl = import.meta.env.DEV ? 'http://localhost:3000' : (import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || 'https://dev-api-invoke.onrender.com');
   return `${baseUrl}/uploads/game/${gameId}/${filename}`;
+};
+
+// Fonction pour obtenir l'image de fallback
+export const getFallbackGameImage = (): string => {
+  return fallbackGameImage;
+};
+
+// Fonction pour obtenir le logo par défaut
+export const getDefaultGameLogo = (): string => {
+  return defaultGameLogo;
 };
 
 // Fonction pour calculer l'URL d'un avatar utilisateur

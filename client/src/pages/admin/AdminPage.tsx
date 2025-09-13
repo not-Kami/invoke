@@ -72,11 +72,9 @@ const AdminPage: React.FC = () => {
   // Vérification de sécurité
   useEffect(() => {
     if (!canViewAdminPanel()) {
-      console.log('AdminPage: Access denied - user is not admin');
       return;
     }
     
-    console.log('AdminPage: User has admin access');
   }, []);
 
   // Vérification de sécurité au rendu
@@ -167,7 +165,6 @@ const AdminPage: React.FC = () => {
       setGameModalOpen(false);
       setSelectedGame(null);
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde du jeu:', error);
     }
   };
 

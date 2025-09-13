@@ -16,14 +16,12 @@ export function useHomePageData() {
     const fetchFeaturedGames = async () => {
       try {
         setGamesLoading(true);
-        const response = await publicAPI.getGames();
+        const response = await publicAPI.getFeaturedGames();
         if (response.success && response.data) {
-          const featured = response.data.filter((game: Game) => game.featured);
-          console.log('⭐ Jeux mis en avant:', featured);
-          setFeaturedGames(featured);
+          setFeaturedGames(response.data);
         }
       } catch (error) {
-        console.error('Erreur chargement jeux:', error);
+        // Gestion silencieuse des erreurs
       } finally {
         setGamesLoading(false);
       }
@@ -39,11 +37,9 @@ export function useHomePageData() {
         setSessionsLoading(true);
         const response = await publicAPI.getFeaturedSessions();
         if (response.success && response.data) {
-          console.log('⭐ Sessions mises en avant:', response.data);
           setFeaturedSessions(response.data);
         }
       } catch (error) {
-        console.error('Erreur chargement sessions:', error);
         setFeaturedSessions([]);
       } finally {
         setSessionsLoading(false);

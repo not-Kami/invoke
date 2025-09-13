@@ -25,7 +25,8 @@ export default function CreateSessionPage() {
     title: '',
     description: '',
     date: '',
-    time: '',
+    startTime: '',
+    estimatedDuration: 120, // Durée en minutes (2h par défaut)
     timezone: 'UTC',
     sessionType: 'online' as 'online' | 'offline',
     isOneShot: false,
@@ -81,17 +82,17 @@ export default function CreateSessionPage() {
     return timezones;
   };
 
-  // Générer les heures par intervalles de 5 minutes
-  const generateTimeOptions = () => {
-    const times = [];
-    for (let hour = 0; hour < 24; hour++) {
-      for (let minute = 0; minute < 60; minute += 5) {
-        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        times.push(timeString);
-      }
-    }
-    return times;
-  };
+  // Options de durée prédéfinies
+  const durationOptions = [
+    { value: 60, label: '1 hour' },
+    { value: 90, label: '1.5 hours' },
+    { value: 120, label: '2 hours' },
+    { value: 150, label: '2.5 hours' },
+    { value: 180, label: '3 hours' },
+    { value: 240, label: '4 hours' },
+    { value: 300, label: '5 hours' },
+    { value: 360, label: '6 hours' }
+  ];
 
   useEffect(() => {
     // Load available games from API
@@ -101,31 +102,26 @@ export default function CreateSessionPage() {
         if (response.success && response.data) {
           setAvailableGames(response.data);
         } else {
-          console.error('Failed to fetch games:', response.message);
         }
       } catch (error) {
-        console.error('Error fetching games:', error);
       }
     };
 
     // Charger les joueurs disponibles depuis l'API
     const fetchPlayers = async () => {
       try {
-        console.log('🔐 CreateSessionPage - Fetching users, user role:', user?.role);
-        const response = await adminAPI.getUsers();
-        console.log('🔐 CreateSessionPage - getUsers response:', response);
+        const response = await adminAPI.getPlayersForInvitation();
         
         if (response.success && response.data) {
-          // Filtrer pour ne garder que les utilisateurs (pas les admins)
-          const regularUsers = response.data.filter((user: User) => user.role === 'user');
-          setAvailablePlayers(regularUsers);
-          setFilteredPlayers(regularUsers);
-          console.log('🔐 CreateSessionPage - Users loaded:', regularUsers.length);
+          setAvailablePlayers(response.data);
+          setFilteredPlayers(response.data);
         } else {
-          console.error('🔐 CreateSessionPage - Failed to fetch users:', response.error);
+          setAvailablePlayers([]);
+          setFilteredPlayers([]);
         }
       } catch (error) {
-        console.error('🔐 CreateSessionPage - Error fetching players:', error);
+        setAvailablePlayers([]);
+        setFilteredPlayers([]);
       }
     };
 
@@ -210,15 +206,11 @@ export default function CreateSessionPage() {
         maxPlayers: formData.maxPlayers
       };
 
-      console.log('Creating session with data:', sessionData);
-      console.log('maxPlayers from formData:', formData.maxPlayers);
-      console.log('maxPlayers in sessionData:', sessionData.maxPlayers);
 
       // Appel API pour créer la session
       const response = await adminAPI.createSession(sessionData);
       
       if (response.success) {
-        console.log('Session created successfully:', response.data);
         
         // Si une image a été sélectionnée, l'uploader
         if (formData.image && response.data?._id) {
@@ -232,12 +224,9 @@ export default function CreateSessionPage() {
             });
             
             if (imageResponse.ok) {
-              console.log('Session image uploaded successfully');
             } else {
-              console.warn('Failed to upload session image');
             }
           } catch (imageError) {
-            console.warn('Error uploading session image:', imageError);
           }
         }
         
@@ -247,7 +236,6 @@ export default function CreateSessionPage() {
       }
     } catch (error) {
       setError('Failed to create session. Please try again.');
-      console.error('Error creating session:', error);
     } finally {
       setLoading(false);
     }
@@ -343,44 +331,49 @@ export default function CreateSessionPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white mb-2">
-                    Time
+                    Start Time
                   </label>
-                  <div className="flex space-x-2">
-                    <select
-                      value={formData.time}
-                      onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
-                      className="flex-1 rounded-lg border border-gray-600 bg-gray-800 text-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-                      required
-                    >
-                      <option value="">Select time</option>
-                      {generateTimeOptions().map(time => (
-                        <option key={time} value={time}>{time}</option>
-                      ))}
-                    </select>
-                    <input
-                      type="time"
-                      value={formData.time}
-                      onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
-                      className="flex-1 rounded-lg border border-gray-600 bg-gray-800 text-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-                      placeholder="Or type manually"
-                    />
-                  </div>
+                  <input
+                    type="time"
+                    value={formData.startTime}
+                    onChange={(e) => setFormData(prev => ({ ...prev, startTime: e.target.value }))}
+                    className="w-full rounded-lg border border-gray-600 bg-gray-800 text-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    required
+                  />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-white mb-2">
-                    Timezone
+                    Estimated Duration
                   </label>
                   <select
-                    value={formData.timezone}
-                    onChange={(e) => setFormData(prev => ({ ...prev, timezone: e.target.value }))}
-                    className="block w-full rounded-lg border border-gray-600 bg-gray-800 text-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    value={formData.estimatedDuration}
+                    onChange={(e) => setFormData(prev => ({ ...prev, estimatedDuration: parseInt(e.target.value) }))}
+                    className="w-full rounded-lg border border-gray-600 bg-gray-800 text-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    required
                   >
-                    {generateTimezones().map(tz => (
-                      <option key={tz.value} value={tz.value}>{tz.label}</option>
+                    {durationOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
                     ))}
                   </select>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Timezone
+                </label>
+                <select
+                  value={formData.timezone}
+                  onChange={(e) => setFormData(prev => ({ ...prev, timezone: e.target.value }))}
+                  className="block w-full rounded-lg border border-gray-600 bg-gray-800 text-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                >
+                  {generateTimezones().map(tz => (
+                    <option key={tz.value} value={tz.value}>{tz.label}</option>
+                  ))}
+                </select>
               </div>
 
               <div className="flex items-center space-x-2">

@@ -18,7 +18,6 @@ export default function HomePage() {
   // Fonction pour gérer l'ajout/suppression des favoris
   const handleToggleFavorite = async (game: any) => {
     if (!user) {
-      console.log('Utilisateur non connecté');
       return;
     }
 
@@ -29,7 +28,6 @@ export default function HomePage() {
         await addFavoriteGame(game);
       }
     } catch (error) {
-      console.error('Erreur lors de la gestion des favoris:', error);
     }
   };
 

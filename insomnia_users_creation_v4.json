@@ -1,0 +1,528 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2025-01-09T12:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
+  "resources": [
+    {
+      "_id": "req_admin_nacho",
+      "parentId": "fld_users",
+      "modified": 1704794400000,
+      "created": 1704794400000,
+      "url": "{{ _.base_url }}/auth/signup",
+      "name": "1. Admin - Nacho",
+      "description": "Création de l'administrateur principal - Nacho (le boss des boss !)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"firstName\": \"Nacho\",\n  \"lastName\": \"Admin\",\n  \"email\": \"nacho@invoke.com\",\n  \"password\": \"admin123\",\n  \"isDM\": true,\n  \"avatar\": null\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704794400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_mj_maxime_chattam",
+      "parentId": "fld_users",
+      "modified": 1704794400000,
+      "created": 1704794400000,
+      "url": "{{ _.base_url }}/auth/signup",
+      "name": "2. MJ - Maxime Chattam",
+      "description": "Création d'un Maître de Jeu - Maxime Chattam (auteur français de JDR)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"firstName\": \"Maxime\",\n  \"lastName\": \"Chattam\",\n  \"email\": \"maxime.chattam@invoke.com\",\n  \"password\": \"mj123\",\n  \"isDM\": true,\n  \"role\": \"user\",\n  \"avatar\": null\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704794400001,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_mj_julien_dutel",
+      "parentId": "fld_users",
+      "modified": 1704794400000,
+      "created": 1704794400000,
+      "url": "{{ _.base_url }}/auth/signup",
+      "name": "3. MJ - Julien Dutel",
+      "description": "Création d'un Maître de Jeu - Julien Dutel (créateur de JDR français)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"firstName\": \"Julien\",\n  \"lastName\": \"Dutel\",\n  \"email\": \"julien.dutel@invoke.com\",\n  \"password\": \"mj123\",\n  \"isDM\": true,\n  \"avatar\": null\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704794400002,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_mj_tolkien",
+      "parentId": "fld_users",
+      "modified": 1704794400000,
+      "created": 1704794400000,
+      "url": "{{ _.base_url }}/auth/signup",
+      "name": "4. MJ - Tolkien",
+      "description": "Création d'un Maître de Jeu - J.R.R. Tolkien (père de la fantasy moderne)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"firstName\": \"J.R.R.\",\n  \"lastName\": \"Tolkien\",\n  \"email\": \"tolkien@invoke.com\",\n  \"password\": \"mj123\",\n  \"isDM\": true,\n  \"avatar\": null\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704794400003,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_mj_dave_arneson",
+      "parentId": "fld_users",
+      "modified": 1704794400000,
+      "created": 1704794400000,
+      "url": "{{ _.base_url }}/auth/signup",
+      "name": "5. MJ - Dave Arneson",
+      "description": "Création d'un Maître de Jeu - Dave Arneson (co-créateur de D&D)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"firstName\": \"Dave\",\n  \"lastName\": \"Arneson\",\n  \"email\": \"dave.arneson@invoke.com\",\n  \"password\": \"mj123\",\n  \"isDM\": true,\n  \"avatar\": null\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704794400004,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_mj_monte_cook",
+      "parentId": "fld_users",
+      "modified": 1704794400000,
+      "created": 1704794400000,
+      "url": "{{ _.base_url }}/auth/signup",
+      "name": "6. MJ - Monte Cook",
+      "description": "Création d'un Maître de Jeu - Monte Cook (designer de JDR renommé)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"firstName\": \"Monte\",\n  \"lastName\": \"Cook\",\n  \"email\": \"monte.cook@invoke.com\",\n  \"password\": \"mj123\",\n  \"isDM\": true,\n  \"avatar\": null\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704794400005,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_player_elminster",
+      "parentId": "fld_users",
+      "modified": 1704794400000,
+      "created": 1704794400000,
+      "url": "{{ _.base_url }}/auth/signup",
+      "name": "7. Joueur - Elminster",
+      "description": "Création d'un Joueur - Elminster (mage légendaire de D&D)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"firstName\": \"Elminster\",\n  \"lastName\": \"Aumar\",\n  \"email\": \"elminster@invoke.com\",\n  \"password\": \"player123\",\n  \"isDM\": false,\n  \"avatar\": null\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704794400006,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_player_drizzt",
+      "parentId": "fld_users",
+      "modified": 1704794400000,
+      "created": 1704794400000,
+      "url": "{{ _.base_url }}/auth/signup",
+      "name": "8. Joueur - Drizzt Do'Urden",
+      "description": "Création d'un Joueur - Drizzt Do'Urden (ranger drow légendaire)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"firstName\": \"Drizzt\",\n  \"lastName\": \"Do'Urden\",\n  \"email\": \"drizzt@invoke.com\",\n  \"password\": \"player123\",\n  \"isDM\": false,\n  \"avatar\": null\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704794400007,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_player_raistlin",
+      "parentId": "fld_users",
+      "modified": 1704794400000,
+      "created": 1704794400000,
+      "url": "{{ _.base_url }}/auth/signup",
+      "name": "9. Joueur - Raistlin Majere",
+      "description": "Création d'un Joueur - Raistlin Majere (mage de Dragonlance)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"firstName\": \"Raistlin\",\n  \"lastName\": \"Majere\",\n  \"email\": \"raistlin@invoke.com\",\n  \"password\": \"player123\",\n  \"isDM\": false,\n  \"avatar\": null\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704794400008,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_player_conan",
+      "parentId": "fld_users",
+      "modified": 1704794400000,
+      "created": 1704794400000,
+      "url": "{{ _.base_url }}/auth/signup",
+      "name": "10. Joueur - Conan",
+      "description": "Création d'un Joueur - Conan the Barbarian (barbare légendaire)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"firstName\": \"Conan\",\n  \"lastName\": \"the Barbarian\",\n  \"email\": \"conan@invoke.com\",\n  \"password\": \"player123\",\n  \"isDM\": false,\n  \"avatar\": null\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704794400009,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_player_gandalf",
+      "parentId": "fld_users",
+      "modified": 1704794400000,
+      "created": 1704794400000,
+      "url": "{{ _.base_url }}/auth/signup",
+      "name": "11. Joueur - Gandalf",
+      "description": "Création d'un Joueur - Gandalf the Grey (mage de la Terre du Milieu)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"firstName\": \"Gandalf\",\n  \"lastName\": \"the Grey\",\n  \"email\": \"gandalf@invoke.com\",\n  \"password\": \"player123\",\n  \"isDM\": false,\n  \"avatar\": null\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704794400010,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_player_aragorn",
+      "parentId": "fld_users",
+      "modified": 1704794400000,
+      "created": 1704794400000,
+      "url": "{{ _.base_url }}/auth/signup",
+      "name": "12. Joueur - Aragorn",
+      "description": "Création d'un Joueur - Aragorn Elessar (ranger du Gondor)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"firstName\": \"Aragorn\",\n  \"lastName\": \"Elessar\",\n  \"email\": \"aragorn@invoke.com\",\n  \"password\": \"player123\",\n  \"isDM\": false,\n  \"avatar\": null\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704794400011,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_player_legolas",
+      "parentId": "fld_users",
+      "modified": 1704794400000,
+      "created": 1704794400000,
+      "url": "{{ _.base_url }}/auth/signup",
+      "name": "13. Joueur - Legolas",
+      "description": "Création d'un Joueur - Legolas Greenleaf (elfe de la Forêt Noire)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"firstName\": \"Legolas\",\n  \"lastName\": \"Greenleaf\",\n  \"email\": \"legolas@invoke.com\",\n  \"password\": \"player123\",\n  \"isDM\": false,\n  \"avatar\": null\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704794400012,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_player_gimli",
+      "parentId": "fld_users",
+      "modified": 1704794400000,
+      "created": 1704794400000,
+      "url": "{{ _.base_url }}/auth/signup",
+      "name": "14. Joueur - Gimli",
+      "description": "Création d'un Joueur - Gimli son of Glóin (nain de la Montagne Solitaire)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"firstName\": \"Gimli\",\n  \"lastName\": \"son of Glóin\",\n  \"email\": \"gimli@invoke.com\",\n  \"password\": \"player123\",\n  \"isDM\": false,\n  \"avatar\": null\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704794400013,
+      "isPrivate": false,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_player_frodo",
+      "parentId": "fld_users",
+      "modified": 1704794400000,
+      "created": 1704794400000,
+      "url": "{{ _.base_url }}/auth/signup",
+      "name": "15. Joueur - Frodo",
+      "description": "Création d'un Joueur - Frodo Baggins (hobbit porteur de l'Anneau)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"firstName\": \"Frodo\",\n  \"lastName\": \"Baggins\",\n  \"email\": \"frodo@invoke.com\",\n  \"password\": \"player123\",\n  \"isDM\": false,\n  \"avatar\": null\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704794400014,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_users",
+      "parentId": "wrk_invoke",
+      "modified": 1704794400000,
+      "created": 1704794400000,
+      "name": "Création d'utilisateurs JDR",
+      "description": "Collection de requêtes pour créer des utilisateurs avec des noms de références au JDR",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1704794400000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "wrk_invoke",
+      "parentId": null,
+      "modified": 1704794400000,
+      "created": 1704794400000,
+      "name": "Invoke Project",
+      "description": "Projet Invoke - Plateforme de JDR",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "env_base",
+      "parentId": "wrk_invoke",
+      "modified": 1704794400000,
+      "created": 1704794400000,
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:3000/api/v1"
+      },
+      "dataPropertyOrder": {
+        "&": ["base_url"]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1704794400000,
+      "_type": "environment"
+    },
+    {
+      "_id": "env_prod",
+      "parentId": "wrk_invoke",
+      "modified": 1704794400000,
+      "created": 1704794400000,
+      "name": "Production Environment",
+      "data": {
+        "base_url": "https://invoke-api.onrender.com/api/v1"
+      },
+      "dataPropertyOrder": {
+        "&": ["base_url"]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1704794400001,
+      "_type": "environment"
+    }
+  ]
+}

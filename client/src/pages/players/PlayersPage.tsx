@@ -21,7 +21,6 @@ export default function PlayersPage() {
         setUsers(Array.isArray(response.data) ? response.data : []);
         setFilteredUsers(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
-        console.error('Error fetching users:', error);
       } finally {
         setLoading(false);
       }

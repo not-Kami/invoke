@@ -22,7 +22,6 @@ export const useOnboarding = () => {
           setShowOnboarding(false);
         }
       } catch (error) {
-        console.error('Error checking onboarding status:', error);
         // En cas d'erreur, on affiche l'onboarding par défaut
         if (user) {
           setShowOnboarding(true);
@@ -43,7 +42,6 @@ export const useOnboarding = () => {
       // Afficher la bannière de bienvenue après l'onboarding
       setShowWelcomeBanner(true);
     } catch (error) {
-      console.error('Error saving onboarding status:', error);
     }
   };
 
@@ -53,7 +51,6 @@ export const useOnboarding = () => {
       localStorage.removeItem(ONBOARDING_KEY);
       setShowOnboarding(true);
     } catch (error) {
-      console.error('Error resetting onboarding status:', error);
     }
   };
 

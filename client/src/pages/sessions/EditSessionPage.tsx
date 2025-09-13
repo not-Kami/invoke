@@ -19,7 +19,8 @@ export default function EditSessionPage() {
     title: '',
     description: '',
     date: '',
-    time: '',
+    startTime: '',
+    estimatedDuration: 120, // Durée en minutes (2h par défaut)
     timezone: 'UTC',
     sessionType: 'online' as 'online' | 'offline',
     isOneShot: false,
@@ -49,26 +50,16 @@ export default function EditSessionPage() {
   const fetchSession = async () => {
     try {
       setFetching(true);
-      console.log('Fetching session with ID:', id);
-      console.log('Current user:', user);
       
       const response = await adminAPI.getSession(id!);
-      console.log('Session API response:', response);
       
       if (response.success && response.data) {
         const session = response.data;
-        console.log('Session data:', session);
-        console.log('Session DM ID:', session.dm);
-        console.log('User ID:', user?._id);
-        console.log('Are IDs equal?', session.dm === user?._id);
         
         // Vérifier que l'utilisateur est le DM de cette session
         // session.dm peut être un objet populé ou juste l'ID
         const dmId = typeof session.dm === 'object' ? session.dm._id : session.dm;
         if (dmId !== user?._id) {
-          console.log('Permission denied: user is not the DM');
-          console.log('DM ID from session:', dmId);
-          console.log('User ID:', user?._id);
           setError('You can only edit sessions you created');
           return;
         }
@@ -78,7 +69,8 @@ export default function EditSessionPage() {
           title: session.title,
           description: session.description,
           date: new Date(session.date).toISOString().split('T')[0],
-          time: new Date(session.date).toTimeString().slice(0, 5),
+          startTime: session.startTime || new Date(session.date).toTimeString().slice(0, 5),
+          estimatedDuration: session.estimatedDuration || 120,
           timezone: session.timezone || 'UTC',
           sessionType: session.sessionType,
           isOneShot: session.isOneShot,
@@ -97,6 +89,8 @@ export default function EditSessionPage() {
             );
             setSelectedPlayers(existingPlayers);
           }
+        } else {
+          setSelectedPlayers([]);
         }
 
         // Charger l'image si elle existe
@@ -108,7 +102,6 @@ export default function EditSessionPage() {
       }
     } catch (error) {
       setError('An error occurred while fetching the session');
-      console.error('Error fetching session:', error);
     } finally {
       setFetching(false);
     }
@@ -131,13 +124,10 @@ export default function EditSessionPage() {
         const result = await response.json();
         if (result.success) {
           setImagePreview(result.data.secure_url);
-          console.log('Image uploaded successfully');
         }
       } else {
-        console.error('Failed to upload image');
       }
     } catch (error) {
-      console.error('Error uploading image:', error);
     } finally {
       setUploadingImage(false);
     }
@@ -213,7 +203,6 @@ export default function EditSessionPage() {
           setAvailableGames(response.data);
         }
       } catch (error) {
-        console.error('Error fetching games:', error);
       }
     };
 
@@ -242,18 +231,16 @@ export default function EditSessionPage() {
   const openPlayerSearch = async () => {
     try {
       // Charger les joueurs seulement quand on ouvre le modal
-      const response = await adminAPI.getUsers();
+      const response = await adminAPI.getPlayersForInvitation();
       if (response.success && response.data) {
         setAvailablePlayers(response.data);
         setFilteredPlayers(response.data);
       } else {
-        console.error('Failed to fetch users:', response.message);
         // Fallback : utiliser seulement les joueurs déjà invités
         setAvailablePlayers(selectedPlayers);
         setFilteredPlayers(selectedPlayers);
       }
     } catch (error) {
-      console.error('Error fetching users:', error);
       // Fallback : utiliser seulement les joueurs déjà invités
       setAvailablePlayers(selectedPlayers);
       setFilteredPlayers(selectedPlayers);
@@ -298,13 +285,11 @@ export default function EditSessionPage() {
         maxPlayers: formData.maxPlayers
       };
 
-      console.log('Updating session with data:', sessionData);
 
       // Appel API pour mettre à jour la session
       const response = await adminAPI.updateSession(id!, sessionData);
       
       if (response.success) {
-        console.log('Session updated successfully:', response.data);
         
         navigate(`/sessions/${id}`);
       } else {
@@ -312,7 +297,6 @@ export default function EditSessionPage() {
       }
     } catch (error) {
       setError('Failed to update session. Please try again.');
-      console.error('Error updating session:', error);
     } finally {
       setLoading(false);
     }
@@ -455,28 +439,36 @@ export default function EditSessionPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white mb-2">
-                    Time
+                    Start Time
                   </label>
-                  <div className="flex space-x-2">
-                    <select
-                      value={formData.time}
-                      onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
-                      className="flex-1 rounded-lg border border-gray-600 bg-gray-800 text-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-                      required
-                    >
-                      <option value="">Select time</option>
-                      {generateTimeOptions().map(time => (
-                        <option key={time} value={time}>{time}</option>
-                      ))}
-                    </select>
-                    <input
-                      type="time"
-                      value={formData.time}
-                      onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
-                      className="flex-1 rounded-lg border border-gray-600 bg-gray-800 text-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-                      placeholder="Or type manually"
-                    />
-                  </div>
+                  <input
+                    type="time"
+                    value={formData.startTime}
+                    onChange={(e) => setFormData(prev => ({ ...prev, startTime: e.target.value }))}
+                    className="w-full rounded-lg border border-gray-600 bg-gray-800 text-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Estimated Duration
+                  </label>
+                  <select
+                    value={formData.estimatedDuration}
+                    onChange={(e) => setFormData(prev => ({ ...prev, estimatedDuration: parseInt(e.target.value) }))}
+                    className="w-full rounded-lg border border-gray-600 bg-gray-800 text-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    required
+                  >
+                    <option value={60}>1 hour</option>
+                    <option value={90}>1.5 hours</option>
+                    <option value={120}>2 hours</option>
+                    <option value={150}>2.5 hours</option>
+                    <option value={180}>3 hours</option>
+                    <option value={240}>4 hours</option>
+                    <option value={300}>5 hours</option>
+                    <option value={360}>6 hours</option>
+                  </select>
                 </div>
                 
                 <div>
@@ -596,7 +588,7 @@ export default function EditSessionPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-medium text-white">
-                    Invited Players ({selectedPlayers.length}/{formData.maxPlayers})
+                    Session Players ({selectedPlayers.length}/{formData.maxPlayers})
                   </h3>
                   <p className="text-sm text-gray-300">
                     Manage who can join your session
@@ -614,11 +606,15 @@ export default function EditSessionPage() {
               </div>
 
               {selectedPlayers.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-medium text-gray-300">Current Players ({selectedPlayers.length})</h4>
+                    <span className="text-xs text-gray-500">Click X to remove player</span>
+                  </div>
                   {selectedPlayers.map(player => (
-                    <div key={player._id} className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
+                    <div key={player._id} className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700/50 hover:bg-gray-800/70 transition-colors">
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
+                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
                           <span className="text-white text-sm font-medium">
                             {player.firstName[0]}{player.lastName[0]}
                           </span>
@@ -635,7 +631,8 @@ export default function EditSessionPage() {
                         onClick={() => removePlayer(player._id)}
                         variant="outline"
                         size="sm"
-                        className="text-red-400 border-red-600 hover:text-white hover:bg-red-600"
+                        className="text-red-400 border-red-600 hover:text-white hover:bg-red-600 hover:border-red-500 transition-colors"
+                        title="Remove player from session"
                       >
                         <X className="h-4 w-4" />
                       </Button>

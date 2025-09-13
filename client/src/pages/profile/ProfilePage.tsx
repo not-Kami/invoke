@@ -5,8 +5,10 @@ import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import Avatar from '../../components/ui/Avatar';
 import Input from '../../components/ui/Input';
-import { usersApi, publicAPI, Game } from '../../lib/api';
+import { usersApi, publicAPI, adminAPI, Game } from '../../lib/api';
 import { useNotification } from '../../hooks/useNotification';
+import { useFavoriteGames } from '../../hooks/useFavoriteGames';
+import { useMasteredGames } from '../../hooks/useMasteredGames';
 import ImagePreview from '../../components/ui/ImagePreview';
 import { 
   User, 
@@ -43,10 +45,16 @@ interface ProfilePageProps {
 export default function ProfilePage({ defaultEditMode = false }: ProfilePageProps) {
   const { user, updateUser } = useAuth();
   const { success, error } = useNotification();
+  const { favoriteGames, addFavoriteGame, removeFavoriteGame, isFavorite } = useFavoriteGames();
+  const { masteredGames, addMasteredGame, removeMasteredGame } = useMasteredGames();
   const [isEditing, setIsEditing] = useState(defaultEditMode);
   const [activeTab, setActiveTab] = useState<'personal' | 'preferences' | 'dm-settings' | 'feedback'>('personal');
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [availableGames, setAvailableGames] = useState<Game[]>([]);
+  const [showGameSelector, setShowGameSelector] = useState(false);
+  const [gameSearchTerm, setGameSearchTerm] = useState('');
+  const [selectorType, setSelectorType] = useState<'favorites' | 'mastered'>('favorites');
 
   if (!user) {
     return (
@@ -105,13 +113,12 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
         }
       }
 
-      // Charger tous les jeux disponibles
-      const gamesResponse = await publicAPI.getGames();
+      // Charger tous les jeux disponibles (utiliser l'API admin pour avoir tous les jeux)
+      const gamesResponse = await adminAPI.getGames();
       if (gamesResponse.success && gamesResponse.data) {
-        // setAvailableGames(gamesResponse.data);
+        setAvailableGames(gamesResponse.data);
       }
     } catch (err) {
-      console.error('Error loading profile data:', err);
               error('Loading Error', 'Unable to load profile data');
     } finally {
       setLoading(false);
@@ -124,7 +131,6 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
 
   // Debug: surveiller les changements de l'état d'édition
   useEffect(() => {
-    console.log('Editing state changed:', isEditing);
   }, [isEditing]);
 
   // Protection contre la remise en édition automatique
@@ -157,7 +163,6 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
         try {
           await updateUser(response.data);
         } catch (err) {
-          console.warn('Could not update user in auth context:', err);
         }
         
         success('Profile Updated', 'Your profile has been updated successfully!');
@@ -168,7 +173,6 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
         error('Update Error', response.message || 'Error during update');
       }
     } catch (err) {
-      console.error('Error updating profile:', err);
       error('Update Error', 'Error updating profile');
     } finally {
       setLoading(false);
@@ -237,7 +241,6 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
         error('Upload Error', errorData.message || 'Error uploading avatar');
       }
     } catch (err) {
-      console.error('Error uploading avatar:', err);
       error('Upload Error', 'Error uploading avatar. Please try again.');
     } finally {
       setAvatarLoading(false);
@@ -246,6 +249,37 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
 
   const handleRemoveImage = () => {
     setSelectedImage(null);
+  };
+
+  // Fonctions pour gérer les jeux favoris
+  const handleToggleFavorite = async (game: Game) => {
+    try {
+      if (isFavorite(game._id)) {
+        await removeFavoriteGame(game._id);
+        success('Game Removed', `${game.name} removed from favorites`);
+      } else {
+        await addFavoriteGame(game);
+        success('Game Added', `${game.name} added to favorites`);
+      }
+    } catch (err) {
+      error('Error', 'Failed to update favorite games');
+    }
+  };
+
+  // Fonctions pour gérer les jeux maîtrisés
+  const handleToggleMastered = async (game: Game) => {
+    try {
+      const isMastered = masteredGames.find(g => g._id === game._id);
+      if (isMastered) {
+        await removeMasteredGame(game._id);
+        success('Game Removed', `${game.name} removed from mastered games`);
+      } else {
+        await addMasteredGame(game);
+        success('Game Added', `${game.name} added to mastered games`);
+      }
+    } catch (err) {
+      error('Error', 'Failed to update mastered games');
+    }
   };
 
 
@@ -262,10 +296,10 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
             <h1 className="text-3xl font-bold text-white">Profile</h1>
             {profileData.isDM && (
-              <Badge variant="warning">
+              <Badge variant="warning" className="mt-1">
                 <Crown className="h-3 w-3 mr-1" />
                 Dungeon Master
               </Badge>
@@ -493,31 +527,58 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
 
                 {activeTab === 'preferences' && (
                   <div className="space-y-6">
-                    <div>
-                      <h3 className="text-lg font-medium text-white mb-4">Favorite Games</h3>
-                      {profileData.favorite_games.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {profileData.favorite_games.map((game: Game) => (
-                            <div key={game._id} className="p-4 bg-white/5 rounded-lg border border-white/10">
-                              <div className="mb-2">
-                                <h4 className="font-medium text-white">{game.name}</h4>
-                              </div>
-                              <p className="text-sm text-gray-400 mb-2">{game.description}</p>
-                              <div className="flex items-center justify-between">
-                                <Badge variant="info" size="sm">{game.genre}</Badge>
-                                <Badge variant="default" size="sm">{game.system}</Badge>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-8">
-                          <Heart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                          <p className="text-gray-400 mb-4">No favorite games yet</p>
-                          <p className="text-sm text-gray-500">Your favorite games will appear here</p>
-                        </div>
-                      )}
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-medium text-white">Favorite Games</h3>
+                      <Button
+                        onClick={() => {
+                          setSelectorType('favorites');
+                          setShowGameSelector(true);
+                        }}
+                        size="sm"
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                      >
+                        <Heart className="h-4 w-4 mr-2" />
+                        Add Games
+                      </Button>
                     </div>
+                    {favoriteGames.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {favoriteGames.map((game: Game) => (
+                          <div key={game._id} className="p-4 bg-white/5 rounded-lg border border-white/10">
+                            <div className="flex items-start justify-between mb-2">
+                              <h4 className="font-medium text-white">{game.name}</h4>
+                              <button
+                                onClick={() => handleToggleFavorite(game)}
+                                className="text-red-400 hover:text-red-300 transition-colors"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </div>
+                            <p className="text-sm text-gray-400 mb-2">{game.description}</p>
+                            <div className="flex items-center justify-between">
+                              <Badge variant="info" size="sm">{game.genre}</Badge>
+                              <Badge variant="default" size="sm">{game.system}</Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Heart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-400 mb-4">No favorite games yet</p>
+                        <p className="text-sm text-gray-500 mb-4">Your favorite games will appear here</p>
+                        <Button
+                          onClick={() => {
+                            setSelectorType('favorites');
+                            setShowGameSelector(true);
+                          }}
+                          className="bg-purple-600 hover:bg-purple-700 text-white"
+                        >
+                          <Heart className="h-4 w-4 mr-2" />
+                          Add Your First Game
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -528,14 +589,35 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
                     </div>
 
                     <div>
-                      <h4 className="text-md font-medium text-white mb-3">Mastered Games</h4>
-                      {profileData.mastered_games.length > 0 ? (
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-md font-medium text-white">Mastered Games</h4>
+                        <Button
+                          onClick={() => {
+                            setSelectorType('mastered');
+                            setShowGameSelector(true);
+                          }}
+                          size="sm"
+                          className="bg-purple-600 hover:bg-purple-700 text-white"
+                        >
+                          <Crown className="h-4 w-4 mr-2" />
+                          Add Games
+                        </Button>
+                      </div>
+                      {masteredGames.length > 0 ? (
                         <div className="space-y-3">
-                          {profileData.mastered_games.map((game: Game) => (
+                          {masteredGames.map((game: Game) => (
                             <div key={game._id} className="p-3 bg-white/5 rounded-lg border border-white/10">
-                              <div>
-                                <h5 className="font-medium text-white">{game.name}</h5>
-                                <p className="text-sm text-gray-400">{game.system}</p>
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <h5 className="font-medium text-white">{game.name}</h5>
+                                  <p className="text-sm text-gray-400">{game.system}</p>
+                                </div>
+                                <button
+                                  onClick={() => handleToggleMastered(game)}
+                                  className="text-red-400 hover:text-red-300 transition-colors"
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
                               </div>
                             </div>
                           ))}
@@ -544,7 +626,17 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
                         <div className="text-center py-6">
                           <Crown className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                           <p className="text-gray-400 mb-4">No mastered games yet</p>
-                          <p className="text-sm text-gray-500">Your mastered games will appear here</p>
+                          <p className="text-sm text-gray-500 mb-4">Your mastered games will appear here</p>
+                          <Button
+                            onClick={() => {
+                              setSelectorType('mastered');
+                              setShowGameSelector(true);
+                            }}
+                            className="bg-purple-600 hover:bg-purple-700 text-white"
+                          >
+                            <Crown className="h-4 w-4 mr-2" />
+                            Add Your First Game
+                          </Button>
                         </div>
                       )}
                     </div>
@@ -600,6 +692,90 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
             </Card>
           </div>
         </div>
+
+        {/* Modal de sélection de jeux simplifié */}
+        {showGameSelector && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-gray-900 rounded-lg border border-white/20 max-w-2xl w-full max-h-[80vh] overflow-hidden">
+              <div className="p-6 border-b border-white/10">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-semibold text-white">
+                    {selectorType === 'favorites' ? 'Select Favorite Games' : 'Select Mastered Games'}
+                  </h3>
+                  <button
+                    onClick={() => setShowGameSelector(false)}
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
+                <Input
+                  placeholder="Search games..."
+                  value={gameSearchTerm}
+                  onChange={(e) => setGameSearchTerm(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+              <div className="p-6 max-h-[50vh] overflow-y-auto">
+                <div className="space-y-2">
+                  {availableGames
+                    .filter(game => 
+                      game.name.toLowerCase().includes(gameSearchTerm.toLowerCase()) ||
+                      game.description.toLowerCase().includes(gameSearchTerm.toLowerCase())
+                    )
+                    .map((game: Game) => (
+                      <div key={game._id} className="p-3 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <h4 className="font-medium text-white">{game.name}</h4>
+                            <p className="text-sm text-gray-400">{game.genre} • {game.system}</p>
+                          </div>
+                          <div className="flex space-x-2 ml-4">
+                            {selectorType === 'favorites' && (
+                              <button
+                                onClick={() => handleToggleFavorite(game)}
+                                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                                  isFavorite(game._id)
+                                    ? 'bg-red-600 text-white hover:bg-red-700'
+                                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                }`}
+                              >
+                                <Heart className={`h-4 w-4 inline mr-1 ${isFavorite(game._id) ? 'fill-current' : ''}`} />
+                                {isFavorite(game._id) ? 'Remove' : 'Add'}
+                              </button>
+                            )}
+                            {selectorType === 'mastered' && user.isDM && (
+                              <button
+                                onClick={() => handleToggleMastered(game)}
+                                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                                  masteredGames.find(g => g._id === game._id)
+                                    ? 'bg-yellow-600 text-white hover:bg-yellow-700'
+                                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                }`}
+                              >
+                                <Crown className={`h-4 w-4 inline mr-1 ${masteredGames.find(g => g._id === game._id) ? 'fill-current' : ''}`} />
+                                {masteredGames.find(g => g._id === game._id) ? 'Remove' : 'Add'}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+              <div className="p-6 border-t border-white/10">
+                <div className="flex justify-end">
+                  <Button
+                    onClick={() => setShowGameSelector(false)}
+                    className="bg-gray-600 hover:bg-gray-700 text-white"
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

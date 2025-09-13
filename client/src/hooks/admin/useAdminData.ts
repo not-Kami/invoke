@@ -17,7 +17,6 @@ export const useAdminData = (activeTab: TabType) => {
 
   const loadData = async () => {
     if (isLoadingData) {
-      console.log('useAdminData: Chargement déjà en cours, ignoré');
       return;
     }
     
@@ -25,7 +24,6 @@ export const useAdminData = (activeTab: TabType) => {
     setLoading(true);
     
     try {
-      console.log('useAdminData: Chargement des données...');
       
       let usersRes: any = null, sessionsRes: any = null, campaignsRes: any = null, gamesRes: any = null, conversationsRes: any = null;
       
@@ -100,7 +98,6 @@ export const useAdminData = (activeTab: TabType) => {
 
       addSuccess('Données chargées avec succès');
     } catch (error) {
-      console.error('useAdminData: Erreur lors du chargement des données:', error);
       addError(`Erreur de connexion: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     } finally {
       setLoading(false);

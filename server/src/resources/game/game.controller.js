@@ -7,7 +7,7 @@ const gameController = {
     },
     getGames: async (req, res) => {
         try {
-            const { q, system, genre, page = 1, limit = 10, sort } = req.query;
+            const { q, system, genre, page = 1, limit = 10, sort, admin } = req.query;
             const filter = {};
             if (q) {
                 filter.$or = [
@@ -19,31 +19,55 @@ const gameController = {
             if (genre) filter.genre = genre;
 
             const sortOption = sort ? (sort.startsWith('-') ? { [sort.slice(1)]: -1 } : { [sort]: 1 }) : { createdAt: -1 };
-            const skip = (parseInt(page) - 1) * parseInt(limit);
-            const games = await Game.find(filter)
-                .sort(sortOption)
-                .skip(skip)
-                .limit(parseInt(limit))
-                .select('name description genre system images featured createdAt')
-                .lean(); // Convertir en objets JavaScript simples
             
-            // Ajouter featured: false par défaut si le champ n'existe pas
-            const gamesWithFeatured = games.map(game => ({
-                ...game,
-                featured: game.featured !== undefined ? game.featured : false
-            }));
-            
-            console.log('🔍 Jeux avant transformation:', games);
-            console.log('✨ Jeux après transformation:', gamesWithFeatured);
-            
-            const total = await Game.countDocuments(filter);
-            res.status(200).json({
-                success: true,
-                data: gamesWithFeatured,
-                page: parseInt(page),
-                limit: parseInt(limit),
-                total
-            });
+            // Si c'est un appel admin, retourner tous les jeux sans pagination
+            if (admin === 'true' || req.user?.role === 'admin') {
+                const games = await Game.find(filter)
+                    .sort(sortOption)
+                    .select('name description genre system images featured createdAt')
+                    .lean();
+                
+                // Ajouter featured: false par défaut si le champ n'existe pas
+                const gamesWithFeatured = games.map(game => ({
+                    ...game,
+                    featured: game.featured !== undefined ? game.featured : false
+                }));
+                
+                console.log('🔍 Admin - Tous les jeux chargés:', gamesWithFeatured.length);
+                
+                res.status(200).json({
+                    success: true,
+                    data: gamesWithFeatured,
+                    total: gamesWithFeatured.length
+                });
+            } else {
+                // Pagination normale pour les utilisateurs publics
+                const skip = (parseInt(page) - 1) * parseInt(limit);
+                const games = await Game.find(filter)
+                    .sort(sortOption)
+                    .skip(skip)
+                    .limit(parseInt(limit))
+                    .select('name description genre system images featured createdAt')
+                    .lean();
+                
+                // Ajouter featured: false par défaut si le champ n'existe pas
+                const gamesWithFeatured = games.map(game => ({
+                    ...game,
+                    featured: game.featured !== undefined ? game.featured : false
+                }));
+                
+                console.log('🔍 Jeux avant transformation:', games);
+                console.log('✨ Jeux après transformation:', gamesWithFeatured);
+                
+                const total = await Game.countDocuments(filter);
+                res.status(200).json({
+                    success: true,
+                    data: gamesWithFeatured,
+                    page: parseInt(page),
+                    limit: parseInt(limit),
+                    total
+                });
+            }
         } catch (error) {
             res.status(500).json({ success: false, message: 'Failed to fetch games', error: error.message });
         }
@@ -90,8 +114,7 @@ const gameController = {
     getFeaturedGames: async (req, res) => {
         try {
             const games = await Game.find({ featured: true })
-                .sort({ createdAt: -1 })
-                .limit(4);
+                .sort({ createdAt: -1 });
             
             res.status(200).json({
                 success: true,

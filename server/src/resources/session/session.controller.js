@@ -49,11 +49,11 @@ const sessionController = {
             console.log('maxPlayers from request:', req.body.maxPlayers);
             
             // Validation des données requises
-            const { title, description, date, game, dm } = req.body;
-            if (!title || !description || !date || !game || !dm) {
+            const { title, description, date, startTime, game, dm } = req.body;
+            if (!title || !description || !date || !startTime || !game || !dm) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Missing required fields: title, description, date, game, dm'
+                    message: 'Missing required fields: title, description, date, startTime, game, dm'
                 });
             }
 
@@ -83,7 +83,7 @@ const sessionController = {
     },
     getSessions: async (req, res) => {
         try {
-            const { q, system, dateStart, dateEnd, format, slots_gte, page = 1, limit = 10, sort } = req.query;
+            const { q, system, dateStart, dateEnd, format, slots_gte, game, page = 1, limit = 10, sort } = req.query;
             
             // Mettre à jour automatiquement les statuts des sessions
             await updateSessionStatuses();
@@ -97,6 +97,7 @@ const sessionController = {
             }
             if (system) filter.system = system;
             if (format) filter.format = format;
+            if (game) filter.game = game;
             if (dateStart || dateEnd) {
                 filter.date = {};
                 if (dateStart) filter.date.$gte = new Date(dateStart);

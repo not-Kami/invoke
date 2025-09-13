@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
 import Avatar from '../ui/Avatar';
+import { useNavigate } from 'react-router-dom';
 import { 
   Calendar, 
   Users, 
@@ -33,13 +34,8 @@ export default function PlayerDashboard({
   onAddFavoriteGame,
   onRemoveFavoriteGame
 }: PlayerDashboardProps) {
+  const navigate = useNavigate();
   // Debug: Log des données reçues
-  console.log('🔍 PlayerDashboard Debug Info:');
-  console.log('📊 upcomingSessions reçues:', upcomingSessions);
-  console.log('⏳ loading:', loading);
-  console.log('👑 isAdmin:', isAdmin);
-  console.log('🎲 isDM:', isDM);
-  console.log('❤️ favoriteGames:', favoriteGames);
   // Données mockées pour les fonctionnalités à venir
   const myCharacters = [
     {
@@ -105,7 +101,11 @@ export default function PlayerDashboard({
               </div>
             ) : upcomingSessions.length > 0 ? (
               upcomingSessions.map((session) => (
-                <div key={session._id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
+                <div 
+                  key={session._id} 
+                  className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 cursor-pointer transition-colors"
+                  onClick={() => navigate(`/sessions/${session._id}`)}
+                >
                   <div className="flex items-center space-x-4">
                     <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
                       <Gamepad2 className="h-6 w-6 text-white" />

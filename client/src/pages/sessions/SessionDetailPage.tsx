@@ -66,7 +66,6 @@ export default function SessionDetailPage() {
       }
     } catch (error) {
       setError('An error occurred while fetching the session');
-      console.error('Error fetching session:', error);
     } finally {
       setLoading(false);
     }

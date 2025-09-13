@@ -27,24 +27,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Vérifier si l'utilisateur est connecté via le cookie
-    authAPI.getCurrentUser().then((response) => {
-      
-      if (response.success && response.data && response.data.user) {
-        setToken('cookie');
-        setUser(response.data.user);
-        // User authenticated via cookie
-      } else {
-        // No valid session found
+    const checkAuth = async () => {
+      try {
+        const response = await authAPI.getCurrentUser();
+        
+        if (response.success && response.data && response.data.user) {
+          setToken('cookie');
+          setUser(response.data.user);
+        } else {
+          // Utilisateur non authentifié (401 ou autre erreur)
+          setToken(null);
+          setUser(null);
+        }
+      } catch (error) {
+        // Erreur réseau ou autre - user not authenticated
         setToken(null);
         setUser(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    }).catch(() => {
-      // getCurrentUser error
-      setToken(null);
-      setUser(null);
-      setLoading(false);
-    });
+    };
+
+    checkAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -55,7 +59,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error(response.error || 'Login failed');
       }
       
-      console.log('Login Debug - Response data:', response.data);
       const userData = response.data as any;
       
       if (!userData || !userData.user) {
@@ -66,16 +69,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (userData.token) {
         localStorage.setItem('authToken', userData.token);
         setToken(userData.token);
-        console.log('🔐 Login Debug - Token stored in localStorage');
       } else {
         setToken('cookie');
-        console.log('🔐 Login Debug - No token in response, using cookie fallback');
       }
       
       setUser(userData.user);
-      console.log('Login Debug - User authenticated:', userData.user);
-      console.log('🔐 Login Debug - User role:', userData.user.role);
-      console.log('🔐 Login Debug - User isDM:', userData.user.isDM);
     } catch (error: any) {
       throw new Error(error.message || 'Login failed');
     }
@@ -121,9 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Mettre à jour l'utilisateur localement
       setUser(response.data);
-      console.log('User updated successfully:', response.data);
     } catch (error: any) {
-      console.error('Error updating user:', error);
       throw new Error(error.message || 'Failed to update user');
     }
   };
@@ -133,7 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Appeler l'API de logout pour supprimer le cookie
       await authAPI.logout();
     } catch (error) {
-      console.error('Logout error:', error);
+      // Gestion silencieuse des erreurs de logout
     } finally {
       setUser(null);
       setToken(null);
@@ -149,7 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

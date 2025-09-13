@@ -10,6 +10,7 @@ import CreateSessionPage from './pages/sessions/CreateSessionPage';
 import SessionDetailPage from './pages/sessions/SessionDetailPage';
 import EditSessionPage from './pages/sessions/EditSessionPage';
 import GamesPage from './pages/games/GamesPage';
+import GameDetailPage from './pages/games/GameDetailPage';
 import CampaignsPage from './pages/campaigns/CampaignsPage';
 import CreateCampaignPage from './pages/campaigns/CreateCampaignPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
@@ -27,7 +28,7 @@ import OnboardingDemo from './components/onboarding/OnboardingDemo';
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           <Route path="/" element={<Layout><HomePage /></Layout>} />
           <Route path="/sessions" element={<Layout><SessionsPage /></Layout>} />
@@ -47,6 +48,7 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/games" element={<Layout><GamesPage /></Layout>} />
+          <Route path="/game/:gameId" element={<Layout><GameDetailPage /></Layout>} />
           <Route path="/campaigns" element={<Layout><CampaignsPage /></Layout>} />
           <Route path="/campaigns/create" element={
             <ProtectedRoute>
@@ -57,8 +59,8 @@ function App() {
           } />
           <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
           <Route path="/about" element={<Layout><AboutPage /></Layout>} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/login" element={<Layout><LoginPage /></Layout>} />
+          <Route path="/signup" element={<Layout><SignupPage /></Layout>} />
           
           {/* Route Dashboard - Protégée */}
           <Route path="/dashboard" element={
