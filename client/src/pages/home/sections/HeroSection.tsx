@@ -3,8 +3,11 @@ import { Link } from 'react-router-dom';
 import { Plus, Users, Sparkles } from 'lucide-react';
 import Button from '../../../components/ui/Button';
 import HeroImage from '../../../assets/hero_section.webp';
+import { useStats } from '../../../hooks/useStats';
 
 export default function HeroSection() {
+  const { stats, loading } = useStats();
+
   return (
     <section className="relative overflow-hidden min-h-screen flex items-center">
       {/* Background Image */}
@@ -64,15 +67,21 @@ export default function HeroSection() {
             {/* Quick Stats */}
             <div className="mt-12 grid grid-cols-3 gap-6 max-w-md ml-auto">
               <div className="text-right">
-                <div className="font-display text-2xl font-bold text-white">156+</div>
+                <div className="font-display text-2xl font-bold text-white">
+                  {loading ? '...' : `${stats?.totalUsers || 0}+`}
+                </div>
                 <div className="text-gray-300 text-sm">Adventurers</div>
               </div>
               <div className="text-right">
-                <div className="font-display text-2xl font-bold text-white">24</div>
+                <div className="font-display text-2xl font-bold text-white">
+                  {loading ? '...' : stats?.activeSessions || 0}
+                </div>
                 <div className="text-gray-300 text-sm">Active Sessions</div>
               </div>
               <div className="text-right">
-                <div className="font-display text-2xl font-bold text-white">12</div>
+                <div className="font-display text-2xl font-bold text-white">
+                  {loading ? '...' : stats?.totalDMs || 0}
+                </div>
                 <div className="text-gray-300 text-sm">Master DMs</div>
               </div>
             </div>

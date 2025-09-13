@@ -358,6 +358,17 @@ export const usersApi = {
   removeMastered: (userId: string, gameId: string) => 
     apiCall<Game[]>(`/users/${userId}/mastered/${gameId}`, { method: 'DELETE' }),
   
+  // Statistiques
+  getStats: () => 
+    apiCall<{
+      totalUsers: number;
+      activeSessions: number;
+      totalSessions: number;
+      totalDMs: number;
+      uniquePlayers: number;
+      totalCampaigns: number;
+    }>('/users/stats'),
+  
   // Évaluations
   getEvaluations: (userId: string) => 
     apiCall<any[]>(`/users/${userId}/evaluations`),

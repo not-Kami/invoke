@@ -1,4 +1,5 @@
 import User from "./user.model.js";
+import Session from "../session/session.model.js";
 import { catchAsync } from "../../utils/catchAsync.js";
 import { AppError } from "../../utils/appError.js";
 
@@ -481,5 +482,55 @@ export const updateUserFeatured = catchAsync(async (req, res, next) => {
         success: true,
         data: updatedUser,
         message: 'User featured status updated successfully'
+    });
+});
+
+// ===== STATISTIQUES =====
+export const getStats = catchAsync(async (req, res) => {
+    // Compter le nombre total d'utilisateurs
+    const totalUsers = await User.countDocuments();
+    
+    // Compter le nombre de sessions actives (status: 'open')
+    const activeSessions = await Session.countDocuments({ status: 'open' });
+    
+    // Compter le nombre total de sessions
+    const totalSessions = await Session.countDocuments();
+    
+    // Compter le nombre de DM (utilisateurs avec isDM: true)
+    const totalDMs = await User.countDocuments({ isDM: true });
+    
+    // Compter le nombre de joueurs uniques (utilisateurs qui participent à au moins une session)
+    // Récupérer toutes les sessions avec leurs joueurs
+    const sessionsWithPlayers = await Session.find({}, 'players');
+    const allPlayerIds = new Set();
+    
+    sessionsWithPlayers.forEach(session => {
+        if (session.players && Array.isArray(session.players)) {
+            session.players.forEach(player => {
+                // Gérer les cas où player est un objet ou un string
+                const playerId = typeof player === 'string' ? player : player._id;
+                if (playerId) {
+                    allPlayerIds.add(playerId.toString());
+                }
+            });
+        }
+    });
+    
+    const uniquePlayers = allPlayerIds.size;
+    
+    // Compter le nombre de campagnes (sessions non one-shot)
+    const totalCampaigns = await Session.countDocuments({ isOneShot: false });
+    
+    
+    res.json({
+        success: true,
+        data: {
+            totalUsers,
+            activeSessions,
+            totalSessions,
+            totalDMs,
+            uniquePlayers,
+            totalCampaigns
+        }
     });
 });

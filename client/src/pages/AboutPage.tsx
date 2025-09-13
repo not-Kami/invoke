@@ -12,9 +12,11 @@ import {
 } from 'lucide-react';
 import InvokeLogo from '../assets/invoke-logo.svg';
 import { useAuth } from '../contexts/AuthContext';
+import { useStats } from '../hooks/useStats';
 
 const AboutPage: React.FC = () => {
   const { user } = useAuth();
+  const { stats, loading: statsLoading } = useStats();
   
   const features = [
     {
@@ -39,11 +41,23 @@ const AboutPage: React.FC = () => {
     }
   ];
 
-  const stats = [
-    { number: '1000+', label: 'Active Players' },
-    { number: '500+', label: 'Sessions Created' },
-    { number: '100+', label: 'Campaigns' },
-    { number: '24/7', label: 'Support' }
+  const displayStats = [
+    { 
+      number: statsLoading ? '...' : `${stats?.totalUsers || 0}+`, 
+      label: 'Active Players' 
+    },
+    { 
+      number: statsLoading ? '...' : `${stats?.totalSessions || 0}+`, 
+      label: 'Sessions Created' 
+    },
+    { 
+      number: statsLoading ? '...' : `${stats?.totalCampaigns || 0}+`, 
+      label: 'Campaigns' 
+    },
+    { 
+      number: '24/7', 
+      label: 'Support' 
+    }
   ];
 
   return (
@@ -130,7 +144,7 @@ const AboutPage: React.FC = () => {
       <div className="py-24">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
+            {displayStats.map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="text-4xl md:text-5xl font-bold text-purple-400 mb-2">
                   {stat.number}

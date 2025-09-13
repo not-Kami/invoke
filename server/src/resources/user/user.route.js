@@ -11,6 +11,7 @@ const userRouter = Router();
 // ===== ROUTES PUBLIQUES =====
 userRouter.post("/", validate(userValidation.createUserSchema), userController.createUser);
 userRouter.get("/featured-dms", userController.getFeaturedDMs);
+userRouter.get("/stats", userController.getStats);
 
 // ===== ROUTES PROTÉGÉES =====
 userRouter.use(protect); // Toutes les routes suivantes nécessitent une authentification
