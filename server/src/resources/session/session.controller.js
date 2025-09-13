@@ -146,6 +146,9 @@ const sessionController = {
                 .populate('game', 'name system genre images')
                 .populate('players', 'firstName lastName avatar');
                 
+            console.log('Session found:', session);
+            console.log('Players in session:', session?.players);
+                
             if (!session) {
                 return res.status(404).json({
                     success: false,
@@ -157,6 +160,7 @@ const sessionController = {
                 data: session
             });
         } catch (error) {
+            console.error('Error in getSession:', error);
             res.status(500).json({
                 success: false,
                 error: error.message
@@ -187,8 +191,16 @@ const sessionController = {
                 });
             }
 
+            // Préparer les données de mise à jour
+            const updateData = { ...req.body };
+            
+            // Si players n'est pas fourni, préserver les joueurs existants
+            if (!updateData.players) {
+                updateData.players = existingSession.players;
+            }
+            
             // Mettre à jour la session
-            const session = await Session.findByIdAndUpdate(sessionId, req.body, { new: true });
+            const session = await Session.findByIdAndUpdate(sessionId, updateData, { new: true });
             
             console.log(`Session ${sessionId} updated successfully by user ${userId}`);
             
@@ -414,6 +426,9 @@ const sessionController = {
 
             // Vérifier que la session existe
             const session = await Session.findById(sessionId);
+            console.log('Session found:', session);
+            console.log('Session players:', session?.players);
+            
             if (!session) {
                 return res.status(404).json({
                     success: false,
@@ -461,6 +476,11 @@ const sessionController = {
                 session.status = 'full';
             }
 
+            // S'assurer que startTime existe pour éviter l'erreur de validation
+            if (!session.startTime) {
+                session.startTime = '20:00'; // Valeur par défaut
+            }
+
             await session.save();
 
             console.log(`User ${userId} successfully joined session ${sessionId}`);
@@ -475,6 +495,75 @@ const sessionController = {
             res.status(500).json({
                 success: false,
                 message: 'Failed to join session',
+                error: error.message
+            });
+        }
+    },
+
+    // Quitter une session en tant que joueur
+    leaveSession: async (req, res) => {
+        try {
+            const sessionId = req.params.id;
+            const userId = req.user._id;
+            const { reason } = req.body;
+
+            console.log(`User ${userId} attempting to leave session ${sessionId} with reason: ${reason}`);
+
+            // Vérifier que la session existe
+            const session = await Session.findById(sessionId);
+            console.log('Session found:', session);
+            console.log('Session players:', session?.players);
+            
+            if (!session) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Session not found'
+                });
+            }
+
+            // Vérifier que l'utilisateur n'est pas le DM
+            if (session.dm.toString() === userId.toString()) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Dungeon Master cannot leave their own session'
+                });
+            }
+
+            // Vérifier que le joueur est dans la session
+            if (!session.players.includes(userId)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'You are not in this session'
+                });
+            }
+
+            // Retirer le joueur de la session
+            session.players = session.players.filter(playerId => playerId.toString() !== userId.toString());
+            
+            // Mettre à jour le statut si nécessaire
+            if (session.status === 'full' && session.players.length < session.maxPlayers) {
+                session.status = 'open';
+            }
+
+            // S'assurer que startTime existe pour éviter l'erreur de validation
+            if (!session.startTime) {
+                session.startTime = '20:00'; // Valeur par défaut
+            }
+
+            await session.save();
+
+            console.log(`User ${userId} successfully left session ${sessionId}. Reason: ${reason}`);
+
+            res.status(200).json({
+                success: true,
+                message: 'Successfully left session',
+                data: session
+            });
+        } catch (error) {
+            console.error('Error leaving session:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Failed to leave session',
                 error: error.message
             });
         }

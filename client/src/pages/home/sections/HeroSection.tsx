@@ -35,8 +35,9 @@ export default function HeroSection() {
             
             <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
               Roll the Dice,<br />
-              <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                Write Your Legend
+              <span className="shimmer-text">
+                <span className="shimmer-text-base">Write Your Legend</span>
+                <span className="shimmer-text-effect">Write Your Legend</span>
               </span>
             </h1>
             
@@ -46,21 +47,24 @@ export default function HeroSection() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-end">
-              <Link to="/sessions/create">
-                <Button variant="glass" size="lg">
+              <Link to="/sessions">
+                <Button variant="glass" size="lg" className="w-full sm:w-auto">
                   <Plus className="h-5 w-5 mr-2" />
-                  Onto your next an Adventure
+                  <span className="hidden sm:inline">Start your next Adventure</span>
+                  <span className="sm:hidden">Start Adventure</span>
                 </Button>
               </Link>
               <Button 
                 size="lg" 
-                className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white border-0 shadow-2xl opacity-50 cursor-not-allowed"
+                className="w-full sm:w-auto bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white border-0 shadow-2xl opacity-50 cursor-not-allowed"
                 disabled
                 title="Fonctionnalité à venir"
               >
                 <Users className="h-5 w-5 mr-2" />
-                Hire a Dungeon Master
-                <span className="ml-2 text-sm text-gray-300">(À venir)</span>
+                <span className="hidden sm:inline">Hire a Dungeon Master</span>
+                <span className="sm:hidden">Hire DM</span>
+                <span className="ml-2 text-sm text-gray-300 hidden sm:inline">(coming soon)</span>
+                <span className="ml-2 text-xs text-gray-300 sm:hidden">(soon)</span>
               </Button>
             </div>
             

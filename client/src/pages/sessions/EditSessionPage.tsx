@@ -1,11 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { adminAPI } from '../../lib/api';
+import { adminAPI, publicAPI } from '../../lib/api';
 import { Game, User } from '../../types';
 import Button from '../../components/ui/Button';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import { Users, Plus, X, AlertCircle, ArrowLeft } from 'lucide-react';
+
+// Options de durée prédéfinies (tranches de 30 minutes jusqu'à 12h)
+const durationOptions = [
+  { value: 30, label: '30 minutes' },
+  { value: 60, label: '1 hour' },
+  { value: 90, label: '1.5 hours' },
+  { value: 120, label: '2 hours' },
+  { value: 150, label: '2.5 hours' },
+  { value: 180, label: '3 hours' },
+  { value: 210, label: '3.5 hours' },
+  { value: 240, label: '4 hours' },
+  { value: 270, label: '4.5 hours' },
+  { value: 300, label: '5 hours' },
+  { value: 330, label: '5.5 hours' },
+  { value: 360, label: '6 hours' },
+  { value: 390, label: '6.5 hours' },
+  { value: 420, label: '7 hours' },
+  { value: 450, label: '7.5 hours' },
+  { value: 480, label: '8 hours' },
+  { value: 510, label: '8.5 hours' },
+  { value: 540, label: '9 hours' },
+  { value: 570, label: '9.5 hours' },
+  { value: 600, label: '10 hours' },
+  { value: 630, label: '10.5 hours' },
+  { value: 660, label: '11 hours' },
+  { value: 690, label: '11.5 hours' },
+  { value: 720, label: '12 hours' }
+];
 
 export default function EditSessionPage() {
   const navigate = useNavigate();
@@ -70,7 +98,7 @@ export default function EditSessionPage() {
           description: session.description,
           date: new Date(session.date).toISOString().split('T')[0],
           startTime: new Date(session.date).toTimeString().slice(0, 5),
-          estimatedDuration: 120,
+          estimatedDuration: (session as any).estimatedDuration || 120,
           timezone: session.timezone || 'UTC',
           sessionType: session.sessionType,
           isOneShot: session.isOneShot,
@@ -80,7 +108,7 @@ export default function EditSessionPage() {
 
         // Charger les joueurs existants
         if (session.players && session.players.length > 0) {
-          const playersResponse = await adminAPI.getUsers();
+          const playersResponse = await publicAPI.getUsersForInvite();
           if (playersResponse.success && playersResponse.data) {
             const existingPlayers = playersResponse.data.filter(player => 
               session.players.some(sessionPlayer => 
@@ -262,7 +290,7 @@ export default function EditSessionPage() {
 
     try {
       // Préparer les données pour l'API
-      const sessionData = {
+      const sessionData: any = {
         title: formData.title,
         description: formData.description,
         date: `${formData.date}T${formData.startTime}:00.000Z`,
@@ -270,9 +298,14 @@ export default function EditSessionPage() {
         sessionType: formData.sessionType,
         isOneShot: formData.isOneShot,
         game: formData.gameId,
-        players: selectedPlayers.map(p => p._id),
-        maxPlayers: formData.maxPlayers
+        maxPlayers: formData.maxPlayers,
+        estimatedDuration: formData.estimatedDuration
       };
+      
+      // Ne modifier les joueurs que si on a des joueurs sélectionnés
+      if (selectedPlayers.length > 0) {
+        sessionData.players = selectedPlayers.map(p => p._id);
+      }
 
 
       // Appel API pour mettre à jour la session
@@ -449,14 +482,11 @@ export default function EditSessionPage() {
                     className="w-full rounded-lg border border-gray-600 bg-gray-800 text-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                     required
                   >
-                    <option value={60}>1 hour</option>
-                    <option value={90}>1.5 hours</option>
-                    <option value={120}>2 hours</option>
-                    <option value={150}>2.5 hours</option>
-                    <option value={180}>3 hours</option>
-                    <option value={240}>4 hours</option>
-                    <option value={300}>5 hours</option>
-                    <option value={360}>6 hours</option>
+                    {durationOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 

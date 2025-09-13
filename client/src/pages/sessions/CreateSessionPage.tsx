@@ -82,16 +82,32 @@ export default function CreateSessionPage() {
     return timezones;
   };
 
-  // Options de durée prédéfinies
+  // Options de durée prédéfinies (tranches de 30 minutes jusqu'à 12h)
   const durationOptions = [
+    { value: 30, label: '30 minutes' },
     { value: 60, label: '1 hour' },
     { value: 90, label: '1.5 hours' },
     { value: 120, label: '2 hours' },
     { value: 150, label: '2.5 hours' },
     { value: 180, label: '3 hours' },
+    { value: 210, label: '3.5 hours' },
     { value: 240, label: '4 hours' },
+    { value: 270, label: '4.5 hours' },
     { value: 300, label: '5 hours' },
-    { value: 360, label: '6 hours' }
+    { value: 330, label: '5.5 hours' },
+    { value: 360, label: '6 hours' },
+    { value: 390, label: '6.5 hours' },
+    { value: 420, label: '7 hours' },
+    { value: 450, label: '7.5 hours' },
+    { value: 480, label: '8 hours' },
+    { value: 510, label: '8.5 hours' },
+    { value: 540, label: '9 hours' },
+    { value: 570, label: '9.5 hours' },
+    { value: 600, label: '10 hours' },
+    { value: 630, label: '10.5 hours' },
+    { value: 660, label: '11 hours' },
+    { value: 690, label: '11.5 hours' },
+    { value: 720, label: '12 hours' }
   ];
 
   useEffect(() => {

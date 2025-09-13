@@ -21,5 +21,6 @@ sessionRouter.patch("/:id/featured", protect, restrictTo("admin"), sessionContro
 sessionRouter.post("/:id/invite", protect, sessionController.invitePlayer);
 sessionRouter.delete("/:id/remove-player", protect, sessionController.removePlayer);
 sessionRouter.post("/:id/join", protect, sessionController.joinSession);
+sessionRouter.post("/:id/leave", protect, sessionController.leaveSession);
 
 export default sessionRouter;

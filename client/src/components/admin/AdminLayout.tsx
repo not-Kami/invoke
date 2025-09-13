@@ -4,6 +4,7 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import InvokeLogo from '../../assets/invoke-logo.svg';
+import GlobalSearch from './GlobalSearch';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -28,6 +29,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               <div className="flex items-center space-x-4">
                 <img src={InvokeLogo} alt="Invoke" className="w-10 h-10" />
                 <h1 className="text-2xl font-cinzel font-bold text-white">Invoke - Admin Panel</h1>
+              </div>
+              
+              {/* Recherche globale */}
+              <div className="flex-1 max-w-md mx-8">
+                <GlobalSearch />
               </div>
               
               {/* Bouton retour */}

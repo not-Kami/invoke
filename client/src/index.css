@@ -42,6 +42,46 @@
   100% { background-position: 0% 50%; }
 }
 
+/* Shimmer effect for text - smooth scanning */
+@keyframes shimmer {
+  0% { 
+    background-position: -200% 0;
+  }
+  30% { 
+    background-position: 200% 0;
+  }
+  100% { 
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-text {
+  position: relative;
+  display: inline-block;
+}
+
+.shimmer-text-base {
+  background: linear-gradient(90deg, #a855f7, #3b82f6, #8b5cf6);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.shimmer-text-effect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  z-index: 1;
+}
+
 @layer base {
   html {
     font-family: 'Inter', system-ui, sans-serif;
