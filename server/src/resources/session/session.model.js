@@ -4,7 +4,7 @@ const sessionSchema = new mongoose.Schema({
     title: { type: String, required: true },
     description: { type: String, required: true },
     date: { type: Date, required: true },
-    startTime: { type: String, required: true }, // Format HH:MM
+    startTime: { type: String, required: false }, // Format HH:MM
     estimatedDuration: { type: Number, default: 120, min: 30 }, // Durée en minutes
     timezone: { type: String, default: 'UTC' },
     sessionType: { type: String, enum: ["online", "offline"], required: true },

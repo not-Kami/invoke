@@ -7,7 +7,7 @@ const gameController = {
     },
     getGames: async (req, res) => {
         try {
-            const { q, system, genre, page = 1, limit = 10, sort, admin } = req.query;
+            const { q, system, genre, page = 1, limit = 100, sort, admin } = req.query;
             const filter = {};
             if (q) {
                 filter.$or = [
