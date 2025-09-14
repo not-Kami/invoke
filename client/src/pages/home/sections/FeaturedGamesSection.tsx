@@ -42,7 +42,7 @@ export default function FeaturedGamesSection({
       const newIndex = prev + 1;
       
       // Si on dépasse la fin, on revient au début
-      if (newIndex + visibleCards > totalGames) {
+      if (newIndex >= totalGames) {
         return 0;
       }
       return newIndex;
@@ -58,7 +58,7 @@ export default function FeaturedGamesSection({
       
       // Si on va en négatif, on va à la fin
       if (newIndex < 0) {
-        return Math.max(0, totalGames - visibleCards);
+        return totalGames - 1;
       }
       return newIndex;
     });
@@ -158,7 +158,7 @@ export default function FeaturedGamesSection({
         </div>
         
         {/* Featured games carousel */}
-        <div className="w-full">
+        <div className="w-full overflow-hidden">
           {/* Games carousel - responsive avec transition de translation */}
           <div 
             className="relative mb-6"
@@ -166,29 +166,55 @@ export default function FeaturedGamesSection({
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            {/* Container avec padding pour éviter la coupure des cartes */}
-            <div className="px-4 md:px-0">
-              <div 
-                className="flex gap-6 transition-transform duration-500 ease-in-out"
-                style={{
-                  transform: `translateX(-${currentIndex * (100 / visibleCards)}%)`
-                }}
-              >
-                {featuredGames.map((game, index) => (
-                  <div 
-                    key={`${game._id}-${index}`}
-                    className={`flex-shrink-0 ${isMobile ? 'w-full' : 'w-1/4'}`}
-                  >
-                    <div className="group relative overflow-visible">
-                      <GameCard
-                        game={game}
-                        onClick={() => handleGameClick(game)}
-                        className="h-80 w-full transition-transform duration-300 ease-out hover:scale-105 hover:shadow-2xl cursor-pointer"
-                      />
+            {/* Container avec overflow caché pour éviter les débordements */}
+            <div className="overflow-hidden">
+              {isMobile ? (
+                // Version mobile avec centrage parfait
+                <div 
+                  className="flex transition-transform duration-500 ease-in-out"
+                  style={{
+                    transform: `translateX(-${currentIndex * 100}%)`
+                  }}
+                >
+                  {featuredGames.map((game, index) => (
+                    <div 
+                      key={`${game._id}-${index}`}
+                      className="w-full flex-shrink-0 flex justify-center px-4"
+                    >
+                      <div className="w-full max-w-sm">
+                        <GameCard
+                          game={game}
+                          onClick={() => handleGameClick(game)}
+                          className="h-80 w-full transition-transform duration-300 ease-out hover:scale-105 hover:shadow-2xl cursor-pointer"
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                // Version desktop
+                <div 
+                  className="flex gap-6 transition-transform duration-500 ease-in-out"
+                  style={{
+                    transform: `translateX(-${currentIndex * (100 / visibleCards)}%)`
+                  }}
+                >
+                  {featuredGames.map((game, index) => (
+                    <div 
+                      key={`${game._id}-${index}`}
+                      className="flex-shrink-0 w-1/4"
+                    >
+                      <div className="group relative overflow-visible w-full">
+                        <GameCard
+                          game={game}
+                          onClick={() => handleGameClick(game)}
+                          className="h-80 w-full transition-transform duration-300 ease-out hover:scale-105 hover:shadow-2xl cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
