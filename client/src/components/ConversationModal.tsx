@@ -22,8 +22,7 @@ interface Message {
 const ConversationModal: React.FC<ConversationModalProps> = ({
   isOpen,
   onClose,
-  conversationId,
-  currentUserEmail
+  conversationId
 }) => {
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -56,7 +55,7 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
         const realMessages: Message[] = conversation.messages.map(msg => ({
           _id: msg._id || Date.now().toString(),
           content: msg.content,
-          sender: typeof msg.sender === 'string' ? 'User' : msg.sender.firstName || 'User',
+          sender: typeof msg.sender === 'string' ? 'User' : msg.sender?.firstName || 'User',
           timestamp: msg.timestamp,
           isAdmin: msg.senderType === 'admin'
         }));

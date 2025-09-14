@@ -85,32 +85,6 @@ const ConversationsPage: React.FC = () => {
     }
   };
 
-  const getConversationPartner = (conversation: Conversation) => {
-    // Pour les conversations contact_admin, le "partner" est l'admin
-    if (conversation.conversationType === 'contact_admin') {
-      return {
-        _id: 'admin',
-        firstName: 'Admin',
-        lastName: 'Support',
-        email: 'admin@invoke.com'
-      };
-    }
-    
-    // Pour les conversations user_chat, trouver l'autre participant
-    if (conversation.participants && conversation.participants.length > 0) {
-      const otherParticipant = conversation.participants.find(p => 
-        typeof p === 'object' ? p._id !== user?._id : p !== user?._id
-      );
-      return otherParticipant || conversation.participants[0];
-    }
-    
-    return {
-      _id: 'unknown',
-      firstName: 'Unknown',
-      lastName: 'User',
-      email: 'unknown@example.com'
-    };
-  };
 
   const getDisplayName = (conversation: Conversation) => {
     if (conversation.conversationType === 'contact_admin') {
@@ -216,7 +190,6 @@ const ConversationsPage: React.FC = () => {
             </Card>
           ) : (
             filteredConversations.map((conversation) => {
-              const partner = getConversationPartner(conversation);
               const isUnread = conversation.isUnread || false;
               
               return (
