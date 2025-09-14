@@ -242,14 +242,11 @@ export const optionalAuth = async (req, res, next) => {
 
 // Utilitaires pour l'authentification
 export const generateToken = (userId) => {
-    console.log('GenerateToken Debug - JWT_SECRET:', env.JWT_SECRET ? 'Present' : 'Missing');
-    console.log('GenerateToken Debug - userId:', userId);
     
     const token = jwt.sign({ id: userId }, env.JWT_SECRET, {
         expiresIn: env.JWT_EXPIRES_IN || '30d'
     });
     
-    console.log('GenerateToken Debug - Generated token:', token ? 'Present' : 'Missing');
     return token;
 };
 

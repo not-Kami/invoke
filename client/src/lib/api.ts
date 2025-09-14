@@ -83,20 +83,21 @@ interface Game {
   updatedAt: string;
 }
 
-// Type pour les conversations
+// Type pour les conversations (correspondant au modèle backend)
 export interface Conversation {
   _id: string;
   conversationType: 'contact_admin' | 'user_chat';
   userEmail?: string;
   userName?: string;
-  participants: string[] | User[];
+  participants?: string[] | User[];
   subject: string;
   status: 'open' | 'in_progress' | 'closed';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   messages: Array<{
+    _id?: string;
     content: string;
     timestamp: string;
-    sender: string | User;
+    sender?: string | User;
     senderType: 'user' | 'admin';
     isRead: boolean;
   }>;
@@ -110,6 +111,9 @@ export interface Conversation {
   tags: string[];
   createdAt: string;
   updatedAt: string;
+  // Virtuals
+  unreadCount?: number;
+  isUnread?: boolean;
 }
 
 // Fonction utilitaire pour les appels API
@@ -371,11 +375,11 @@ export const usersApi = {
 
 // ===== CONVERSATIONS API =====
 export const conversationsApi = {
-  // Créer une nouvelle conversation (contact admin)
+  // Créer une nouvelle conversation (contact admin) - Route publique
   createContactAdmin: (data: {
     userEmail: string;
     content: string;
-    conversationType: string;
+    conversationType?: string;
     subject: string;
     userName?: string;
   }) => 
@@ -396,9 +400,16 @@ export const conversationsApi = {
   getConversation: (conversationId: string) => 
     apiCall<Conversation>(`/conversations/${conversationId}`),
 
-  // Ajouter un message à une conversation
+  // Ajouter un message à une conversation (utilisateur connecté)
   addMessage: (conversationId: string, message: string) => 
     apiCall<Conversation>(`/conversations/${conversationId}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ content: message }),
+    }),
+
+  // Réponse utilisateur à une conversation (route publique)
+  userReply: (conversationId: string, message: string) => 
+    apiCall<Conversation>(`/conversations/${conversationId}/reply`, {
       method: 'POST',
       body: JSON.stringify({ content: message }),
     }),

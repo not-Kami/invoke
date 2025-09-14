@@ -33,7 +33,6 @@ const gameController = {
                     featured: game.featured !== undefined ? game.featured : false
                 }));
                 
-                console.log('🔍 Admin - Tous les jeux chargés:', gamesWithFeatured.length);
                 
                 res.status(200).json({
                     success: true,
@@ -56,8 +55,6 @@ const gameController = {
                     featured: game.featured !== undefined ? game.featured : false
                 }));
                 
-                console.log('🔍 Jeux avant transformation:', games);
-                console.log('✨ Jeux après transformation:', gamesWithFeatured);
                 
                 const total = await Game.countDocuments(filter);
                 res.status(200).json({
