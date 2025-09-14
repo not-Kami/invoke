@@ -22,7 +22,7 @@ import {
 
 export default function DashboardPage() {
   const { user, updateUser } = useAuth();
-  const { loading, sessions, isAdmin, isDM } = useDashboardData();
+  const { loading, sessions, tables, isAdmin, isDM } = useDashboardData();
   const { favoriteGames, removeFavoriteGame } = useFavoriteGames();
   const { masteredGames, removeMasteredGame } = useMasteredGames();
   const [viewMode, setViewMode] = useState<'player' | 'dm'>('player');
@@ -215,6 +215,7 @@ export default function DashboardPage() {
             isAdmin={isAdmin || false}
             isDM={isDM || false}
             favoriteGames={favoriteGames}
+            tables={tables}
             onAddFavoriteGame={() => window.location.href = '/games'}
             onRemoveFavoriteGame={removeFavoriteGame}
           />

@@ -23,14 +23,6 @@ export const getUsers = catchAsync(async (req, res) => {
 });
 
 export const getPlayersForInvitation = catchAsync(async (req, res) => {
-    // Vérifier que l'utilisateur est DM ou admin
-    if (!req.user.isDM && req.user.role !== 'admin') {
-        return res.status(403).json({
-            success: false,
-            message: 'Only DMs and admins can access the players list'
-        });
-    }
-    
     // Retourner seulement les informations nécessaires pour les invitations
     const players = await User.find({ role: 'user' })
         .select('firstName lastName avatar email')

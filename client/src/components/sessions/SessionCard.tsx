@@ -177,14 +177,13 @@ export default function SessionCard({
                   Join Session
                 </Button>
               ) : (
-                <Button
-                  onClick={() => window.location.href = `/sessions/${session._id}`}
-                  size="lg"
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white border-0"
-                >
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Join Session
-                </Button>
+                <div className="text-center py-3">
+                  <p className="text-sm text-gray-400">
+                    {session.players?.some((player: any) => 
+                      typeof player === 'string' ? player === user?._id : player._id === user?._id
+                    ) ? 'You are already in this session' : 'Cannot join this session'}
+                  </p>
+                </div>
               )}
               <Button
                 onClick={() => window.location.href = `/sessions/${session._id}`}

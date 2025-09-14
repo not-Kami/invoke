@@ -390,18 +390,6 @@ export default function SessionDetailPage() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-3">
-                    <Clock className="h-5 w-5 text-primary-400" />
-                    <div>
-                      <p className="text-white font-medium">Time</p>
-                      <p className="text-sm text-gray-300">
-                        {new Date(session.date).toLocaleTimeString('en-US', { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
-                        })}
-                      </p>
-                    </div>
-                  </div>
                 </div>
                 
                 <div className="flex items-center space-x-3">

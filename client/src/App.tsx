@@ -14,6 +14,10 @@ import GameDetailPage from './pages/games/GameDetailPage';
 import CampaignsPage from './pages/campaigns/CampaignsPage';
 import CreateCampaignPage from './pages/campaigns/CreateCampaignPage';
 import CampaignDetailPage from './pages/campaigns/CampaignDetailPage';
+import TablesPage from './pages/tables/TablesPage';
+import CreateTablePage from './pages/tables/CreateTablePage';
+import TableDetailPage from './pages/tables/TableDetailPage';
+import EditTablePage from './pages/tables/EditTablePage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import ContactPage from './pages/contact/ContactPage';
@@ -63,6 +67,41 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/campaigns/:id" element={<Layout><CampaignDetailPage /></Layout>} />
+          <Route path="/tables" element={
+            <ProtectedRoute>
+              <Layout>
+                <TablesPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/tables/create" element={
+            <ProtectedRoute>
+              <Layout>
+                <CreateTablePage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/tables/:id" element={
+            <ProtectedRoute>
+              <Layout>
+                <TableDetailPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/tables/:id/edit" element={
+            <ProtectedRoute>
+              <Layout>
+                <EditTablePage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/tables/:id/join" element={
+            <ProtectedRoute>
+              <Layout>
+                <TableDetailPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
           <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
           <Route path="/about" element={<Layout><AboutPage /></Layout>} />
           <Route path="/login" element={<Layout><LoginPage /></Layout>} />

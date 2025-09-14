@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { adminAPI, User, Session, Campaign, Game, Conversation } from '../../lib/api';
-import { useNotifications } from '../useNotifications';
+import { useSimpleNotifications } from '../useSimpleNotifications';
 
 type TabType = 'users' | 'sessions' | 'campaigns' | 'games' | 'conversations';
 
 export const useAdminData = (activeTab: TabType) => {
-  const { addSuccess, addError } = useNotifications();
+  const { addSuccess, addError } = useSimpleNotifications();
   const [users, setUsers] = useState<User[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [originalSessions, setOriginalSessions] = useState<Session[]>([]);
@@ -55,7 +55,7 @@ export const useAdminData = (activeTab: TabType) => {
       } else if (usersRes && Array.isArray(usersRes)) {
         setUsers(usersRes);
       } else if (usersRes && usersRes.error && !usersRes.error.includes('Données invalides')) {
-        addError(`Erreur utilisateurs: ${usersRes.error}`);
+        addError('Error', `Erreur utilisateurs: ${usersRes.error}`);
       }
 
       // Traitement des sessions
@@ -66,7 +66,7 @@ export const useAdminData = (activeTab: TabType) => {
         setSessions(sessionsRes);
         setOriginalSessions(sessionsRes);
       } else if (sessionsRes && sessionsRes.error && !sessionsRes.error.includes('Données invalides')) {
-        addError(`Erreur sessions: ${sessionsRes.error}`);
+        addError('Error', `Erreur sessions: ${sessionsRes.error}`);
       }
 
       // Traitement des campagnes
@@ -75,7 +75,7 @@ export const useAdminData = (activeTab: TabType) => {
       } else if (campaignsRes && Array.isArray(campaignsRes)) {
         setCampaigns(campaignsRes);
       } else if (campaignsRes && campaignsRes.error && !campaignsRes.error.includes('Données invalides')) {
-        addError(`Erreur campagnes: ${campaignsRes.error}`);
+        addError('Error', `Erreur campagnes: ${campaignsRes.error}`);
       }
 
       // Traitement des jeux
@@ -84,7 +84,7 @@ export const useAdminData = (activeTab: TabType) => {
       } else if (gamesRes && Array.isArray(gamesRes)) {
         setGames(gamesRes);
       } else if (gamesRes && gamesRes.error && !gamesRes.error.includes('Données invalides')) {
-        addError(`Erreur jeux: ${gamesRes.error}`);
+        addError('Error', `Erreur jeux: ${gamesRes.error}`);
       }
 
       // Traitement des conversations
@@ -93,12 +93,12 @@ export const useAdminData = (activeTab: TabType) => {
       } else if (conversationsRes && Array.isArray(conversationsRes)) {
         setConversations(conversationsRes);
       } else if (conversationsRes && conversationsRes.error && !conversationsRes.error.includes('Données invalides')) {
-        addError(`Erreur conversations: ${conversationsRes.error}`);
+        addError('Error', `Erreur conversations: ${conversationsRes.error}`);
       }
 
-      addSuccess('Données chargées avec succès');
+      addSuccess('Success', 'Données chargées avec succès');
     } catch (error) {
-      addError(`Erreur de connexion: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+      addError('Error', `Erreur de connexion: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     } finally {
       setLoading(false);
       setIsLoadingData(false);

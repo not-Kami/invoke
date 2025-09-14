@@ -141,3 +141,77 @@ export interface ApiResponse<T> {
   data?: T;
   error?: string;
 }
+
+export interface Table {
+  _id: string;
+  name: string;
+  description: string;
+  owner: string | User;
+  members: TableMember[];
+  isPrivate: boolean;
+  tags: string[];
+  avatar: string | null;
+  pendingInvitations: PendingInvitation[];
+  preferences: TablePreferences;
+  stats: TableStats;
+  status: 'active' | 'inactive' | 'archived';
+  memberCount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TableMember {
+  user: string | User;
+  joinedAt: string;
+}
+
+export interface PendingInvitation {
+  user: string | User;
+  invitedAt: string;
+  expiresAt: string;
+}
+
+export interface TablePreferences {
+  preferredGames: string[] | Game[];
+  timezone: string;
+  sessionTypes: ('online' | 'offline')[];
+  availability: {
+    weekdays: string[];
+    timeSlots: {
+      start: string;
+      end: string;
+    }[];
+  };
+}
+
+export interface TableStats {
+  sessionsPlayed: number;
+  totalPlayTime: number;
+  averageRating: number;
+}
+
+export interface PopulatedTable extends Omit<Table, 'owner' | 'members' | 'pendingInvitations' | 'preferences'> {
+  owner: User;
+  members: Array<{
+    user: User;
+    status: 'ACTIVE' | 'INVITED';
+    joinedAt: string;
+  }>;
+  pendingInvitations: Array<{
+    user: User;
+    invitedAt: string;
+    expiresAt: string;
+  }>;
+  preferences: {
+    preferredGames: Game[];
+    timezone: string;
+    sessionTypes: ('online' | 'offline')[];
+    availability: {
+      weekdays: string[];
+      timeSlots: {
+        start: string;
+        end: string;
+      }[];
+    };
+  };
+}

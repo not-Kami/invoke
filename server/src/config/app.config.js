@@ -16,6 +16,7 @@ import uploadRouter from "../resources/upload/upload.route.js";
 import conversationRouter from "../resources/conversation/conversation.route.js";
 import searchRouter from "../resources/search/search.route.js";
 
+
 const app = express();
 
 // Middleware de sécurité et logging

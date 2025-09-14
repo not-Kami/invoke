@@ -47,6 +47,7 @@ const GameCard = forwardRef<HTMLDivElement, GameCardProps>(
     };
 
     const handleCardClick = () => {
+      console.log('GameCard clicked:', game._id, game.name);
       if (onClick) {
         onClick(game);
       }
