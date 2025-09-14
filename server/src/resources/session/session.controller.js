@@ -46,15 +46,21 @@ const sessionController = {
             
             // Validation des données requises
             const { title, description, date, startTime, game, dm } = req.body;
-            if (!title || !description || !date || !startTime || !game || !dm) {
+            if (!title || !description || !date || !game) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Missing required fields: title, description, date, startTime, game, dm'
+                    message: 'Missing required fields: title, description, date, game'
                 });
             }
 
+            // Ajouter le DM automatiquement si pas fourni
+            const sessionData = {
+                ...req.body,
+                dm: dm || req.user.id
+            };
+
             // Créer la session
-            const session = await Session.create(req.body);
+            const session = await Session.create(sessionData);
             
             
             res.status(201).json({
