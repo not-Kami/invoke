@@ -31,7 +31,7 @@ export default function CampaignsPage() {
     const fetchCampaigns = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/v1/campaigns');
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:3000/api/v1' : 'https://invoke-api.onrender.com/api/v1')}/campaigns`);
         if (response.ok) {
           const data = await response.json();
           setCampaigns(data.data || []);

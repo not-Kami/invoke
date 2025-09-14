@@ -1,7 +1,8 @@
 // Types pour les réponses API
 
-// Utiliser la variable d'environnement ou fallback
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
+// Hotfix pour la production - utiliser l'URL de production directement
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+  (window.location.hostname === 'localhost' ? 'http://localhost:3000/api/v1' : 'https://invoke-api.onrender.com/api/v1');
 
 // Types pour les réponses API
 interface ApiResponse<T> {

@@ -218,7 +218,7 @@ export default function CreateSessionPage() {
             const imageFormData = new FormData();
             imageFormData.append('image', formData.image);
             
-            const imageResponse = await fetch(`/api/v1/upload/immediate/session/${response.data._id}/banner`, {
+            const imageResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:3000/api/v1' : 'https://invoke-api.onrender.com/api/v1')}/upload/immediate/session/${response.data._id}/banner`, {
               method: 'POST',
               body: imageFormData,
             });
