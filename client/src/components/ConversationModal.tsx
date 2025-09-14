@@ -51,22 +51,19 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
         throw new Error('Failed to load conversation');
       }
 
-      // TODO: Load messages when API is ready
-      // For now, we'll simulate some messages
-      const mockMessages: Message[] = [
-        {
-          _id: '1',
-          content: conversation?.messages && conversation.messages.length > 0 
-            ? conversation.messages[conversation.messages.length - 1].content 
-            : 'Initial message',
-          sender: 'User',
-          timestamp: conversation?.messages && conversation.messages.length > 0 
-            ? conversation.messages[conversation.messages.length - 1].timestamp 
-            : new Date().toISOString(),
-          isAdmin: false
-        }
-      ];
-      setMessages(mockMessages);
+      // Utiliser les vrais messages de la conversation
+      if (conversation?.messages && conversation.messages.length > 0) {
+        const realMessages: Message[] = conversation.messages.map(msg => ({
+          _id: msg._id || Date.now().toString(),
+          content: msg.content,
+          sender: typeof msg.sender === 'string' ? 'User' : msg.sender.firstName || 'User',
+          timestamp: msg.timestamp,
+          isAdmin: msg.senderType === 'admin'
+        }));
+        setMessages(realMessages);
+      } else {
+        setMessages([]);
+      }
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load conversation');
@@ -87,32 +84,15 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
         return;
       }
 
-      // TODO: Send message via API when ready
-      // const response = await conversationsApi.addMessage(conversationId, newMessage);
+      // Envoyer le message via l'API
+      const response = await conversationsApi.addMessage(conversationId, newMessage);
       
-      // For now, simulate sending
-      const mockMessage: Message = {
-        _id: Date.now().toString(),
-        content: newMessage,
-        sender: currentUserEmail || 'You',
-        timestamp: new Date().toISOString(),
-        isAdmin: false
-      };
-
-      setMessages(prev => [...prev, mockMessage]);
-      setNewMessage('');
-      
-      // Update conversation last message
-      if (conversation) {
-        setConversation(prev => prev ? {
-          ...prev,
-          lastMessage: {
-            content: newMessage,
-            timestamp: new Date().toISOString(),
-            sender: currentUserEmail || 'You'
-          },
-          updatedAt: new Date().toISOString()
-        } : null);
+      if (response.success && response.data) {
+        // Recharger la conversation pour avoir les vrais messages
+        await loadConversation();
+        setNewMessage('');
+      } else {
+        throw new Error('Failed to send message');
       }
 
     } catch (err) {
@@ -126,11 +106,13 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
     if (!conversation) return;
 
     try {
-      // TODO: Close conversation via API when ready
-      // const response = await conversationsApi.closeConversation(conversationId);
+      const response = await conversationsApi.closeConversation(conversationId);
       
-      // For now, simulate closing
-      setConversation(prev => prev ? { ...prev, status: 'closed' } : null);
+      if (response.success && response.data) {
+        setConversation(response.data);
+      } else {
+        throw new Error('Failed to close conversation');
+      }
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to close conversation');

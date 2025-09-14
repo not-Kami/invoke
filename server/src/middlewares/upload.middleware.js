@@ -121,16 +121,10 @@ const gameImageStorage = multer.diskStorage({
         // Créer le dossier avec l'ID du jeu
         const folderName = gameId;
         
-        console.log('🔍 Upload image de jeu:', {
-            gameId,
-            imageType,
-            folderName
-        });
         
         // Chemin d'upload standardisé
         const uploadPath = path.join(process.cwd(), 'uploads/game', folderName);
         
-        console.log('📁 Chemin d\'upload:', uploadPath);
         
         ensureDirectoryExists(uploadPath);
         cb(null, uploadPath);
@@ -344,7 +338,6 @@ export const uploadToCloudinaryMiddleware = async (req, res, next) => {
             type = 'game';
             id = req.params.gameId;
             imageType = req.params.imageType;
-            console.log('🎮 Route de jeu détectée:', { type, id, imageType });
         } else if (req.params.id) {
             // Autres routes : /:type/:id
             type = req.params.type || 'user';

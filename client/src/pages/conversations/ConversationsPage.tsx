@@ -2,27 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '../../components/ui/Card';
 import { MessageSquare, User, Calendar, Plus, Search, Filter } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { conversationsApi } from '../../lib/api';
 
-interface Conversation {
-  _id: string;
-  title: string;
-  content: string;
-  sender: {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
-  receiver: {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-  isRead: boolean;
-}
+// Utiliser l'interface Conversation de l'API
+import { Conversation } from '../../lib/api';
 
 const ConversationsPage: React.FC = () => {
   const { user } = useAuth();
@@ -30,68 +13,62 @@ const ConversationsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'sent' | 'received'>('all');
+  const [showNewConversationModal, setShowNewConversationModal] = useState(false);
 
-  // Mock data pour la démonstration
+  // Charger les vraies conversations
   useEffect(() => {
-    const mockConversations: Conversation[] = [
-      {
-        _id: '1',
-        title: 'Question sur la session D&D',
-        content: 'Salut ! J\'ai une question sur la session de demain...',
-        sender: {
-          _id: 'user1',
-          firstName: 'Alice',
-          lastName: 'Martin',
-          email: 'alice@example.com'
-        },
-        receiver: {
-          _id: user?._id || 'user2',
-          firstName: user?.firstName || 'John',
-          lastName: user?.lastName || 'Doe',
-          email: user?.email || 'john@example.com'
-        },
-        createdAt: '2024-08-16T10:00:00Z',
-        updatedAt: '2024-08-16T10:00:00Z',
-        isRead: false
-      },
-      {
-        _id: '2',
-        title: 'Organisation campagne Pathfinder',
-        content: 'Bonjour ! Je voudrais organiser une campagne Pathfinder...',
-        sender: {
-          _id: user?._id || 'user2',
-          firstName: user?.firstName || 'John',
-          lastName: user?.lastName || 'Doe',
-          email: user?.email || 'john@example.com'
-        },
-        receiver: {
-          _id: 'user3',
-          firstName: 'Bob',
-          lastName: 'Wilson',
-          email: 'bob@example.com'
-        },
-        createdAt: '2024-08-15T14:30:00Z',
-        updatedAt: '2024-08-15T14:30:00Z',
-        isRead: true
+    const loadConversations = async () => {
+      try {
+        setLoading(true);
+        const response = await conversationsApi.getUserConversations();
+        
+        if (response.success && response.data) {
+          setConversations(response.data);
+        } else {
+          setConversations([]);
+        }
+      } catch (error) {
+        console.error('Error loading conversations:', error);
+        setConversations([]);
+      } finally {
+        setLoading(false);
       }
-    ];
+    };
 
-    setConversations(mockConversations);
-    setLoading(false);
+    if (user) {
+      loadConversations();
+    }
   }, [user]);
 
-  const filteredConversations = conversations.filter(conversation => {
-    const matchesSearch = conversation.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         conversation.content.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    let matchesFilter = true;
-    if (filterType === 'sent') {
-      matchesFilter = conversation.sender._id === user?._id;
-    } else if (filterType === 'received') {
-      matchesFilter = conversation.receiver._id === user?._id;
-    }
+  const handleNewConversation = () => {
+    setShowNewConversationModal(true);
+  };
 
-    return matchesSearch && matchesFilter;
+  const handleCloseNewConversationModal = () => {
+    setShowNewConversationModal(false);
+  };
+
+  const handleConversationCreated = async () => {
+    // Recharger les conversations après création
+    try {
+      const response = await conversationsApi.getUserConversations();
+      if (response.success && response.data) {
+        setConversations(response.data);
+      }
+    } catch (error) {
+      console.error('Error reloading conversations:', error);
+    }
+    setShowNewConversationModal(false);
+  };
+
+  const filteredConversations = conversations.filter(conversation => {
+    const matchesSearch = conversation.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (conversation.messages && conversation.messages.length > 0 && 
+                          conversation.messages[conversation.messages.length - 1].content.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    // Pour les conversations contact_admin, on ne filtre pas par sender/receiver
+    // car c'est toujours l'utilisateur qui contacte l'admin
+    return matchesSearch;
   });
 
   const formatDate = (dateString: string) => {
@@ -109,10 +86,46 @@ const ConversationsPage: React.FC = () => {
   };
 
   const getConversationPartner = (conversation: Conversation) => {
-    if (conversation.sender._id === user?._id) {
-      return conversation.receiver;
+    // Pour les conversations contact_admin, le "partner" est l'admin
+    if (conversation.conversationType === 'contact_admin') {
+      return {
+        _id: 'admin',
+        firstName: 'Admin',
+        lastName: 'Support',
+        email: 'admin@invoke.com'
+      };
     }
-    return conversation.sender;
+    
+    // Pour les conversations user_chat, trouver l'autre participant
+    if (conversation.participants && conversation.participants.length > 0) {
+      const otherParticipant = conversation.participants.find(p => 
+        typeof p === 'object' ? p._id !== user?._id : p !== user?._id
+      );
+      return otherParticipant || conversation.participants[0];
+    }
+    
+    return {
+      _id: 'unknown',
+      firstName: 'Unknown',
+      lastName: 'User',
+      email: 'unknown@example.com'
+    };
+  };
+
+  const getDisplayName = (conversation: Conversation) => {
+    if (conversation.conversationType === 'contact_admin') {
+      return 'Admin';
+    }
+    
+    // Pour les conversations user_chat, vérifier si c'est l'utilisateur connecté
+    if (conversation.participants && conversation.participants.length > 0) {
+      const isCurrentUser = conversation.participants.some(p => 
+        typeof p === 'object' ? p._id === user?._id : p === user?._id
+      );
+      return isCurrentUser ? 'Me' : 'User';
+    }
+    
+    return 'Unknown';
   };
 
   if (loading) {
@@ -177,9 +190,12 @@ const ConversationsPage: React.FC = () => {
           </div>
 
           {/* Bouton nouvelle conversation */}
-          <button className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
+          <button 
+            onClick={handleNewConversation}
+            className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+          >
             <Plus className="w-4 h-4" />
-            <span>Nouvelle conversation</span>
+            <span>New Conversation</span>
           </button>
         </div>
 
@@ -189,11 +205,11 @@ const ConversationsPage: React.FC = () => {
             <Card className="bg-slate-800/50 border-slate-700">
               <CardContent className="p-8 text-center">
                 <MessageSquare className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">Aucune conversation</h3>
+                <h3 className="text-xl font-semibold text-white mb-2">No conversations</h3>
                 <p className="text-slate-400">
                   {searchTerm || filterType !== 'all' 
-                    ? 'Aucune conversation ne correspond à vos critères.'
-                    : 'Vous n\'avez pas encore de conversations. Commencez par en créer une !'
+                    ? 'No conversations match your criteria.'
+                    : 'You don\'t have any conversations yet. Start by creating one!'
                   }
                 </p>
               </CardContent>
@@ -201,7 +217,7 @@ const ConversationsPage: React.FC = () => {
           ) : (
             filteredConversations.map((conversation) => {
               const partner = getConversationPartner(conversation);
-              const isUnread = !conversation.isRead && conversation.receiver._id === user?._id;
+              const isUnread = conversation.isUnread || false;
               
               return (
                 <Card 
@@ -219,10 +235,10 @@ const ConversationsPage: React.FC = () => {
                           </div>
                           <div>
                             <h3 className="font-semibold text-white">
-                              {conversation.title}
+                              {conversation.subject}
                             </h3>
                             <p className="text-slate-400 text-sm">
-                              avec {partner.firstName} {partner.lastName}
+                              with {getDisplayName(conversation)}
                             </p>
                           </div>
                           {isUnread && (
@@ -231,17 +247,26 @@ const ConversationsPage: React.FC = () => {
                         </div>
                         
                         <p className="text-slate-300 mb-3 line-clamp-2">
-                          {conversation.content}
+                          {conversation.messages && conversation.messages.length > 0 
+                            ? conversation.messages[conversation.messages.length - 1].content 
+                            : 'No message'}
                         </p>
                         
                         <div className="flex items-center justify-between text-sm text-slate-500">
                           <div className="flex items-center space-x-2">
                             <Calendar className="w-4 h-4" />
-                            <span>{formatDate(conversation.createdAt)}</span>
+                            <span>{formatDate(conversation.lastMessageAt || conversation.createdAt)}</span>
                           </div>
-                          <span className="capitalize">
-                            {conversation.sender._id === user?._id ? 'Envoyé' : 'Reçu'}
-                          </span>
+                          <div className="flex items-center space-x-2">
+                            <span className={`px-2 py-1 rounded-full text-xs ${
+                              conversation.status === 'closed' ? 'bg-gray-900/50 text-gray-400' :
+                              conversation.status === 'in_progress' ? 'bg-blue-900/50 text-blue-400' :
+                              'bg-green-900/50 text-green-400'
+                            }`}>
+                              {conversation.status === 'closed' ? 'Closed' :
+                               conversation.status === 'in_progress' ? 'In Progress' : 'Open'}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -252,6 +277,86 @@ const ConversationsPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Modal pour créer une nouvelle conversation */}
+      {showNewConversationModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 border border-slate-700 rounded-lg w-full max-w-md">
+            <div className="p-6">
+              <h3 className="text-xl font-semibold text-white mb-4">New Conversation</h3>
+              
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const subject = formData.get('subject') as string;
+                const content = formData.get('content') as string;
+                
+                if (!user) return;
+                
+                try {
+                  const response = await conversationsApi.createContactAdmin({
+                    userEmail: user.email,
+                    subject: subject,
+                    content: content,
+                    conversationType: 'contact_admin',
+                    userName: `${user.firstName} ${user.lastName}`
+                  });
+                  
+                  if (response.success) {
+                    // Recharger les conversations
+                    await handleConversationCreated();
+                    // Rediriger vers la page de contact
+                    window.location.href = '/contact';
+                  }
+                } catch (error) {
+                  console.error('Error creating conversation:', error);
+                }
+              }}>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Subject
+                  </label>
+                  <input
+                    type="text"
+                    name="subject"
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="Subject of your conversation..."
+                    required
+                  />
+                </div>
+                
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Message
+                  </label>
+                  <textarea
+                    name="content"
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 h-24 resize-none"
+                    placeholder="Describe your question or request..."
+                    required
+                  />
+                </div>
+                
+                <div className="flex space-x-3">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg transition-colors"
+                  >
+                    Create Conversation
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCloseNewConversationModal}
+                    className="flex-1 bg-slate-600 hover:bg-slate-700 text-white py-2 px-4 rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

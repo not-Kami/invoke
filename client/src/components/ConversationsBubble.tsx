@@ -28,14 +28,16 @@ const ConversationsBubble: React.FC<ConversationsBubbleProps> = ({ className = '
   const loadUserConversations = async () => {
     try {
       setLoading(true);
-      // Utiliser la route simple /user pour l'utilisateur connecté
       const response = await conversationsApi.getUserConversations();
       
       if (response.success && response.data) {
         setConversations(response.data);
       } else {
+        setConversations([]);
       }
     } catch (error) {
+      console.error('Error loading conversations:', error);
+      setConversations([]);
     } finally {
       setLoading(false);
     }
@@ -55,6 +57,7 @@ const ConversationsBubble: React.FC<ConversationsBubbleProps> = ({ className = '
         setSelectedConversation(null);
       }
     } catch (error) {
+      console.error('Error sending message:', error);
     } finally {
       setSending(false);
     }
@@ -73,7 +76,7 @@ const ConversationsBubble: React.FC<ConversationsBubbleProps> = ({ className = '
   }
 
   const unreadCount = conversations ? conversations.filter(conv => 
-    conv.messages && conv.messages.some(msg => !msg.isRead)
+    conv.isUnread || (conv.messages && conv.messages.some(msg => !msg.isRead))
   ).length : 0;
 
   return (
@@ -94,10 +97,10 @@ const ConversationsBubble: React.FC<ConversationsBubbleProps> = ({ className = '
 
       {/* Panneau des conversations */}
       {isOpen && (
-        <div className="absolute bottom-16 right-0 w-96 bg-slate-800 border border-slate-700 rounded-lg shadow-xl">
+        <div className="absolute bottom-16 right-0 w-[calc(100vw-3rem)] sm:w-96 bg-slate-800 border border-slate-700 rounded-lg shadow-xl">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-slate-700">
-            <h3 className="text-white font-semibold">Mes conversations</h3>
+            <h3 className="text-white font-semibold">My Conversations</h3>
             <button
               onClick={() => {
                 setIsOpen(false);
@@ -115,7 +118,7 @@ const ConversationsBubble: React.FC<ConversationsBubbleProps> = ({ className = '
             {loading ? (
               <div className="p-4 text-center">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-400 mx-auto"></div>
-                <p className="text-slate-400 mt-2">Chargement...</p>
+                <p className="text-slate-400 mt-2">Loading...</p>
               </div>
             ) : conversations && conversations.length > 0 ? (
               <div className="p-2">
@@ -137,7 +140,10 @@ const ConversationsBubble: React.FC<ConversationsBubbleProps> = ({ className = '
                         <p className="text-slate-400 text-sm truncate mt-1">
                           {conversation.messages && conversation.messages.length > 0
                             ? conversation.messages[conversation.messages.length - 1].content
-                            : 'Aucun message'}
+                            : 'No message'}
+                        </p>
+                        <p className="text-slate-500 text-xs mt-1">
+                          with {conversation.conversationType === 'contact_admin' ? 'Admin' : 'me'}
                         </p>
                         <div className="flex items-center space-x-2 mt-2">
                           <span className={`text-xs px-2 py-1 rounded-full ${
@@ -145,11 +151,11 @@ const ConversationsBubble: React.FC<ConversationsBubbleProps> = ({ className = '
                               ? 'bg-green-500/20 text-green-400' 
                               : 'bg-slate-500/20 text-slate-400'
                           }`}>
-                            {conversation.status === 'open' ? 'Ouvert' : 'Fermé'}
+                            {conversation.status === 'open' ? 'Open' : 'Closed'}
                           </span>
                           {conversation.messages && conversation.messages.some(msg => !msg.isRead) && (
                             <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                              Nouveau
+                              New
                             </span>
                           )}
                         </div>
@@ -161,8 +167,8 @@ const ConversationsBubble: React.FC<ConversationsBubbleProps> = ({ className = '
             ) : (
               <div className="p-4 text-center">
                 <MessageSquare className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                <p className="text-slate-400">Aucune conversation</p>
-                <p className="text-slate-500 text-sm">Vos conversations apparaîtront ici</p>
+                <p className="text-slate-400">No conversations</p>
+                <p className="text-slate-500 text-sm">Your conversations will appear here</p>
               </div>
             )}
           </div>
@@ -172,7 +178,7 @@ const ConversationsBubble: React.FC<ConversationsBubbleProps> = ({ className = '
             <div className="p-3 border-t border-slate-700">
               <div className="mb-3">
                 <h4 className="text-white font-medium text-sm mb-2">
-                  Répondre à : {selectedConversation.subject}
+                  Reply to: {selectedConversation.subject}
                 </h4>
                 {/* Aperçu du dernier message */}
                 {selectedConversation.messages && selectedConversation.messages.length > 0 && (
@@ -184,7 +190,7 @@ const ConversationsBubble: React.FC<ConversationsBubbleProps> = ({ className = '
                         <User className="w-3 h-3 text-blue-400" />
                       )}
                       <span className="text-xs text-slate-300">
-                        {selectedConversation.messages[selectedConversation.messages.length - 1].senderType === 'admin' ? 'Admin' : 'Vous'}
+                        {selectedConversation.messages[selectedConversation.messages.length - 1].senderType === 'admin' ? 'Admin' : 'Me'}
                       </span>
                     </div>
                     <p className="text-xs text-slate-300">
@@ -198,7 +204,7 @@ const ConversationsBubble: React.FC<ConversationsBubbleProps> = ({ className = '
                 value={replyContent}
                 onChange={(e) => setReplyContent(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Tapez votre réponse... (Entrée pour envoyer, Shift+Entrée pour nouvelle ligne)"
+                placeholder="Type your reply... (Enter to send, Shift+Enter for new line)"
                 className="min-h-[80px] bg-slate-700 text-white border-slate-600 placeholder-slate-400 mb-3 resize-none"
               />
               
@@ -214,7 +220,7 @@ const ConversationsBubble: React.FC<ConversationsBubbleProps> = ({ className = '
                   ) : (
                     <>
                       <Send className="w-4 h-4 mr-2" />
-                      Envoyer
+                      Send
                     </>
                   )}
                 </Button>
@@ -226,7 +232,7 @@ const ConversationsBubble: React.FC<ConversationsBubbleProps> = ({ className = '
                   variant="outline"
                   size="sm"
                 >
-                  Annuler
+                  Cancel
                 </Button>
               </div>
             </div>
@@ -238,7 +244,7 @@ const ConversationsBubble: React.FC<ConversationsBubbleProps> = ({ className = '
               onClick={() => window.open('/conversations', '_blank')}
               className="w-full bg-slate-700 hover:bg-slate-600 text-white py-2 px-4 rounded-lg transition-colors text-sm"
             >
-              Voir toutes mes conversations
+              View All My Conversations
             </button>
           </div>
         </div>
