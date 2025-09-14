@@ -56,7 +56,7 @@ const sessionController = {
             // Ajouter le DM automatiquement si pas fourni
             const sessionData = {
                 ...req.body,
-                dm: dm || req.user.id
+                dm: dm || req.user._id
             };
 
             // Créer la session
