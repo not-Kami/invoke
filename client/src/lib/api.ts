@@ -276,7 +276,7 @@ export const adminAPI = {
     apiCall(`/sessions/${id}`, { method: 'DELETE' }),
 
   // Games
-  getGames: () => apiCall<Game[]>('/games?admin=true'),
+  getGames: () => apiCall<Game[]>('/games'),
   getFeaturedGames: () => apiCall<Game[]>('/games/featured'),
   createGame: (data: Partial<Game>) => 
     apiCall<Game>('/games', {
