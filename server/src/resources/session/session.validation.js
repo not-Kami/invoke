@@ -48,11 +48,12 @@ export const deleteSessionSchema = Joi.object({
 
 export const getSessionsSchema = Joi.object({
     page: Joi.number().integer().min(1).optional(),
-    limit: Joi.number().integer().min(1).max(100).optional(),
+    limit: Joi.number().integer().min(1).max(1000).optional(),
     search: Joi.string().optional(),
     sessionType: Joi.string().valid("online", "offline").optional(),
     status: Joi.string().valid("open", "full", "finished", "cancelled").optional(),
     game: Joi.string().optional(),
     dm: Joi.string().optional(),
+    showFinished: Joi.boolean().optional(),
 });
 
