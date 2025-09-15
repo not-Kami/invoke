@@ -1,0 +1,19 @@
+{
+  "name": "invoke-presentation",
+  "version": "1.0.0",
+  "description": "Présentation de l'application Invoke - Plateforme de Jeux de Rôle",
+  "main": "index.js",
+  "scripts": {
+    "dev": "slidev",
+    "build": "slidev build",
+    "export": "slidev export",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["presentation", "invoke", "jdr", "games", "slidev"],
+  "author": "Salim",
+  "license": "ISC",
+  "devDependencies": {
+    "@slidev/cli": "^0.50.0",
+    "@slidev/theme-default": "^0.25.0"
+  }
+}
