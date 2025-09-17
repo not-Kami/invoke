@@ -1,8 +1,8 @@
 import { adminAPI } from '../../lib/api';
-import { useNotifications } from '../useNotifications';
+import { useSimpleNotifications } from '../useSimpleNotifications';
 
 export const useAdminActions = () => {
-  const { addSuccess, addError } = useNotifications();
+  const { addSuccess, addError } = useSimpleNotifications();
 
   const deleteUser = async (userId: string, setUsers: any) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
@@ -13,12 +13,12 @@ export const useAdminActions = () => {
       const response = await adminAPI.deleteUser(userId);
       if (response.success) {
         setUsers((prev: any[]) => prev.filter((user: any) => user._id !== userId));
-        addSuccess('Utilisateur supprimé avec succès');
+        addSuccess('Success', 'Utilisateur supprimé avec succès');
       } else {
         throw new Error(response.error || 'Erreur lors de la suppression');
       }
     } catch (error) {
-      addError(`Erreur de suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+      addError('Error', `Erreur de suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
 
@@ -31,12 +31,12 @@ export const useAdminActions = () => {
       const response = await adminAPI.deleteSession(sessionId);
       if (response.success) {
         setSessions((prev: any[]) => prev.filter((session: any) => session._id !== sessionId));
-        addSuccess('Session supprimée avec succès');
+        addSuccess('Success', 'Session supprimée avec succès');
       } else {
         throw new Error(response.error || 'Erreur lors de la suppression');
       }
     } catch (error) {
-      addError(`Erreur de suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+      addError('Error', `Erreur de suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
 
@@ -49,12 +49,12 @@ export const useAdminActions = () => {
       const response = await adminAPI.deleteCampaign(campaignId);
       if (response.success) {
         setCampaigns((prev: any[]) => prev.filter((campaign: any) => campaign._id !== campaignId));
-        addSuccess('Campagne supprimée avec succès');
+        addSuccess('Success', 'Campagne supprimée avec succès');
       } else {
         throw new Error(response.error || 'Erreur lors de la suppression');
       }
     } catch (error) {
-      addError(`Erreur de suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+      addError('Error', `Erreur de suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
 
@@ -67,12 +67,12 @@ export const useAdminActions = () => {
       const response = await adminAPI.deleteGame(gameId);
       if (response.success) {
         setGames((prev: any[]) => prev.filter((game: any) => game._id !== gameId));
-        addSuccess('Jeu supprimé avec succès');
+        addSuccess('Success', 'Jeu supprimé avec succès');
       } else {
         throw new Error(response.error || 'Erreur lors de la suppression');
       }
     } catch (error) {
-      addError(`Erreur de suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+      addError('Error', `Erreur de suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
 
@@ -87,7 +87,7 @@ export const useAdminActions = () => {
             setter((prev: any[]) => prev.map((item: any) => 
               item._id === id ? { ...item, featured } : item
             ));
-            addSuccess('Utilisateur mis à jour avec succès');
+            addSuccess('Success', 'Utilisateur mis à jour avec succès');
           } else {
             throw new Error(response.error || 'Erreur lors de la mise à jour');
           }
@@ -98,7 +98,7 @@ export const useAdminActions = () => {
             setter((prev: any[]) => prev.map((item: any) => 
               item._id === id ? { ...item, featured } : item
             ));
-            addSuccess('Session mise à jour avec succès');
+            addSuccess('Success', 'Session mise à jour avec succès');
           } else {
             throw new Error(response.error || 'Erreur lors de la mise à jour');
           }
@@ -109,7 +109,7 @@ export const useAdminActions = () => {
             setter((prev: any[]) => prev.map((item: any) => 
               item._id === id ? { ...item, featured } : item
             ));
-            addSuccess('Campagne mise à jour avec succès');
+            addSuccess('Success', 'Campagne mise à jour avec succès');
           } else {
             throw new Error(response.error || 'Erreur lors de la mise à jour');
           }
@@ -120,7 +120,7 @@ export const useAdminActions = () => {
             setter((prev: any[]) => prev.map((item: any) => 
               item._id === id ? { ...item, featured } : item
             ));
-            addSuccess('Jeu mis à jour avec succès');
+            addSuccess('Success', 'Jeu mis à jour avec succès');
           } else {
             throw new Error(response.error || 'Erreur lors de la mise à jour');
           }
@@ -129,25 +129,25 @@ export const useAdminActions = () => {
           throw new Error(`Type non supporté: ${type}`);
       }
     } catch (error) {
-      addError(`Erreur de mise à jour: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+      addError('Error', `Erreur de mise à jour: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
 
   // TODO: Implémenter exportSession quand l'API sera disponible
   const exportSession = async (_sessionId: string) => {
-    addSuccess('Export des sessions pas encore implémenté');
+    addSuccess('Info', 'Export des sessions pas encore implémenté');
   };
 
   const replyToConversation = async (conversationId: string, content: string) => {
     try {
       const response = await adminAPI.replyToConversation(conversationId, content);
       if (response.success) {
-        addSuccess('Réponse envoyée avec succès');
+        addSuccess('Success', 'Réponse envoyée avec succès');
       } else {
         throw new Error(response.error || 'Erreur lors de l\'envoi de la réponse');
       }
     } catch (error) {
-      addError(`Erreur d'envoi: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+      addError('Error', `Erreur d'envoi: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
 

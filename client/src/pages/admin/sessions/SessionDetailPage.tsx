@@ -157,7 +157,7 @@ const SessionDetailPage: React.FC = () => {
                   <label className="text-sm text-gray-400">Date & Time</label>
                   <p className="text-white font-medium flex items-center">
                     <Clock className="h-4 w-4 mr-2" />
-                    {new Date(session.date).toLocaleString()}
+                    {new Date(session.date).toLocaleDateString()}
                   </p>
                 </div>
                 <div>

@@ -1,4 +1,5 @@
 // Types pour les réponses API
+import { Table } from '../types';
 
 // Utiliser la variable d'environnement ou fallback
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
@@ -608,4 +609,33 @@ export const searchAPI = {
     }>>(`/search/suggestions?q=${encodeURIComponent(query)}`)
 };
 
-export type { User, Session, Campaign, Game, ApiResponse };
+// Table API
+export const tableAPI = {
+  // CRUD des tables
+  getTables: (params?: any) => {
+    const queryString = params ? '?' + new URLSearchParams(params).toString() : '';
+    return apiCall<{ tables: Table[]; pagination: any }>(`/tables${queryString}`, { method: 'GET' });
+  },
+  getTable: (id: string) => apiCall<Table>(`/tables/${id}`, { method: 'GET' }),
+  createTable: (data: any) => apiCall<Table>('/tables', { method: 'POST', body: JSON.stringify(data) }),
+  updateTable: (id: string, data: any) => apiCall<Table>(`/tables/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteTable: (id: string) => apiCall<void>(`/tables/${id}`, { method: 'DELETE' }),
+  
+  // Gestion des tables de l'utilisateur
+  getUserTables: () => apiCall<Table[]>('/tables/user/my-tables', { method: 'GET' }),
+  
+  // Gestion des membres
+  addMembers: (tableId: string, userIds: string[]) => 
+    apiCall<Table>(`/tables/${tableId}/add-members`, { 
+      method: 'POST', 
+      body: JSON.stringify({ userIds }) 
+    }),
+  leaveTable: (tableId: string) => apiCall<void>(`/tables/${tableId}/leave`, { method: 'POST' }),
+  kickMember: (tableId: string, userId: string) => 
+    apiCall<void>(`/tables/${tableId}/kick/${userId}`, { method: 'DELETE' }),
+  
+  // Dissoudre une table
+  dissolveTable: (tableId: string) => apiCall<void>(`/tables/${tableId}/dissolve`, { method: 'DELETE' }),
+};
+
+export type { User, Session, Campaign, Game, Table, ApiResponse };

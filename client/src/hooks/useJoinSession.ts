@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNotifications } from './useNotifications';
+import { useSimpleNotifications } from './useSimpleNotifications';
 import { adminAPI } from '../lib/api';
 
 interface UseJoinSessionReturn {
@@ -13,13 +13,13 @@ export function useJoinSession(): UseJoinSessionReturn {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
-  const { addNotification } = useNotifications();
+  const { addSuccess, addError } = useSimpleNotifications();
 
   const joinSession = async (sessionId: string): Promise<boolean> => {
     if (!user) {
       setError('You must be logged in to join a session');
-      addNotification(
-        'error',
+      addError(
+        'Error',
         'You must be logged in to join a session'
       );
       return false;
@@ -37,8 +37,8 @@ export function useJoinSession(): UseJoinSessionReturn {
       }
 
       
-      addNotification(
-        'success',
+      addSuccess(
+        'Success',
         'You have successfully joined the session'
       );
 
@@ -47,8 +47,8 @@ export function useJoinSession(): UseJoinSessionReturn {
       const errorMessage = err instanceof Error ? err.message : 'Failed to join session';
       setError(errorMessage);
       
-      addNotification(
-        'error',
+      addError(
+        'Error',
         errorMessage
       );
 

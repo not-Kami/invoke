@@ -66,6 +66,7 @@ export default function FeaturedGamesSection({
 
   // Fonction pour naviguer vers la page détaillée du jeu
   const handleGameClick = (game: Game) => {
+    console.log('Navigating to game:', game._id, `/game/${game._id}`);
     navigate(`/game/${game._id}`);
   };
 

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '../ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
+import { NotificationCenter } from '../notifications/NotificationCenter';
+import { useNotifications } from '../../hooks/useNotifications';
 
 import { 
   Menu, 
@@ -17,6 +19,7 @@ import InvokeLogo from '../../assets/invoke-logo.svg';
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, logout } = useAuth();
+  const { notifications, markAsRead, acceptInvitation, declineInvitation } = useNotifications();
 
   const navigation = [
     { name: 'Games', href: '/games' },
@@ -63,6 +66,13 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-4 flex-shrink-0">
             {user ? (
               <>
+                {/* Notification Center */}
+                <NotificationCenter
+                  notifications={notifications}
+                  onMarkAsRead={markAsRead}
+                  onAcceptInvitation={acceptInvitation}
+                  onDeclineInvitation={declineInvitation}
+                />
 
                 {user.role === 'admin' && (
                   <Link to="/admin">

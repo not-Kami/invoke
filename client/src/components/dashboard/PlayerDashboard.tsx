@@ -21,6 +21,7 @@ interface PlayerDashboardProps {
   isAdmin: boolean;
   isDM: boolean;
   favoriteGames: any[];
+  tables: any[];
   onAddFavoriteGame: () => void;
   onRemoveFavoriteGame: (gameId: string) => void;
 }
@@ -31,6 +32,7 @@ export default function PlayerDashboard({
   isAdmin,
   isDM,
   favoriteGames,
+  tables,
   onAddFavoriteGame,
   onRemoveFavoriteGame
 }: PlayerDashboardProps) {
@@ -53,27 +55,6 @@ export default function PlayerDashboard({
       level: 4,
       campaign: "Cyberpunk Chronicles",
       avatar: null
-    }
-  ];
-
-  const mySessions = [
-    {
-      id: 1,
-      title: "The Mysteries of Arkham",
-      game: "Call of Cthulhu",
-      players: 4,
-      maxPlayers: 6,
-      nextSession: "2024-01-30",
-      status: "active"
-    },
-    {
-      id: 2,
-      title: "Epic Fantasy Campaign",
-      game: "D&D 5e",
-      players: 6,
-      maxPlayers: 6,
-      nextSession: "2024-02-01",
-      status: "full"
     }
   ];
 
@@ -103,34 +84,68 @@ export default function PlayerDashboard({
               upcomingSessions.map((session) => (
                 <div 
                   key={session._id} 
-                  className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 cursor-pointer transition-colors"
+                  className="relative flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 cursor-pointer transition-colors overflow-hidden"
                   onClick={() => navigate(`/sessions/${session._id}`)}
                 >
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
-                      <Gamepad2 className="h-6 w-6 text-white" />
+                  {/* Image de fond de la session - 2/3 droite avec fondu */}
+                  {(session.image || session.game?.images?.banner) && (
+                    <div 
+                      className="absolute right-0 top-0 bottom-0 w-2/3 bg-cover bg-center bg-no-repeat pointer-events-none"
+                      style={{ 
+                        backgroundImage: `url(${session.image || session.game?.images?.banner})`,
+                        maskImage: 'linear-gradient(to right, transparent 0%, black 50%)',
+                        WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 50%)'
+                      }}
+                    ></div>
+                  )}
+                  
+                  {/* Overlay sombre pour la lisibilité - seulement sur l'image */}
+                  {(session.image || session.game?.images?.banner) && (
+                    <div 
+                      className="absolute right-0 top-0 bottom-0 w-2/3 pointer-events-none"
+                      style={{
+                        background: 'rgba(0, 0, 0, 0.4)',
+                        maskImage: 'linear-gradient(to right, transparent 0%, black 50%)',
+                        WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 50%)'
+                      }}
+                    ></div>
+                  )}
+                  
+                  <div className="flex items-center space-x-4 relative z-10 flex-1 min-w-0">
+                    <div className="w-12 h-12 flex items-center justify-center flex-shrink-0">
+                      {session.game?.images?.logo ? (
+                        <img
+                          src={session.game.images.logo}
+                          alt={`${session.game.name} logo`}
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
+                          <Gamepad2 className="h-6 w-6 text-white" />
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-white">{session.title}</h3>
-                      <p className="text-sm text-gray-300">{session.game?.name || 'Unknown Game'}</p>
-                      <div className="flex items-center space-x-4 mt-1">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-white truncate">{session.title}</h3>
+                      <p className="text-sm text-gray-300 truncate">{session.game?.name || 'Unknown Game'}</p>
+                      <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-4 mt-1">
                         <div className="flex items-center space-x-1 text-xs text-gray-400">
-                          <Calendar className="h-3 w-3" />
-                          <span>{new Date(session.date).toLocaleDateString('fr-FR')}</span>
+                          <Calendar className="h-3 w-3 flex-shrink-0" />
+                          <span className="truncate">{new Date(session.date).toLocaleDateString('fr-FR')}</span>
                         </div>
                         <div className="flex items-center space-x-1 text-xs text-gray-400">
-                          <Users className="h-3 w-3" />
+                          <Users className="h-3 w-3 flex-shrink-0" />
                           <span>{session.players?.length || 0} joueurs</span>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 relative z-10 mt-3 sm:mt-0 flex-shrink-0">
                     <Badge variant="info" size="sm">
                       {session.status || 'Unknown'}
                     </Badge>
                     <Badge variant="default" size="sm">
-                      Session
+                      {session.sessionType === 'offline' ? 'IRL' : 'Online'}
                     </Badge>
                   </div>
                 </div>
@@ -200,43 +215,91 @@ export default function PlayerDashboard({
           </CardContent>
         </Card>
 
-        {/* My Tables - Grisé (upcoming feature) */}
-        <Card className="bg-white/5 backdrop-blur-sm border-white/10 mt-6 opacity-50">
+        {/* My Tables */}
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20 mt-6">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <Users className="h-5 w-5 text-gray-400" />
-                <h2 className="text-xl font-semibold text-gray-400">My Tables</h2>
-                <Badge variant="default" size="sm" className="bg-gray-600 text-gray-300">
-                  Coming Soon
-                </Badge>
+                <Users className="h-5 w-5 text-cyan-400" />
+                <h2 className="text-xl font-semibold text-white">My Tables</h2>
               </div>
-              <Button size="sm" className="bg-gray-600 text-gray-300 border-gray-500 cursor-not-allowed" disabled>
+              <Button 
+                size="sm" 
+                className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white border-0"
+                onClick={() => window.location.href = '/tables'}
+              >
                 <Plus className="h-4 w-4 mr-2" />
-                Join Table
+                Manage Tables
               </Button>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {mySessions.map((session) => (
-                <div key={session.id} className="p-4 bg-white/5 rounded-lg border border-white/10">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-500 rounded-lg flex items-center justify-center">
-                      <Gamepad2 className="h-5 w-5 text-white" />
+            {tables && tables.length > 0 ? (
+              <div className="space-y-3">
+                {tables.slice(0, 3).map((table) => (
+                  <div key={table._id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                        {table.avatar ? (
+                          <img
+                            src={table.avatar}
+                            alt={`${table.name} avatar`}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Users className="h-5 w-5 text-white" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-white font-medium">{table.name}</p>
+                        <p className="text-sm text-gray-400">
+                          {table.members?.length || 0} members
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-medium text-gray-300">{session.title}</h3>
-                      <p className="text-sm text-gray-500">{session.game}</p>
-                    </div>
+                    <Button
+                      onClick={() => window.location.href = `/tables/${table._id}`}
+                      variant="outline"
+                      size="sm"
+                      className="border-cyan-500 text-cyan-400 hover:text-white hover:bg-cyan-500"
+                    >
+                      View
+                    </Button>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-gray-400">
-                    <span>{session.players}/{session.maxPlayers} players</span>
-                    <span>{session.nextSession}</span>
+                ))}
+                {tables.length > 3 && (
+                  <div className="text-center pt-2">
+                    <Button
+                      onClick={() => window.location.href = '/tables'}
+                      variant="outline"
+                      size="sm"
+                      className="border-cyan-500 text-cyan-400 hover:text-white hover:bg-cyan-500"
+                    >
+                      View All ({tables.length})
+                    </Button>
                   </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <div className="h-12 w-12 mx-auto mb-4 flex items-center justify-center">
+                  <img 
+                    src="/invoke-logo.svg" 
+                    alt="Invoke Logo" 
+                    className="h-12 w-12 object-contain"
+                  />
                 </div>
-              ))}
-            </div>
+                <h3 className="text-lg font-semibold text-white mb-2">No tables yet</h3>
+                <p className="text-gray-400 mb-4">Create or join a table to start playing with friends</p>
+                <Button
+                  onClick={() => window.location.href = '/tables'}
+                  className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white border-0"
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Browse Tables
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

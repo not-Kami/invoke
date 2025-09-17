@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Game } from '../../lib/api';
 import GameFilters from '../../components/games/GameFilters';
 import GameCard from '../../components/games/GameCard';
@@ -8,6 +9,7 @@ import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 
 
 export default function GamesPage() {
+  const navigate = useNavigate();
   // État des filtres simplifiés
   const [filters, setFilters] = useState({
     searchTerm: '',
@@ -89,8 +91,9 @@ export default function GamesPage() {
     reset();
   };
 
-  const handleGameClick = (_game: Game) => {
-    // TODO: Navigate to game detail page
+  const handleGameClick = (game: Game) => {
+    console.log('GamesPage - Navigating to game:', game._id, `/game/${game._id}`);
+    navigate(`/game/${game._id}`);
   };
 
   if (loading) {

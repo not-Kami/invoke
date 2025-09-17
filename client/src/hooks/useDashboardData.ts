@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { adminAPI } from '../lib/api';
-import { Session, Campaign } from '../types';
+import { adminAPI, tableAPI } from '../lib/api';
+import { Session, Campaign, Table } from '../types';
 
 export function useDashboardData() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [tables, setTables] = useState<Table[]>([]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -35,8 +36,18 @@ export function useDashboardData() {
           campaignsData = Array.isArray(campaignsResponse.data) ? campaignsResponse.data : [campaignsResponse.data];
         }
 
+        // Fetch user tables
+        const tablesResponse = await tableAPI.getUserTables();
+        console.log('Tables response:', tablesResponse);
+        let tablesData: Table[] = [];
+        
+        if (tablesResponse.success && tablesResponse.data) {
+          tablesData = Array.isArray(tablesResponse.data) ? tablesResponse.data : [];
+        }
+
         setSessions(sessionsData);
         setCampaigns(campaignsData);
+        setTables(tablesData);
       } catch (error) {
       } finally {
         setLoading(false);
@@ -72,14 +83,56 @@ export function useDashboardData() {
   const isAdmin = user?.role === 'admin';
   const isDM = user?.isDM;
 
+  const refreshData = async () => {
+    if (!user) return;
+    
+    try {
+      setLoading(true);
+      
+      // Fetch sessions
+      const sessionsResponse = await adminAPI.getSessions();
+      let sessionsData: Session[] = [];
+      
+      if (sessionsResponse.success && sessionsResponse.data) {
+        sessionsData = sessionsResponse.data.data || sessionsResponse.data;
+      }
+
+      // Fetch campaigns
+      const campaignsResponse = await adminAPI.getCampaigns();
+      let campaignsData: Campaign[] = [];
+      
+      if (campaignsResponse.success && campaignsResponse.data) {
+        campaignsData = Array.isArray(campaignsResponse.data) ? campaignsResponse.data : [campaignsResponse.data];
+      }
+
+      // Fetch user tables
+      const tablesResponse = await tableAPI.getUserTables();
+      let tablesData: Table[] = [];
+      
+      if (tablesResponse.success && tablesResponse.data) {
+        tablesData = tablesResponse.data;
+      }
+
+      setSessions(sessionsData);
+      setCampaigns(campaignsData);
+      setTables(tablesData);
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     loading,
     sessions,
     campaigns,
+    tables,
     userSessions,
     userCampaigns,
     upcomingSessions,
     isAdmin,
-    isDM
+    isDM,
+    refreshData
   };
 }
