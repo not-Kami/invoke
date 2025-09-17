@@ -187,7 +187,21 @@ export default function SessionCard({
                 </Button>
               )}
               <Button
-                onClick={() => window.location.href = `/sessions/${session._id}`}
+                onClick={async () => {
+                  // Vérifier l'existence de la session avant de rediriger
+                  try {
+                    const response = await fetch(`/api/v1/sessions/${session._id}`);
+                    if (response.ok) {
+                      window.location.href = `/sessions/${session._id}`;
+                    } else {
+                      alert('This session no longer exists.');
+                    }
+                  } catch (error) {
+                    console.error('Error checking session:', error);
+                    // En cas d'erreur, rediriger quand même (fallback)
+                    window.location.href = `/sessions/${session._id}`;
+                  }
+                }}
                 size="sm"
                 variant="outline"
                 className="w-full border-gray-600 text-gray-300 hover:text-white hover:border-gray-500"
