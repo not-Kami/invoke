@@ -82,6 +82,7 @@ export default function SessionDetailPage() {
       setLoading(true);
       setError('');
       
+      // Validation préalable : vérifier l'existence de la session
       const response = await publicAPI.getSession(id!);
       
       if (response.success && response.data) {
@@ -89,10 +90,14 @@ export default function SessionDetailPage() {
         console.log('Players:', response.data.players);
         setSession(response.data as PopulatedSession);
       } else {
-        setError(response.message || 'Failed to fetch session');
+        // Session introuvable - afficher l'erreur immédiatement
+        setError('Session not found');
+        setSession(null); // S'assurer que session est null
       }
     } catch (error) {
+      // Erreur réseau ou autre problème
       setError('An error occurred while fetching the session');
+      setSession(null);
     } finally {
       setLoading(false);
     }

@@ -291,6 +291,62 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
     { id: 'feedback', label: 'Reviews & Feedback', icon: Star }
   ];
 
+  // Fonction pour devenir DM
+  const handleBecomeDM = async () => {
+    try {
+      setLoading(true);
+      
+      const response = await usersApi.becomeDM(user._id);
+      
+      if (response.success && response.data) {
+        // Mettre à jour l'utilisateur dans le contexte d'authentification
+        updateUser(response.data);
+        
+        // Mettre à jour les données du profil local
+        setProfileData(prev => ({ ...prev, isDM: true }));
+        
+        success('Congratulations!', 'You are now a Dungeon Master! 🎲 You can now create and manage game sessions.');
+      } else {
+        error('Error', response.error || 'Failed to update your DM status. Please try again.');
+      }
+    } catch (err) {
+      error('Error', 'Failed to update your DM status. Please try again.');
+      console.error('Error updating DM status:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fonction pour retirer le statut DM
+  const handleRemoveDM = async () => {
+    if (!window.confirm('Are you sure you want to remove your Dungeon Master status? You will lose access to DM features like creating sessions.')) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      const response = await usersApi.removeDM(user._id);
+      
+      if (response.success && response.data) {
+        // Mettre à jour l'utilisateur dans le contexte d'authentification
+        updateUser(response.data);
+        
+        // Mettre à jour les données du profil local
+        setProfileData(prev => ({ ...prev, isDM: false }));
+        
+        success('Status Updated', 'Your Dungeon Master status has been removed. You can become a DM again anytime from your profile.');
+      } else {
+        error('Error', response.error || 'Failed to update your DM status. Please try again.');
+      }
+    } catch (err) {
+      error('Error', 'Failed to update your DM status. Please try again.');
+      console.error('Error updating DM status:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -305,7 +361,61 @@ export default function ProfilePage({ defaultEditMode = false }: ProfilePageProp
               </Badge>
             )}
           </div>
+          
+          {/* Remove DM Section - Only show if user is a DM */}
+          {profileData.isDM && (
+            <div className="mt-4 p-3 bg-white/3 backdrop-blur-sm border border-white/5 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className="text-xs text-gray-400">DM Status</div>
+                  <div className="text-xs text-gray-300">•</div>
+                  <div className="text-xs text-gray-400">Want to step down?</div>
+                </div>
+                <button
+                  onClick={handleRemoveDM}
+                  disabled={loading}
+                  className="text-xs text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
+                >
+                  {loading ? 'Updating...' : 'Remove DM status'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Become DM Section - Only show if user is not already a DM */}
+        {!profileData.isDM && (
+          <div className="mb-6 p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Crown className="h-5 w-5 text-purple-400" />
+                <div>
+                  <p className="text-white font-medium">Want to create sessions?</p>
+                  <p className="text-sm text-gray-400">Become a Dungeon Master to start hosting games</p>
+                </div>
+              </div>
+              <Button
+                onClick={handleBecomeDM}
+                disabled={loading}
+                variant="outline"
+                size="sm"
+                className="border-purple-500/30 text-purple-300 hover:bg-purple-500/10 hover:border-purple-400"
+              >
+                {loading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-300"></div>
+                    <span>Upgrading...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-1">
+                    <Crown className="h-3 w-3" />
+                    <span>Become DM</span>
+                  </div>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar with Avatar and Navigation */}

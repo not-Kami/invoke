@@ -18,16 +18,19 @@ const SessionDetailPage: React.FC = () => {
       
       try {
         setLoading(true);
-        const response = await adminAPI.getSessions();
-        const sessionData = response.data?.data?.find((s: any) => s._id === id);
+        // Validation préalable : récupérer directement la session spécifique
+        const response = await adminAPI.getSession(id);
         
-        if (response.success && sessionData) {
-          setSession(sessionData);
+        if (response.success && response.data) {
+          setSession(response.data);
         } else {
+          // Session introuvable - afficher l'erreur immédiatement
           setError('Session not found');
+          setSession(null);
         }
       } catch (err) {
         setError('Failed to load session');
+        setSession(null);
         console.error('Error fetching session:', err);
       } finally {
         setLoading(false);

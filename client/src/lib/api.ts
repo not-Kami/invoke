@@ -355,6 +355,14 @@ export const usersApi = {
   updateRole: (userId: string, role: string) => 
     apiCall<User>(`/users/${userId}/role`, { method: 'PUT', body: JSON.stringify({ role }) }),
   
+  // Devenir DM (mettre à jour le statut isDM)
+  becomeDM: (userId: string) => 
+    apiCall<User>(`/users/${userId}/role`, { method: 'PUT', body: JSON.stringify({ isDM: true }) }),
+  
+  // Retirer le statut DM
+  removeDM: (userId: string) => 
+    apiCall<User>(`/users/${userId}/role`, { method: 'PUT', body: JSON.stringify({ isDM: false }) }),
+  
   // Jeux favoris
   getFavorites: (userId: string) => 
     apiCall<Game[]>(`/users/${userId}/favorites`),
