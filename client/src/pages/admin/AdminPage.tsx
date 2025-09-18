@@ -20,7 +20,7 @@ import { useAdminActions } from '../../hooks/admin/useAdminActions';
 import { adminAPI, Conversation } from '../../lib/api';
 import { Game } from '../../types';
 import { usePermissions } from '../../hooks/usePermissions';
-import { useNotifications } from '../../hooks/useNotifications';
+import { useSimpleNotifications } from '../../hooks/useSimpleNotifications';
 import { 
   Users, 
   Calendar, 
@@ -35,7 +35,7 @@ type TabType = 'users' | 'sessions' | 'campaigns' | 'games' | 'conversations';
 
 const AdminPage: React.FC = () => {
   const { canViewAdminPanel } = usePermissions();
-  const { notifications, removeNotification } = useNotifications();
+  const { notifications, removeNotification } = useSimpleNotifications();
   const [activeTab, setActiveTab] = useState<TabType>('users');
   
   // États pour les modals

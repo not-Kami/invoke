@@ -1,0 +1,28 @@
+{
+  "name": "invoke",
+  "version": "1.0.0",
+  "description": "Invoke - Plateforme de jeux de rôle",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "env:dev": "node scripts/set-environment.js development",
+    "env:staging": "node scripts/set-environment.js staging", 
+    "env:production": "node scripts/set-environment.js production",
+    "env:show": "node scripts/set-environment.js",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd client && npm run build",
+    "build:server": "cd server && npm run build",
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+    "clean": "rm -rf node_modules server/node_modules client/node_modules server/dist client/dist",
+    "setup": "npm run install:all && npm run env:dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": ["rpg", "tabletop", "gaming", "platform"],
+  "author": "Kami",
+  "license": "ISC"
+}

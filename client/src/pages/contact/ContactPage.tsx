@@ -2,21 +2,21 @@ import React, { useState } from 'react';
 import { MessageSquare, MapPin, Clock, Users, Shield, Zap } from 'lucide-react';
 import ContactForm from '../../components/ContactForm';
 import ConversationModal from '../../components/ConversationModal';
-import { useNotifications } from '../../hooks/useNotifications';
+import { useSimpleNotifications } from '../../hooks/useSimpleNotifications';
 
 const ContactPage: React.FC = () => {
-  const { addSuccess, addError } = useNotifications();
+  const { addSuccess, addError } = useSimpleNotifications();
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [isConversationModalOpen, setIsConversationModalOpen] = useState(false);
 
   const handleContactSuccess = (conversationId: string) => {
     setCurrentConversationId(conversationId);
     setIsConversationModalOpen(true);
-    addSuccess('Your message has been sent successfully!');
+    addSuccess('Succès', 'Your message has been sent successfully!');
   };
 
   const handleContactError = (error: string) => {
-    addError(`Error sending message: ${error}`);
+    addError('Erreur', `Error sending message: ${error}`);
   };
 
   const handleCloseConversationModal = () => {

@@ -284,16 +284,17 @@ export default function TableDetailPage() {
                       .filter(member => {
                         const memberUser = member.user;
                         const ownerId = typeof table.owner === 'string' ? table.owner : table.owner._id;
-                        return memberUser?._id !== ownerId;
+                        return typeof memberUser === 'object' && memberUser?._id !== ownerId;
                       })
                       .map((member, index) => {
                         const memberUser = member.user;
+                        const isUserObject = typeof memberUser === 'object' && memberUser !== null;
                         
                           return (
                             <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
                               <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-purple-500 to-blue-500">
-                                  {memberUser && memberUser.avatar ? (
+                                  {isUserObject && memberUser.avatar ? (
                                     <img
                                       src={memberUser.avatar}
                                       alt={`${memberUser.firstName} ${memberUser.lastName}`}
@@ -301,13 +302,13 @@ export default function TableDetailPage() {
                                     />
                                   ) : (
                                     <div className="w-full h-full flex items-center justify-center text-white font-semibold">
-                                      {memberUser ? `${memberUser.firstName?.[0]}${memberUser.lastName?.[0]}` : 'U'}
+                                      {isUserObject ? `${memberUser.firstName?.[0]}${memberUser.lastName?.[0]}` : 'U'}
                                     </div>
                                   )}
                                 </div>
                                 <div>
                                   <p className="text-white font-medium">
-                                    {memberUser ? `${memberUser.firstName} ${memberUser.lastName}` : 'Unknown User'}
+                                    {isUserObject ? `${memberUser.firstName} ${memberUser.lastName}` : 'Unknown User'}
                                   </p>
                                   <p className="text-sm text-gray-400">Member</p>
                                 </div>

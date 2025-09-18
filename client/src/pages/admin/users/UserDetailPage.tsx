@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Mail, Shield, Gamepad2, Star, Trash2 } from 'lucide-react';
 import { adminAPI, User as UserType } from '../../../lib/api';
-import { useNotifications } from '../../../hooks/useNotifications';
+import { useSimpleNotifications } from '../../../hooks/useSimpleNotifications';
 
 const UserDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addNotification } = useNotifications();
+  const { addNotification } = useSimpleNotifications();
   const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,13 +44,13 @@ const UserDetailPage: React.FC = () => {
       const response = await adminAPI.deleteUser(user._id);
       
       if (response.success) {
-        addNotification('success', 'User deleted successfully');
+        addNotification({ type: 'success', title: 'Succès', message: 'User deleted successfully' });
         navigate('/admin');
       } else {
-        addNotification('error', 'Failed to delete user');
+        addNotification({ type: 'error', title: 'Erreur', message: 'Failed to delete user' });
       }
     } catch (err) {
-      addNotification('error', 'Failed to delete user');
+      addNotification({ type: 'error', title: 'Erreur', message: 'Failed to delete user' });
       console.error('Error deleting user:', err);
     }
   };
@@ -63,12 +63,12 @@ const UserDetailPage: React.FC = () => {
       
       if (response.success) {
         setUser({ ...user, featured: !user.featured });
-        addNotification('success', `User ${user.featured ? 'removed from' : 'added to'} featured`);
+        addNotification({ type: 'success', title: 'Succès', message: `User ${user.featured ? 'removed from' : 'added to'} featured` });
       } else {
-        addNotification('error', 'Failed to update featured status');
+        addNotification({ type: 'error', title: 'Erreur', message: 'Failed to update featured status' });
       }
     } catch (err) {
-      addNotification('error', 'Failed to update featured status');
+      addNotification({ type: 'error', title: 'Erreur', message: 'Failed to update featured status' });
       console.error('Error updating featured status:', err);
     }
   };

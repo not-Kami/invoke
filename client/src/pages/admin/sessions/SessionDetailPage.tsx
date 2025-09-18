@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, Users, MapPin, Clock, Gamepad2, Trash2, User } from 'lucide-react';
 import { adminAPI, Session as SessionType } from '../../../lib/api';
-import { useNotifications } from '../../../hooks/useNotifications';
+import { useSimpleNotifications } from '../../../hooks/useSimpleNotifications';
 
 const SessionDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addNotification } = useNotifications();
+  const { addNotification } = useSimpleNotifications();
   const [session, setSession] = useState<SessionType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,13 +47,13 @@ const SessionDetailPage: React.FC = () => {
       const response = await adminAPI.deleteSession(session._id);
       
       if (response.success) {
-        addNotification('success', 'Session deleted successfully');
+        addNotification({ type: 'success', title: 'Succès', message: 'Session deleted successfully' });
         navigate('/admin');
       } else {
-        addNotification('error', 'Failed to delete session');
+        addNotification({ type: 'error', title: 'Erreur', message: 'Failed to delete session' });
       }
     } catch (err) {
-      addNotification('error', 'Failed to delete session');
+      addNotification({ type: 'error', title: 'Erreur', message: 'Failed to delete session' });
       console.error('Error deleting session:', err);
     }
   };

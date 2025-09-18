@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, BookOpen, User, Gamepad2, Trash2 } from 'lucide-react';
 import { adminAPI, Campaign as CampaignType } from '../../../lib/api';
-import { useNotifications } from '../../../hooks/useNotifications';
+import { useSimpleNotifications } from '../../../hooks/useSimpleNotifications';
 
 const CampaignDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addNotification } = useNotifications();
+  const { addNotification } = useSimpleNotifications();
   const [campaign, setCampaign] = useState<CampaignType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,13 +43,13 @@ const CampaignDetailPage: React.FC = () => {
       const response = await adminAPI.deleteCampaign(campaign._id);
       
       if (response.success) {
-        addNotification('success', 'Campaign deleted successfully');
+        addNotification({ type: 'success', title: 'Succès', message: 'Campaign deleted successfully' });
         navigate('/admin');
       } else {
-        addNotification('error', 'Failed to delete campaign');
+        addNotification({ type: 'error', title: 'Erreur', message: 'Failed to delete campaign' });
       }
     } catch (err) {
-      addNotification('error', 'Failed to delete campaign');
+      addNotification({ type: 'error', title: 'Erreur', message: 'Failed to delete campaign' });
       console.error('Error deleting campaign:', err);
     }
   };

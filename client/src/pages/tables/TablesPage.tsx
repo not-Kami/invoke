@@ -177,7 +177,6 @@ export default function TablesPage() {
               <TableCard
                 key={table._id}
                 table={table}
-                filter={filter}
               />
             ))}
           </div>
@@ -189,10 +188,9 @@ export default function TablesPage() {
 
 interface TableCardProps {
   table: Table;
-  filter: 'all' | 'my';
 }
 
-function TableCard({ table, filter }: TableCardProps) {
+function TableCard({ table }: TableCardProps) {
   const { user } = useAuth();
   const isOwner = user?._id === table.owner;
   const isMember = table.members?.some(member => 

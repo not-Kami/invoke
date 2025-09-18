@@ -3,7 +3,8 @@ import Notification from './Notification';
 
 interface NotificationItem {
   id: string;
-  type: 'success' | 'error' | 'info';
+  type: 'success' | 'error' | 'info' | 'warning';
+  title: string;
   message: string;
   autoRemove?: boolean;
   duration?: number;

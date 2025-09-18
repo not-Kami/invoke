@@ -6,13 +6,13 @@ import Badge from '../../../components/ui/Badge';
 import { Textarea } from '../../../components/ui/Textarea';
 import { MessageSquare, Send, ArrowLeft, Archive, Trash2, User, Shield } from 'lucide-react';
 import { adminAPI } from '../../../lib/api';
-import { useNotifications } from '../../../hooks/useNotifications';
+import { useSimpleNotifications } from '../../../hooks/useSimpleNotifications';
 import { Conversation } from '../../../lib/api';
 
 const ConversationPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addSuccess, addError } = useNotifications();
+  const { addSuccess, addError } = useSimpleNotifications();
   
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,7 +46,7 @@ const ConversationPage: React.FC = () => {
         throw new Error(response.error || 'Erreur lors du chargement de la conversation');
       }
     } catch (error) {
-      addError(`Erreur de chargement: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+      addError('Erreur', `Erreur de chargement: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     } finally {
       setLoading(false);
     }
@@ -71,7 +71,7 @@ const ConversationPage: React.FC = () => {
       const response = await adminAPI.replyToConversation(conversation._id, replyContent);
       
       if (response.success) {
-        addSuccess('Réponse envoyée avec succès');
+        addSuccess('Succès', 'Réponse envoyée avec succès');
         setReplyContent('');
         
         // Recharger la conversation pour afficher le nouveau message
@@ -80,7 +80,7 @@ const ConversationPage: React.FC = () => {
         throw new Error(response.error || 'Erreur lors de l\'envoi de la réponse');
       }
     } catch (error) {
-      addError(`Erreur d'envoi: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+      addError('Erreur', `Erreur d'envoi: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     } finally {
       setSending(false);
     }
@@ -94,12 +94,12 @@ const ConversationPage: React.FC = () => {
         const response = await adminAPI.archiveConversation(conversation._id);
         if (response.success) {
           setConversation(prev => prev ? { ...prev, status: 'closed' } : null);
-          addSuccess('Conversation archivée avec succès');
+          addSuccess('Succès', 'Conversation archivée avec succès');
         } else {
           throw new Error(response.error || 'Erreur lors de l\'archivage');
         }
       } catch (error) {
-        addError(`Erreur d'archivage: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+        addError('Erreur', `Erreur d'archivage: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
       }
     }
   };
@@ -111,13 +111,13 @@ const ConversationPage: React.FC = () => {
       try {
         const response = await adminAPI.deleteConversation(conversation._id);
         if (response.success) {
-          addSuccess('Conversation supprimée avec succès');
+          addSuccess('Succès', 'Conversation supprimée avec succès');
           navigate('/admin');
         } else {
           throw new Error(response.error || 'Erreur lors de la suppression');
         }
       } catch (error) {
-        addError(`Erreur de suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+        addError('Erreur', `Erreur de suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
       }
     }
   };
