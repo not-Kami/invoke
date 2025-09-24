@@ -167,7 +167,7 @@ export default function FeaturedGamesSection({
             onTouchEnd={handleTouchEnd}
           >
             <div 
-              className="flex transition-transform duration-500 ease-in-out"
+              className="flex gap-6 transition-transform duration-500 ease-in-out"
               style={{
                 transform: isMobile 
                   ? `translateX(-${currentIndex * 100}%)` 
@@ -177,7 +177,7 @@ export default function FeaturedGamesSection({
               {featuredGames.map((game, index) => (
                 <div 
                   key={`${game._id}-${index}`}
-                  className={`flex-shrink-0 ${isMobile ? 'w-full flex justify-center px-4' : 'w-1/4'}`}
+                  className={`flex-shrink-0 ${isMobile ? 'w-full flex justify-center px-4' : 'w-[calc(25%-1.5rem)]'}`}
                 >
                   <div className={`${isMobile ? 'w-full max-w-sm' : 'w-full'}`}>
                     <GameCard
