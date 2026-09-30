@@ -12,7 +12,9 @@ import {
   User,
   Gamepad2,
   Heart,
-  X
+  X,
+  CheckCircle2,
+  UserPlus
 } from 'lucide-react';
 
 interface PlayerDashboardProps {
@@ -36,44 +38,72 @@ export default function PlayerDashboard({
 }: PlayerDashboardProps) {
   const navigate = useNavigate();
   // Debug: Log des données reçues
-  // Données mockées pour les fonctionnalités à venir
+  // Aperçu démo — fiches d'exemple, pas le compte connecté.
   const myCharacters = [
     {
       id: 1,
       name: "Thorin Barbe-de-Fer",
-      class: "Guerrier Nain",
+      role: "Guerrier nain",
       level: 8,
       campaign: "Les Ombres de Valoria",
-      avatar: null
+      table: "Table du mercredi",
+      accent: "from-amber-500 to-orange-600"
     },
     {
       id: 2,
       name: "Zara Nova",
-      class: "Netrunner",
+      role: "Netrunner",
       level: 4,
-      campaign: "Cyberpunk Chronicles",
-      avatar: null
+      campaign: "Chroniques de Night City",
+      table: "One-shot du vendredi",
+      accent: "from-cyan-500 to-blue-600"
     }
   ];
 
-  const mySessions = [
+  const myTables = [
     {
       id: 1,
-      title: "The Mysteries of Arkham",
-      game: "Call of Cthulhu",
+      title: "Les Mystères d'Arkham",
+      game: "L'Appel de Cthulhu",
       players: 4,
       maxPlayers: 6,
-      nextSession: "2024-01-30",
-      status: "active"
+      nextSession: "2026-10-08",
+      place: "En ligne",
+      status: "Ouverte"
     },
     {
       id: 2,
-      title: "Epic Fantasy Campaign",
+      title: "Campagne des Cinq Couronnes",
       game: "D&D 5e",
       players: 6,
       maxPlayers: 6,
-      nextSession: "2024-02-01",
-      status: "full"
+      nextSession: "2026-10-15",
+      place: "Bruxelles",
+      status: "Complète"
+    }
+  ];
+
+  const recentActivity = [
+    {
+      id: 1,
+      label: "A rejoint la table « Campagne des Cinq Couronnes »",
+      when: "Il y a 2 heures",
+      icon: UserPlus,
+      tone: "text-green-300 bg-green-500/20"
+    },
+    {
+      id: 2,
+      label: "A ajouté D&D 5e aux jeux favoris",
+      when: "Hier",
+      icon: Heart,
+      tone: "text-blue-300 bg-blue-500/20"
+    },
+    {
+      id: 3,
+      label: "Session jouée — Les Mystères d'Arkham",
+      when: "Il y a 3 jours",
+      icon: CheckCircle2,
+      tone: "text-purple-300 bg-purple-500/20"
     }
   ];
 
@@ -158,81 +188,108 @@ export default function PlayerDashboard({
           </CardContent>
         </Card>
 
-        {/* My Characters - Grisé (upcoming feature) */}
-        <Card className="bg-white/5 backdrop-blur-sm border-white/10 mt-6 opacity-50">
+        {/* My Characters — aperçu démo */}
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20 mt-6">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
               <div className="flex items-center space-x-2">
-                <User className="h-5 w-5 text-gray-400" />
-                <h2 className="text-xl font-semibold text-gray-400">My Characters</h2>
-                <Badge variant="default" size="sm" className="bg-gray-600 text-gray-300">
-                  Coming Soon
-                </Badge>
+                <User className="h-5 w-5 text-purple-400" />
+                <h2 className="text-xl font-semibold text-white">My Characters</h2>
+                <Badge variant="info" size="sm">Preview</Badge>
               </div>
-              <Button size="sm" className="bg-gray-600 text-gray-300 border-gray-500 cursor-not-allowed" disabled>
+              <Button size="sm" className="bg-white/10 text-gray-300 border-white/10 cursor-not-allowed" disabled>
                 <Plus className="h-4 w-4 mr-2" />
                 New Character
               </Button>
             </div>
+            <p className="text-sm text-gray-400 mt-2">Sample sheets. They are not linked to this account yet.</p>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {myCharacters.map((character) => (
-                <div key={character.id} className="p-4 bg-white/5 rounded-lg border border-white/10">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <Avatar
-                      firstName={character.name.split(' ')[0]}
-                      lastName={character.name.split(' ')[1] || ''}
-                      size="sm"
-                    />
-                    <div>
-                      <h3 className="font-medium text-gray-300">{character.name}</h3>
-                      <p className="text-sm text-gray-500">{character.class} • Level {character.level}</p>
+              {myCharacters.map((character) => {
+                const [firstName, ...rest] = character.name.split(' ');
+                return (
+                  <div key={character.id} className="p-4 bg-white/5 rounded-lg border border-white/10">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <Avatar
+                        firstName={firstName}
+                        lastName={rest.join(' ')}
+                        size="lg"
+                        className={`bg-gradient-to-br ${character.accent}`}
+                      />
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-white truncate">{character.name}</h3>
+                        <p className="text-sm text-gray-300">{character.role}</p>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
+                        <span>Level {character.level}</span>
+                        <span>10</span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-white/10">
+                        <div
+                          className={`h-1.5 rounded-full bg-gradient-to-r ${character.accent}`}
+                          style={{ width: `${character.level * 10}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1 text-sm text-gray-300">
+                      <p>{character.campaign}</p>
+                      <p className="text-xs text-gray-400">{character.table}</p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-gray-400">
-                    <span>Level {character.level}</span>
-                    <span>{character.campaign}</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
 
-        {/* My Tables - Grisé (upcoming feature) */}
-        <Card className="bg-white/5 backdrop-blur-sm border-white/10 mt-6 opacity-50">
+        {/* My Tables — aperçu démo */}
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20 mt-6">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
               <div className="flex items-center space-x-2">
-                <Users className="h-5 w-5 text-gray-400" />
-                <h2 className="text-xl font-semibold text-gray-400">My Tables</h2>
-                <Badge variant="default" size="sm" className="bg-gray-600 text-gray-300">
-                  Coming Soon
-                </Badge>
+                <Users className="h-5 w-5 text-purple-400" />
+                <h2 className="text-xl font-semibold text-white">My Tables</h2>
+                <Badge variant="info" size="sm">Preview</Badge>
               </div>
-              <Button size="sm" className="bg-gray-600 text-gray-300 border-gray-500 cursor-not-allowed" disabled>
+              <Button size="sm" className="bg-white/10 text-gray-300 border-white/10 cursor-not-allowed" disabled>
                 <Plus className="h-4 w-4 mr-2" />
                 Join Table
               </Button>
             </div>
+            <p className="text-sm text-gray-400 mt-2">Sample tables. Seats and dates are examples.</p>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {mySessions.map((session) => (
-                <div key={session.id} className="p-4 bg-white/5 rounded-lg border border-white/10">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-500 rounded-lg flex items-center justify-center">
-                      <Gamepad2 className="h-5 w-5 text-white" />
+              {myTables.map((table) => (
+                <div key={table.id} className="p-4 bg-white/5 rounded-lg border border-white/10">
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex items-center space-x-3 min-w-0">
+                      <div className="w-10 h-10 shrink-0 bg-gradient-to-br from-green-500 to-blue-500 rounded-lg flex items-center justify-center">
+                        <Gamepad2 className="h-5 w-5 text-white" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-white truncate">{table.title}</h3>
+                        <p className="text-sm text-gray-300">{table.game}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-medium text-gray-300">{session.title}</h3>
-                      <p className="text-sm text-gray-500">{session.game}</p>
-                    </div>
+                    <Badge variant={table.status === 'Complète' ? 'warning' : 'success'} size="sm">
+                      {table.status}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-1 mb-3" aria-hidden="true">
+                    {Array.from({ length: table.maxPlayers }).map((_, index) => (
+                      <span
+                        key={index}
+                        className={`h-1.5 flex-1 rounded-full ${index < table.players ? 'bg-purple-400' : 'bg-white/15'}`}
+                      />
+                    ))}
                   </div>
                   <div className="flex items-center justify-between text-xs text-gray-400">
-                    <span>{session.players}/{session.maxPlayers} players</span>
-                    <span>{session.nextSession}</span>
+                    <span>{table.players}/{table.maxPlayers} players · {table.place}</span>
+                    <span>{new Date(table.nextSession).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</span>
                   </div>
                 </div>
               ))}
@@ -333,40 +390,32 @@ export default function PlayerDashboard({
           </CardContent>
         </Card>
 
-        {/* Recent Activity - Grisé (upcoming feature) */}
-        <Card className="bg-white/5 backdrop-blur-sm border-white/10 opacity-50">
+        {/* Recent Activity — aperçu démo */}
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader>
             <div className="flex items-center space-x-2">
-              <Calendar className="h-5 w-5 text-gray-400" />
-              <h2 className="text-xl font-semibold text-gray-400">Recent Activity</h2>
-              <Badge variant="default" size="sm" className="bg-gray-600 text-gray-300">
-                Coming Soon
-              </Badge>
+              <Calendar className="h-5 w-5 text-purple-400" />
+              <h2 className="text-xl font-semibold text-white">Recent Activity</h2>
+              <Badge variant="info" size="sm">Preview</Badge>
             </div>
+            <p className="text-sm text-gray-400 mt-2">Sample feed. Nothing here is saved.</p>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="flex items-center space-x-3 p-2 bg-white/5 rounded">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm text-gray-300">Joined "Epic Fantasy Campaign"</p>
-                  <p className="text-xs text-gray-400">2 hours ago</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3 p-2 bg-white/5 rounded">
-                <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm text-gray-300">Added D&D 5e to favorites</p>
-                  <p className="text-xs text-gray-400">1 day ago</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3 p-2 bg-white/5 rounded">
-                <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm text-gray-300">Completed session "The Mysteries of Arkham"</p>
-                  <p className="text-xs text-gray-400">3 days ago</p>
-                </div>
-              </div>
+              {recentActivity.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div key={item.id} className="flex items-center space-x-3 p-2 bg-white/5 rounded-lg border border-white/10">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${item.tone}`}>
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-white">{item.label}</p>
+                      <p className="text-xs text-gray-400">{item.when}</p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
